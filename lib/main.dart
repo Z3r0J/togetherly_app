@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'viewmodels/counter_view_model.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
+import 'views/login_view.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Togetherly App',
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+        debugShowCheckedModeBanner: false,
+        home: const LoginView(), // Cambiar a LoginView
       ),
     );
   }
@@ -63,6 +65,16 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Ver Ejemplo MVVM'),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginView()),
+                );
+              },
+              child: const Text('Ver Login'),
             ),
           ],
         ),
