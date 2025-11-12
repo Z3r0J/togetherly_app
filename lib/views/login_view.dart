@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/widgets.dart';
+import '../main.dart';
 
 /// Pantalla de Login de Togetherly
 ///
@@ -250,12 +251,10 @@ class _LoginViewState extends State<LoginView> {
       if (!mounted) return;
 
       // Navegar a la pantalla principal
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const HomeView()),
-      // );
-
-      _showSuccess('Login successful!');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     } catch (e) {
       _showError('Invalid email or password');
     } finally {
