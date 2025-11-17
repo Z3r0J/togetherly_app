@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'viewmodels/counter_view_model.dart';
+import 'viewmodels/auth_view_model.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
@@ -16,8 +17,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => CounterViewModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CounterViewModel()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+      ],
       child: MaterialApp(
         title: 'Togetherly App',
         theme: AppTheme.lightTheme,

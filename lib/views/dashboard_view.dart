@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/auth_view_model.dart';
 import 'notifications_view.dart';
+import 'login_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -57,23 +60,32 @@ class _DashboardViewState extends State<DashboardView> {
       padding: const EdgeInsets.all(24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Bienvenido de nuevo, ${widget.userName}',
-                style: AppTextStyles.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Hoy, 18 de octubre',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bienvenido de nuevo,',
+                  style: AppTextStyles.headlineMedium,
                 ),
-              ),
-            ],
+                Text(
+                  widget.userName,
+                  style: AppTextStyles.headlineMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Hoy, 18 de octubre',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 12),
           // Avatar del usuario y botón de notificaciones
           Row(
             children: [
@@ -90,10 +102,57 @@ class _DashboardViewState extends State<DashboardView> {
                 },
               ),
               const SizedBox(width: 8),
-              UserAvatar(
-                name: widget.userName,
-                size: 56,
-                backgroundColor: AppColors.primary,
+              PopupMenuButton<String>(
+                offset: const Offset(0, 60),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onSelected: (value) async {
+                  if (value == 'logout') {
+                    await _handleLogout();
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'profile',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_outline),
+                        SizedBox(width: 8),
+                        Text('Mi Perfil'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings_outlined),
+                        SizedBox(width: 8),
+                        Text('Configuración'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text(
+                          'Cerrar Sesión',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                child: UserAvatar(
+                  name: widget.userName,
+                  size: 56,
+                  backgroundColor: AppColors.primary,
+                ),
               ),
             ],
           ),
@@ -132,7 +191,7 @@ class _DashboardViewState extends State<DashboardView> {
 
         // Circles horizontales
         SizedBox(
-          height: 180,
+          height: 165,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -173,44 +232,54 @@ class _DashboardViewState extends State<DashboardView> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header con color y nombre
           Row(
             children: [
               Container(
-                width: 12,
-                height: 12,
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 12),
-              Text(name, style: AppTextStyles.headlineSmall),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  name,
+                  style: AppTextStyles.headlineSmall.copyWith(fontSize: 18),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 3),
           Text(
             '$memberCount miembros',
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
 
           // Próximo evento
           Text(
             'PRÓXIMO EVENTO',
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textTertiary,
+              fontSize: 10,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             eventTitle,
             style: AppTextStyles.labelMedium.copyWith(
               fontWeight: FontWeight.w600,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
@@ -218,17 +287,22 @@ class _DashboardViewState extends State<DashboardView> {
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textSecondary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
 
           // Botón Ver Círculo
-          AppButton(
-            text: 'Ver Círculo →',
-            type: AppButtonType.text,
-            fullWidth: true,
-            onPressed: () {
-              // TODO: Navegar a detalles del círculo
-            },
+          SizedBox(
+            height: 30,
+            child: AppButton(
+              text: 'Ver Círculo →',
+              type: AppButtonType.text,
+              fullWidth: true,
+              onPressed: () {
+                // TODO: Navegar a detalles del círculo
+              },
+            ),
           ),
         ],
       ),
@@ -447,5 +521,40 @@ class _DashboardViewState extends State<DashboardView> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleLogout() async {
+    final authViewModel = context.read<AuthViewModel>();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar Sesión'),
+        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Cerrar Sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await authViewModel.logout();
+
+      if (!mounted) return;
+
+      // Navigate to login and clear navigation stack
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginView()),
+        (route) => false,
+      );
+    }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/auth_view_model.dart';
 import 'dashboard_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -241,21 +243,35 @@ class _LoginViewState extends State<LoginView> {
     setState(() => _isLoading = true);
 
     try {
-      // Aquí iría la llamada al servicio de autenticación
-      await Future.delayed(const Duration(seconds: 2)); // Simulación
+      final authViewModel = context.read<AuthViewModel>();
+
+      final success = await authViewModel.login(
+        _emailController.text,
+        _passwordController.text,
+      );
 
       if (!mounted) return;
 
-      // Navegar al dashboard si el login es exitoso
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              DashboardView(userName: _emailController.text.split('@')[0]),
-        ),
-      );
+      if (success) {
+        // Navegar al dashboard si el login es exitoso
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardView(
+              userName:
+                  authViewModel.currentUser?.name ??
+                  _emailController.text.split('@')[0],
+            ),
+          ),
+        );
+      } else {
+        _showError(
+          authViewModel.errorMessage ??
+              'Credenciales invalidas, intente de nuevo',
+        );
+      }
     } catch (e) {
-      _showError('Credenciales invalidas, intente de nuevo');
+      _showError('Error al iniciar sesión: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
