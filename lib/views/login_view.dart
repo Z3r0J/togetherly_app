@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/widgets.dart';
-import '../main.dart';
+import 'dashboard_view.dart';
 
-/// Pantalla de Login de Togetherly
-///
-/// Implementa la interfaz de login con email/password
-/// y opción de magic link
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -211,7 +207,7 @@ class _LoginViewState extends State<LoginView> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Don\'t have an account? ',
+          '¿No estas registrado? ',
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -219,7 +215,7 @@ class _LoginViewState extends State<LoginView> {
         GestureDetector(
           onTap: _isLoading ? null : _handleSignUp,
           child: Text(
-            'Sign up',
+            'Registrate',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
@@ -233,12 +229,12 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _handleLogin() async {
     // Validación básica
     if (_emailController.text.isEmpty) {
-      _showError('Please enter your email');
+      _showError('Escribe tu correo');
       return;
     }
 
     if (_passwordController.text.isEmpty) {
-      _showError('Please enter your password');
+      _showError('Escribe tu contraseña');
       return;
     }
 
@@ -250,13 +246,16 @@ class _LoginViewState extends State<LoginView> {
 
       if (!mounted) return;
 
-      // Navegar a la pantalla principal
+      // Navegar al dashboard si el login es exitoso
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (context) =>
+              DashboardView(userName: _emailController.text.split('@')[0]),
+        ),
       );
     } catch (e) {
-      _showError('Invalid email or password');
+      _showError('Credenciales invalidas, intente de nuevo');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -266,7 +265,7 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _handleMagicLink() async {
     if (_emailController.text.isEmpty) {
-      _showError('Please enter your email');
+      _showError('Escribe tu correo');
       return;
     }
 
@@ -278,9 +277,9 @@ class _LoginViewState extends State<LoginView> {
 
       if (!mounted) return;
 
-      _showSuccess('Magic link sent! Check your email.');
+      _showSuccess('¡Magic link enviado! Revisa tu email');
     } catch (e) {
-      _showError('Failed to send magic link');
+      _showError('Error al enviar magic link');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -293,21 +292,21 @@ class _LoginViewState extends State<LoginView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Password'),
+        title: const Text('Reiniciar contraseña'),
         content: const Text(
-          'Enter your email address and we\'ll send you a link to reset your password.',
+          'Escribe tu correo y te enviaremos un link para reiniciar tu contraseña.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _showSuccess('Password reset link sent!');
+              _showSuccess('¡Enviado link para reiniciar contraseña!');
             },
-            child: const Text('Send'),
+            child: const Text('Enviar'),
           ),
         ],
       ),
@@ -321,7 +320,7 @@ class _LoginViewState extends State<LoginView> {
     //   MaterialPageRoute(builder: (context) => const SignUpView()),
     // );
 
-    _showInfo('Navigate to Sign Up screen');
+    _showInfo('Navegar a pantalla de registro');
   }
 
   void _showError(String message) {
