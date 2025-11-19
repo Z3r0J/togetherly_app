@@ -12,6 +12,7 @@ import 'widgets/auth_wrapper.dart';
 import 'theme/app_theme.dart';
 import 'services/deep_link_service.dart';
 import 'models/magic_link_models.dart';
+import 'models/register_models.dart';
 
 void main() {
   runApp(const MyApp());
@@ -82,6 +83,50 @@ class _MyAppState extends State<MyApp> {
         ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
           SnackBar(content: Text('Error: $error'), backgroundColor: Colors.red),
         );
+      }
+    };
+
+    // Handle email verification deep links
+    _deepLinkService.onEmailVerificationReceived =
+        (EmailVerificationData verificationData) async {
+      // Get AuthViewModel from context
+      final authViewModel = navigatorKey.currentContext?.read<AuthViewModel>();
+
+      if (authViewModel != null) {
+        final success = await authViewModel.handleEmailVerification(
+          verificationData.accessToken,
+          verificationData.refreshToken,
+        );
+
+        if (success && navigatorKey.currentContext != null) {
+          // Navigate to dashboard after successful verification
+          final user = authViewModel.currentUser;
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) =>
+                  DashboardView(userName: user?.name ?? 'Usuario'),
+            ),
+            (route) => false,
+          );
+
+          // Show success message
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(
+              content: Text('¡Correo verificado exitosamente!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (navigatorKey.currentContext != null) {
+          // Show error message
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              content: Text(
+                authViewModel.errorMessage ?? 'Error al verificar el correo',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     };
 

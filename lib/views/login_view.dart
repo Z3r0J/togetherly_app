@@ -4,6 +4,7 @@ import '../widgets/widgets.dart';
 import '../widgets/magic_link_dialog.dart';
 import '../viewmodels/auth_view_model.dart';
 import 'dashboard_view.dart';
+import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -62,7 +63,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Botón principal
               AppButton(
-                text: 'Continue with Email',
+                text: 'Continuar con correo',
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isLoading,
@@ -71,13 +72,13 @@ class _LoginViewState extends State<LoginView> {
 
               const SizedBox(height: 16),
 
-              const DividerWithText(text: 'or'),
+              const DividerWithText(text: 'o'),
 
               const SizedBox(height: 16),
 
               // Botón Magic Link
               AppButton(
-                text: 'Send me a Magic Link',
+                text: 'Envíame un enlace mágico',
                 type: AppButtonType.outline,
                 fullWidth: true,
                 onPressed: _handleMagicLink,
@@ -113,7 +114,7 @@ class _LoginViewState extends State<LoginView> {
 
         // Tagline
         Text(
-          'Plan life together',
+          'Planifica la vida juntos',
           style: AppTextStyles.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -149,7 +150,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Plan together',
+                  'Planifica juntos',
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -164,8 +165,8 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _buildEmailField() {
     return AppTextField(
-      label: 'Email',
-      hintText: 'Enter your email address',
+      label: 'Correo electrónico',
+      hintText: 'Ingresa tu correo electrónico',
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       enabled: !_isLoading,
@@ -174,8 +175,8 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _buildPasswordField() {
     return AppTextField(
-      label: 'Password',
-      hintText: 'Enter your password',
+      label: 'Contraseña',
+      hintText: 'Ingresa tu contraseña',
       controller: _passwordController,
       obscureText: _obscurePassword,
       enabled: !_isLoading,
@@ -195,7 +196,7 @@ class _LoginViewState extends State<LoginView> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         child: Text(
-          'Forgot Password?',
+          '¿Olvidaste tu contraseña?',
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
@@ -316,13 +317,10 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _handleSignUp() {
-    // Navegar a la pantalla de registro
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => const SignUpView()),
-    // );
-
-    _showInfo('Navegar a pantalla de registro');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RegisterView()),
+    );
   }
 
   void _showError(String message) {

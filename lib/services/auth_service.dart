@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_models.dart';
 import '../models/magic_link_models.dart';
+import '../models/register_models.dart';
 import '../config/api_config.dart';
 
 class AuthService {
@@ -143,6 +144,42 @@ class AuthService {
 
   // Save tokens from magic link deep link
   Future<void> saveMagicLinkTokens(
+    String accessToken,
+    String refreshToken,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save tokens using existing key constants
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_refreshTokenKey, refreshToken);
+
+    // Note: userId will be fetched after saving tokens via getUserData()
+  }
+
+  // Register new user with password
+  Future<RegisterResponse> register(RegisterRequest request) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(request.toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return RegisterResponse.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 400) {
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['error'] ?? 'Registration failed');
+      } else {
+        throw Exception('Registration failed: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Register error: $e');
+    }
+  }
+
+  // Save tokens from email verification deep link
+  Future<void> saveVerificationTokens(
     String accessToken,
     String refreshToken,
   ) async {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import '../models/magic_link_models.dart';
+import '../models/register_models.dart';
 
 class DeepLinkService {
   final AppLinks _appLinks = AppLinks();
@@ -8,6 +9,7 @@ class DeepLinkService {
 
   // Callback to handle deep link authentication
   Function(DeepLinkAuthData)? onAuthLinkReceived;
+  Function(EmailVerificationData)? onEmailVerificationReceived;
   Function(String error)? onError;
 
   // Initialize and listen for deep links
@@ -38,7 +40,6 @@ class DeepLinkService {
     try {
       // Check if this is a magic link authentication
       // Expected format: togetherly://auth/success?accessToken=xxx&refreshToken=yyy
-
       if (uri.scheme == 'togetherly' &&
           uri.host == 'auth' &&
           uri.pathSegments.contains('success')) {
@@ -49,6 +50,21 @@ class DeepLinkService {
           onAuthLinkReceived?.call(authData);
         } else {
           onError?.call('Invalid authentication tokens in deep link');
+        }
+      }
+      // Check if this is an email verification
+      // Expected format: togetherly://auth/verified?accessToken=xxx&refreshToken=yyy
+      else if (uri.scheme == 'togetherly' &&
+          uri.host == 'auth' &&
+          uri.pathSegments.contains('verified')) {
+        // Parse authentication tokens from URL
+        final verificationData = EmailVerificationData.fromUri(uri);
+
+        if (verificationData.accessToken.isNotEmpty &&
+            verificationData.refreshToken.isNotEmpty) {
+          onEmailVerificationReceived?.call(verificationData);
+        } else {
+          onError?.call('Invalid verification tokens in deep link');
         }
       } else {
         // Unknown deep link format
