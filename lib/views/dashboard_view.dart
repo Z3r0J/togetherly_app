@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/auth_view_model.dart';
+import '../viewmodels/circle_view_model.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
 
@@ -19,29 +20,46 @@ class _DashboardViewState extends State<DashboardView> {
   final List<String> _filters = ['Todos', 'Personal', 'Asistiendo', 'Quizás'];
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch circles on dashboard load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CircleViewModel>().fetchCircles();
+    });
+  }
+
+  Future<void> _refreshData() async {
+    await context.read<CircleViewModel>().fetchCircles();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header con saludo y notificación
-              _buildHeader(),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header con saludo y notificación
+                _buildHeader(),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // Sección "Mis Círculos"
-              _buildCirclesSection(),
+                // Sección "Mis Círculos"
+                _buildCirclesSection(),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-              // Sección "Próximos Eventos"
-              _buildUpcomingEventsSection(),
+                // Sección "Próximos Eventos"
+                _buildUpcomingEventsSection(),
 
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
@@ -162,67 +180,116 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildCirclesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Título y "See All"
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Mis Círculos', style: AppTextStyles.headlineSmall),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navegar a ver todos los círculos
-                },
-                child: Text(
-                  'Ver todo',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+    return Consumer<CircleViewModel>(
+      builder: (context, circleViewModel, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título y "See All"
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Mis Círculos', style: AppTextStyles.headlineSmall),
+                  TextButton(
+                    onPressed: () {
+                      // TODO: Navegar a ver todos los círculos
+                    },
+                    child: Text(
+                      'Ver todo',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-        // Circles horizontales
-        SizedBox(
-          height: 165,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            // Circles horizontales with loading/error states
+            _buildCirclesContent(circleViewModel),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCirclesContent(CircleViewModel circleViewModel) {
+    if (circleViewModel.isLoading) {
+      return const SizedBox(
+        height: 165,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (circleViewModel.state == CircleState.error) {
+      return SizedBox(
+        height: 165,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildCircleCardItem(
-                name: 'Familia',
-                memberCount: 8,
-                eventTitle: "Cumpleaños de mamá",
-                eventDate: '20 de oct, 7:00 PM',
-                color: AppColors.circleGreen,
+              Text(
+                circleViewModel.errorMessage ?? 'Error loading circles',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.error,
+                ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(width: 16),
-              _buildCircleCardItem(
-                name: 'Club de Lectura',
-                memberCount: 12,
-                eventTitle: "'La biblioteca de medianoche'",
-                eventDate: '22 de oct, 6:30 PM',
-                color: AppColors.circleOrange,
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => circleViewModel.fetchCircles(),
+                child: const Text('Retry'),
               ),
             ],
           ),
         ),
-      ],
+      );
+    }
+
+    if (!circleViewModel.hasCircles) {
+      return SizedBox(
+        height: 165,
+        child: Center(
+          child: Text(
+            'No circles yet. Create your first circle!',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 165,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        itemCount: circleViewModel.circles.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          final circle = circleViewModel.circles[index];
+          return _buildCircleCardItem(
+            name: circle.name,
+            memberCount: circle.memberCountInt,
+            eventTitle: null,
+            eventDate: null,
+            color: AppColors.getCircleColor(circle.color),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildCircleCardItem({
     required String name,
     required int memberCount,
-    required String eventTitle,
-    required String eventDate,
+    String? eventTitle,
+    String? eventDate,
     required Color color,
   }) {
     return Container(
@@ -264,33 +331,43 @@ class _DashboardViewState extends State<DashboardView> {
           ),
           const SizedBox(height: 6),
 
-          // Próximo evento
-          Text(
-            'PRÓXIMO EVENTO',
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.textTertiary,
-              fontSize: 10,
+          // Próximo evento (only show if available)
+          if (eventTitle != null && eventDate != null) ...[
+            Text(
+              'PRÓXIMO EVENTO',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textTertiary,
+                fontSize: 10,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            eventTitle,
-            style: AppTextStyles.labelMedium.copyWith(
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: 2),
+            Text(
+              eventTitle,
+              style: AppTextStyles.labelMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            eventDate,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.textSecondary,
+            const SizedBox(height: 2),
+            Text(
+              eventDate,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
+            const SizedBox(height: 6),
+          ] else ...[
+            Text(
+              'No upcoming events',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+            const SizedBox(height: 6),
+          ],
 
           // Botón Ver Círculo
           SizedBox(

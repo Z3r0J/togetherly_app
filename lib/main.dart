@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
+import 'viewmodels/circle_view_model.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => CounterViewModel()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => CircleViewModel()),
       ],
       child: MaterialApp(
         title: 'Togetherly App',

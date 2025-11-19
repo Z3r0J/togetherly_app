@@ -54,6 +54,30 @@ class AppColors {
   // Colores de overlay
   static const Color overlay = Color(0x33000000);
   static const Color scrim = Color(0x80000000);
+
+  // Helper method to get circle color from string
+  static Color getCircleColor(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case 'purple':
+        return circlePurple;
+      case 'blue':
+        return circleBlue;
+      case 'green':
+        return circleGreen;
+      case 'orange':
+        return circleOrange;
+      case 'pink':
+        return circlePink;
+      case 'teal':
+        return circleTeal;
+      case 'red':
+        return circleRed;
+      case 'yellow':
+        return circleYellow;
+      default:
+        return circlePurple; // Default fallback
+    }
+  }
 }
 
 /// Lista de colores disponibles para círculos

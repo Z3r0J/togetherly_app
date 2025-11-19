@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_models.dart';
+import '../config/api_config.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:3000/api/auth';
+  static String get baseUrl => ApiConfig.authUrl;
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userIdKey = 'user_id';
