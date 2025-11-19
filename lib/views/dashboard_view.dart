@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/widgets.dart';
 import 'notifications_view.dart';
+import 'my_circles_view.dart';
+import 'circle_detail_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -115,7 +117,12 @@ class _DashboardViewState extends State<DashboardView> {
               Text('Mis Círculos', style: AppTextStyles.headlineSmall),
               TextButton(
                 onPressed: () {
-                  // TODO: Navegar a ver todos los círculos
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyCirclesView(),
+                    ),
+                  );
                 },
                 child: Text(
                   'Ver todo',
@@ -173,9 +180,10 @@ class _DashboardViewState extends State<DashboardView> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Header con color y nombre
           Row(
@@ -186,49 +194,74 @@ class _DashboardViewState extends State<DashboardView> {
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 12),
-              Text(name, style: AppTextStyles.headlineSmall),
+              Expanded(
+                child: Text(
+                  name,
+                  style: AppTextStyles.headlineSmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             '$memberCount miembros',
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Próximo evento
           Text(
             'PRÓXIMO EVENTO',
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textTertiary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            eventTitle,
-            style: AppTextStyles.labelMedium.copyWith(
-              fontWeight: FontWeight.w600,
+              fontSize: 10,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            eventDate,
+            eventTitle,
             style: AppTextStyles.labelSmall.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            eventDate,
+            style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Botón Ver Círculo
-          AppButton(
-            text: 'Ver Círculo →',
-            type: AppButtonType.text,
-            fullWidth: true,
+          TextButton(
             onPressed: () {
-              // TODO: Navegar a detalles del círculo
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CircleDetailView(circleName: name, circleColor: color),
+                ),
+              );
             },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size.fromHeight(0),
+            ),
+            child: Text(
+              'Ver Círculo →',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
