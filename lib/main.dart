@@ -13,8 +13,14 @@ import 'theme/app_theme.dart';
 import 'services/deep_link_service.dart';
 import 'models/magic_link_models.dart';
 import 'models/register_models.dart';
+import 'l10n/app_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Cargar traducciones antes de iniciar la app
+  await AppLocalizations.load();
+
   runApp(const MyApp());
 }
 

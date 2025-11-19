@@ -1,0 +1,329 @@
+{
+  "common": {
+    "button": {
+      "cancel": "Cancelar",
+      "ok": "Entendido",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "confirm": "Confirmar",
+      "send": "Enviar",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "close": "Cerrar",
+      "continue": "Continuar",
+      "back": "Volver",
+      "next": "Siguiente",
+      "done": "Listo",
+      "retry": "Reintentar"
+    },
+    "label": {
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "name": "Nombre",
+      "loading": "Cargando...",
+      "error": "Error",
+      "success": "Éxito"
+    },
+    "field": {
+      "email": "Email"
+    },
+    "error": {
+      "title": "Error"
+    },
+    "message": {
+      "loading": "Cargando...",
+      "no_data": "No hay datos disponibles",
+      "network_error": "Error de conexión. Verifica tu internet."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Togetherly",
+      "subtitle": "Planifica la vida juntos",
+      "illustration_placeholder": "Planifica juntos",
+      "label": {
+        "email": "Correo electrónico",
+        "password": "Contraseña"
+      },
+      "hint": {
+        "email": "Ingresa tu correo electrónico",
+        "password": "Ingresa tu contraseña"
+      },
+      "link": {
+        "forgot_password": "¿Olvidaste tu contraseña?",
+        "sign_up": "Registrate",
+        "no_account": "¿No estas registrado? "
+      },
+      "button": {
+        "continue": "Continuar con correo",
+        "magic_link": "Envíame un enlace mágico"
+      },
+      "validation": {
+        "email_required": "Escribe tu correo",
+        "password_required": "Escribe tu contraseña"
+      },
+      "error": {
+        "generic": "Credenciales invalidas, intente de nuevo"
+      }
+    },
+    "register": {
+      "title": "Togetherly",
+      "heading": "Vamos a registrarte",
+      "label": {
+        "name": "Nombre para mostrar",
+        "email": "Correo electrónico",
+        "password": "Contraseña"
+      },
+      "hint": {
+        "name": "Ingresa tu nombre",
+        "email": "Ingresa tu correo electrónico",
+        "password": "Crea una contraseña segura"
+      },
+      "password_instruction": "Mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos",
+      "button": {
+        "create": "Crear cuenta"
+      },
+      "link": {
+        "login": "Iniciar sesión",
+        "have_account": "¿Ya tienes una cuenta? "
+      },
+      "validation": {
+        "name_required": "Por favor, ingresa tu nombre",
+        "email_required": "Por favor, ingresa tu correo electrónico",
+        "email_invalid": "Por favor, ingresa un correo electrónico válido",
+        "password_required": "Por favor, ingresa una contraseña",
+        "password_weak": "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales"
+      },
+      "error": {
+        "generic": "Error al registrarse"
+      }
+    },
+    "forgot_password": {
+      "dialog_title": "Reiniciar contraseña",
+      "dialog_message": "Escribe tu correo y te enviaremos un link para reiniciar tu contraseña.",
+      "success": "¡Enviado link para reiniciar contraseña!"
+    },
+    "magic_link": {
+      "dialog_title": "Enlace Mágico",
+      "dialog_subtitle": "Inicia sesión sin contraseña",
+      "dialog_description": "Te enviaremos un enlace especial a tu email. Solo haz clic en él para iniciar sesión automáticamente.",
+      "hint": {
+        "email": "tu@email.com"
+      },
+      "button": {
+        "send": "Enviar Enlace Mágico"
+      },
+      "validation": {
+        "email_required": "Por favor ingresa tu email",
+        "email_invalid": "Por favor ingresa un email válido"
+      },
+      "success": {
+        "title": "¡Enlace Enviado!",
+        "message": "Hemos enviado un enlace mágico a tu correo electrónico.",
+        "instruction": "Haz clic en el enlace del email para iniciar sesión automáticamente.",
+        "expiry": "💡 El enlace expirará en 15 minutos"
+      },
+      "error": {
+        "generic": "Error al enviar el enlace"
+      }
+    },
+    "email_verification": {
+      "dialog_title": "¡Revisa tu correo!",
+      "dialog_message": "Te hemos enviado un correo de verificación a:",
+      "dialog_instruction": "Por favor, haz clic en el enlace del correo para verificar tu cuenta y acceder a Togetherly.",
+      "info_expiry": "El enlace expirará en 24 horas"
+    },
+    "message": {
+      "login_success": "¡Autenticación exitosa!",
+      "login_error": "Error al autenticar",
+      "verification_success": "¡Correo verificado exitosamente!",
+      "verification_error": "Error al verificar el correo",
+      "logout_confirm_title": "Cerrar Sesión",
+      "logout_confirm_message": "¿Estás seguro de que quieres cerrar sesión?"
+    },
+    "error": {
+      "AUTH_UNAUTHORIZED": "No estás autorizado para realizar esta acción",
+      "AUTH_INVALID_CREDENTIALS": "Correo o contraseña inválidos",
+      "AUTH_INVALID_TOKEN": "Token de autenticación inválido",
+      "AUTH_TOKEN_EXPIRED": "Tu sesión ha expirado",
+      "AUTH_SESSION_EXPIRED": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo",
+      "AUTH_INSUFFICIENT_PERMISSIONS": "No tienes permisos suficientes",
+      "AUTH_INVALID_API_KEY": "Clave de API inválida",
+      "AUTH_EMAIL_ALREADY_EXISTS": "Este correo electrónico ya está registrado",
+      "AUTH_INVALID_EMAIL_FORMAT": "Formato de correo electrónico inválido",
+      "AUTH_WEAK_PASSWORD": "La contraseña no cumple con los requisitos de seguridad",
+      "AUTH_PASSWORDS_DO_NOT_MATCH": "Las contraseñas no coinciden",
+      "AUTH_REGISTRATION_FAILED": "No se pudo completar el registro",
+      "AUTH_EMAIL_NOT_VERIFIED": "Tu correo electrónico no ha sido verificado",
+      "AUTH_EMAIL_ALREADY_VERIFIED": "Tu correo electrónico ya está verificado",
+      "AUTH_VERIFICATION_TOKEN_INVALID": "Token de verificación inválido",
+      "AUTH_VERIFICATION_TOKEN_EXPIRED": "El token de verificación ha expirado",
+      "AUTH_MAGIC_LINK_INVALID": "Enlace mágico inválido",
+      "AUTH_MAGIC_LINK_EXPIRED": "El enlace mágico ha expirado",
+      "AUTH_MAGIC_LINK_ALREADY_USED": "Este enlace mágico ya ha sido usado",
+      "AUTH_MAGIC_LINK_NOT_FOUND": "Enlace mágico no encontrado",
+      "NETWORK_ERROR": "No se pudo conectar al servidor. Verifica tu conexión",
+      "TIMEOUT_ERROR": "La solicitud tardó demasiado. Por favor, intenta de nuevo",
+      "UNKNOWN_ERROR": "Ha ocurrido un error inesperado"
+    }
+  },
+  "dashboard": {
+    "greeting": "Bienvenido de nuevo,",
+    "date": "Hoy, 18 de octubre",
+    "menu": {
+      "profile": "Mi Perfil",
+      "settings": "Configuración",
+      "logout": "Cerrar Sesión"
+    },
+    "section": {
+      "circles": "Mis Círculos",
+      "events": "Próximos Eventos",
+      "upcoming_event": "PRÓXIMO EVENTO"
+    },
+    "link": {
+      "view_all": "Ver todo",
+      "view_circle": "Ver Círculo →"
+    },
+    "label": {
+      "members": "miembros"
+    },
+    "filter": {
+      "all": "Todos",
+      "personal": "Personal",
+      "going": "Asistiendo",
+      "maybe": "Quizás"
+    },
+    "empty": {
+      "no_events": "No hay eventos próximos",
+      "no_circles": "Aún no tienes círculos. ¡Crea tu primer círculo!"
+    },
+    "error": {
+      "loading_circles": "Error al cargar círculos"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "action": {
+      "mark_all_read": "Marcar todo como leído",
+      "view_event": "Ver Evento",
+      "dismiss": "Descartar",
+      "resolve": "Resolver",
+      "view": "Ver",
+      "set_rsvp": "Establecer RSVP",
+      "accept": "Aceptar",
+      "reject": "Rechazar"
+    },
+    "filter": {
+      "all": "Todos",
+      "events": "Eventos",
+      "circles": "Círculos",
+      "rsvp": "RSVP"
+    },
+    "empty": "Sin notificaciones",
+    "message": {
+      "all_read": "Todas las notificaciones marcadas como leídas",
+      "dismissed": "Notificación descartada",
+      "navigating_event": "Navegando a detalles del evento...",
+      "opening_rsvp": "Abriendo selector de RSVP...",
+      "opening_conflict": "Abriendo resolución de conflicto...",
+      "invitation_accepted": "¡Invitación de círculo aceptada!",
+      "invitation_rejected": "Invitación de círculo rechazada.",
+      "action_executed": "Acción ejecutada: "
+    }
+  },
+  "user": {
+    "error": {
+      "USER_NOT_FOUND": "Usuario no encontrado",
+      "USER_ALREADY_EXISTS": "El usuario ya existe",
+      "USER_DELETED": "La cuenta ha sido eliminada",
+      "USER_UPDATE_FAILED": "No se pudo actualizar la información del usuario",
+      "USER_DELETE_FAILED": "No se pudo eliminar la cuenta"
+    }
+  },
+  "circle": {
+    "error": {
+      "CIRCLE_NOT_FOUND": "Círculo no encontrado",
+      "CIRCLE_ALREADY_EXISTS": "Ya existe un círculo con este nombre",
+      "CIRCLE_CREATE_FAILED": "No se pudo crear el círculo",
+      "CIRCLE_UPDATE_FAILED": "No se pudo actualizar el círculo",
+      "CIRCLE_DELETE_FAILED": "No se pudo eliminar el círculo",
+      "CIRCLE_NAME_REQUIRED": "El nombre del círculo es requerido",
+      "CIRCLE_INVALID_PRIVACY": "Configuración de privacidad inválida",
+      "CIRCLE_NOT_MEMBER": "No eres miembro de este círculo",
+      "CIRCLE_NOT_OWNER": "Solo el creador del círculo puede realizar esta acción",
+      "CIRCLE_ALREADY_MEMBER": "Ya eres miembro de este círculo",
+      "CIRCLE_MEMBER_LIMIT_REACHED": "Se ha alcanzado el límite de miembros",
+      "CIRCLE_CANNOT_REMOVE_OWNER": "No se puede eliminar al creador del círculo",
+      "CIRCLE_MEMBER_ADD_FAILED": "No se pudo agregar el miembro",
+      "CIRCLE_MEMBER_REMOVE_FAILED": "No se pudo eliminar el miembro"
+    }
+  },
+  "event": {
+    "error": {
+      "EVENT_NOT_FOUND": "Evento no encontrado",
+      "EVENT_CREATE_FAILED": "No se pudo crear el evento",
+      "EVENT_UPDATE_FAILED": "No se pudo actualizar el evento",
+      "EVENT_DELETE_FAILED": "No se pudo eliminar el evento",
+      "EVENT_TITLE_REQUIRED": "El título del evento es requerido",
+      "EVENT_INVALID_STATUS": "Estado del evento inválido",
+      "EVENT_ALREADY_LOCKED": "El evento ya está bloqueado",
+      "EVENT_NOT_LOCKED": "El evento no está bloqueado",
+      "EVENT_ALREADY_FINALIZED": "El evento ya está finalizado",
+      "EVENT_NOT_FINALIZED": "El evento no está finalizado",
+      "EVENT_CANNOT_MODIFY_LOCKED": "No se puede modificar un evento bloqueado",
+      "EVENT_CANNOT_MODIFY_FINALIZED": "No se puede modificar un evento finalizado",
+      "EVENT_LOCK_FAILED": "No se pudo bloquear el evento",
+      "EVENT_FINALIZE_FAILED": "No se pudo finalizar el evento",
+      "EVENT_TIME_NOT_FOUND": "Horario del evento no encontrado",
+      "EVENT_TIME_REQUIRED": "Se requiere al menos un horario",
+      "EVENT_TIME_INVALID": "Horario del evento inválido",
+      "EVENT_TIME_CONFLICT": "Este horario conflicto con otro evento",
+      "EVENT_NO_TIMES_AVAILABLE": "No hay horarios disponibles",
+      "EVENT_RSVP_NOT_FOUND": "RSVP no encontrado",
+      "EVENT_RSVP_UPDATE_FAILED": "No se pudo actualizar el RSVP",
+      "EVENT_RSVP_INVALID_STATUS": "Estado de RSVP inválido",
+      "EVENT_RSVP_ALREADY_EXISTS": "Ya existe un RSVP para este evento",
+      "EVENT_VOTE_NOT_FOUND": "Voto no encontrado",
+      "EVENT_VOTE_FAILED": "No se pudo registrar el voto",
+      "EVENT_CANNOT_VOTE_LOCKED": "No se puede votar en un evento bloqueado",
+      "EVENT_ALREADY_VOTED": "Ya has votado en este evento"
+    }
+  },
+  "validation": {
+    "error": {
+      "VALIDATION_FAILED": "Validación fallida",
+      "VALIDATION_INVALID_INPUT": "Entrada inválida",
+      "VALIDATION_REQUIRED_FIELD_MISSING": "Falta un campo requerido",
+      "VALIDATION_INVALID_FORMAT": "Formato inválido",
+      "VALIDATION_INVALID_UUID": "Formato de UUID inválido",
+      "VALIDATION_INVALID_DATE": "Formato de fecha inválido",
+      "VALIDATION_INVALID_EMAIL": "Formato de correo inválido",
+      "VALIDATION_INVALID_URL": "Formato de URL inválido",
+      "VALIDATION_VALUE_TOO_LONG": "El valor excede la longitud máxima",
+      "VALIDATION_VALUE_TOO_SHORT": "El valor es demasiado corto",
+      "VALIDATION_VALUE_OUT_OF_RANGE": "El valor está fuera del rango permitido"
+    }
+  },
+  "system": {
+    "error": {
+      "DB_ERROR": "Error de base de datos",
+      "DB_CONNECTION_FAILED": "No se pudo conectar a la base de datos",
+      "DB_DUPLICATE_ENTRY": "Entrada duplicada en la base de datos",
+      "DB_FOREIGN_KEY_CONSTRAINT": "Violación de restricción de clave foránea",
+      "DB_TRANSACTION_FAILED": "Transacción de base de datos fallida",
+      "DB_QUERY_FAILED": "Consulta de base de datos fallida",
+      "INTERNAL_SERVER_ERROR": "Error interno del servidor",
+      "SERVICE_UNAVAILABLE": "Servicio temporalmente no disponible",
+      "NOT_FOUND": "Recurso no encontrado",
+      "NOT_IMPLEMENTED": "Funcionalidad aún no implementada",
+      "RATE_LIMIT_EXCEEDED": "Demasiadas solicitudes. Intenta más tarde",
+      "REQUEST_TIMEOUT": "Tiempo de espera agotado",
+      "PAYLOAD_TOO_LARGE": "La solicitud es demasiado grande",
+      "UNKNOWN_ERROR": "Ha ocurrido un error desconocido",
+      "EMAIL_SERVICE_ERROR": "Error en el servicio de correo",
+      "EMAIL_SEND_FAILED": "No se pudo enviar el correo",
+      "STORAGE_SERVICE_ERROR": "Error en el servicio de almacenamiento",
+      "EXTERNAL_API_ERROR": "Error en API externa"
+    }
+  }
+}

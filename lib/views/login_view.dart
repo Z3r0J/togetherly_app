@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../widgets/magic_link_dialog.dart';
 import '../viewmodels/auth_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'dashboard_view.dart';
 import 'register_view.dart';
 
@@ -18,6 +19,13 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  late final AppLocalizations l10n;
+
+  @override
+  void initState() {
+    super.initState();
+    l10n = AppLocalizations.instance;
+  }
 
   @override
   void dispose() {
@@ -63,7 +71,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Botón principal
               AppButton(
-                text: 'Continuar con correo',
+                text: l10n.tr('auth.login.button.continue'),
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isLoading,
@@ -78,7 +86,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Botón Magic Link
               AppButton(
-                text: 'Envíame un enlace mágico',
+                text: l10n.tr('auth.login.button.magic_link'),
                 type: AppButtonType.outline,
                 fullWidth: true,
                 onPressed: _handleMagicLink,
@@ -105,7 +113,7 @@ class _LoginViewState extends State<LoginView> {
             Icon(Icons.groups, size: 40, color: AppColors.primary),
             const SizedBox(width: 12),
             Text(
-              'Togetherly',
+              l10n.tr('auth.login.title'),
               style: AppTextStyles.displaySmall.copyWith(fontSize: 32),
             ),
           ],
@@ -114,7 +122,7 @@ class _LoginViewState extends State<LoginView> {
 
         // Tagline
         Text(
-          'Planifica la vida juntos',
+          l10n.tr('auth.login.subtitle'),
           style: AppTextStyles.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -150,7 +158,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Planifica juntos',
+                  l10n.tr('auth.login.illustration_placeholder'),
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -165,8 +173,8 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _buildEmailField() {
     return AppTextField(
-      label: 'Correo electrónico',
-      hintText: 'Ingresa tu correo electrónico',
+      label: l10n.tr('auth.login.label.email'),
+      hintText: l10n.tr('auth.login.hint.email'),
       controller: _emailController,
       keyboardType: TextInputType.emailAddress,
       enabled: !_isLoading,
@@ -175,8 +183,8 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _buildPasswordField() {
     return AppTextField(
-      label: 'Contraseña',
-      hintText: 'Ingresa tu contraseña',
+      label: l10n.tr('auth.login.label.password'),
+      hintText: l10n.tr('auth.login.hint.password'),
       controller: _passwordController,
       obscureText: _obscurePassword,
       enabled: !_isLoading,
@@ -196,7 +204,7 @@ class _LoginViewState extends State<LoginView> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         ),
         child: Text(
-          '¿Olvidaste tu contraseña?',
+          l10n.tr('auth.login.link.forgot_password'),
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
@@ -211,7 +219,7 @@ class _LoginViewState extends State<LoginView> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          '¿No estas registrado? ',
+          l10n.tr('auth.login.link.no_account'),
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -219,7 +227,7 @@ class _LoginViewState extends State<LoginView> {
         GestureDetector(
           onTap: _isLoading ? null : _handleSignUp,
           child: Text(
-            'Registrate',
+            l10n.tr('auth.login.link.sign_up'),
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
@@ -233,12 +241,12 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _handleLogin() async {
     // Validación básica
     if (_emailController.text.isEmpty) {
-      _showError('Escribe tu correo');
+      _showError(l10n.tr('auth.login.validation.email_required'));
       return;
     }
 
     if (_passwordController.text.isEmpty) {
-      _showError('Escribe tu contraseña');
+      _showError(l10n.tr('auth.login.validation.password_required'));
       return;
     }
 
@@ -268,8 +276,7 @@ class _LoginViewState extends State<LoginView> {
         );
       } else {
         _showError(
-          authViewModel.errorMessage ??
-              'Credenciales invalidas, intente de nuevo',
+          authViewModel.errorMessage ?? l10n.tr('auth.login.error.generic'),
         );
       }
     } catch (e) {
@@ -295,21 +302,19 @@ class _LoginViewState extends State<LoginView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reiniciar contraseña'),
-        content: const Text(
-          'Escribe tu correo y te enviaremos un link para reiniciar tu contraseña.',
-        ),
+        title: Text(l10n.tr('auth.forgot_password.dialog_title')),
+        content: Text(l10n.tr('auth.forgot_password.dialog_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text(l10n.tr('common.button.cancel')),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _showSuccess('¡Enviado link para reiniciar contraseña!');
+              _showSuccess(l10n.tr('auth.forgot_password.success'));
             },
-            child: const Text('Enviar'),
+            child: Text(l10n.tr('common.button.send')),
           ),
         ],
       ),
@@ -338,16 +343,6 @@ class _LoginViewState extends State<LoginView> {
       SnackBar(
         content: Text(message),
         backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showInfo(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.info,
         behavior: SnackBarBehavior.floating,
       ),
     );

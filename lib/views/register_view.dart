@@ -6,6 +6,7 @@ import '../viewmodels/auth_view_model.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/email_verification_dialog.dart';
+import '../l10n/app_localizations.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -20,6 +21,13 @@ class _RegisterViewState extends State<RegisterView> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  late final AppLocalizations l10n;
+
+  @override
+  void initState() {
+    super.initState();
+    l10n = AppLocalizations.instance;
+  }
 
   @override
   void dispose() {
@@ -49,30 +57,40 @@ class _RegisterViewState extends State<RegisterView> {
 
     // Validate name
     if (name.isEmpty) {
-      _showErrorDialog('Por favor, ingresa tu nombre');
+      _showErrorDialog(
+        AppLocalizations.instance.tr('auth.register.validation.name_required'),
+      );
       return;
     }
 
     // Validate email
     if (email.isEmpty) {
-      _showErrorDialog('Por favor, ingresa tu correo electrónico');
+      _showErrorDialog(
+        AppLocalizations.instance.tr('auth.register.validation.email_required'),
+      );
       return;
     }
 
     if (!_isValidEmail(email)) {
-      _showErrorDialog('Por favor, ingresa un correo electrónico válido');
+      _showErrorDialog(
+        AppLocalizations.instance.tr('auth.register.validation.email_invalid'),
+      );
       return;
     }
 
     // Validate password
     if (password.isEmpty) {
-      _showErrorDialog('Por favor, ingresa una contraseña');
+      _showErrorDialog(
+        AppLocalizations.instance.tr(
+          'auth.register.validation.password_required',
+        ),
+      );
       return;
     }
 
     if (!_isStrongPassword(password)) {
       _showErrorDialog(
-        'La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y caracteres especiales',
+        AppLocalizations.instance.tr('auth.register.validation.password_weak'),
       );
       return;
     }
@@ -98,7 +116,9 @@ class _RegisterViewState extends State<RegisterView> {
       );
     } else if (mounted) {
       // Show error message
-      final errorMessage = authViewModel.errorMessage ?? 'Error al registrarse';
+      final errorMessage =
+          authViewModel.errorMessage ??
+          AppLocalizations.instance.tr('auth.register.error.generic');
       _showErrorDialog(errorMessage);
     }
   }
@@ -108,12 +128,12 @@ class _RegisterViewState extends State<RegisterView> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Error'),
+        title: Text(AppLocalizations.instance.tr('common.error.title')),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.instance.tr('common.button.ok')),
           ),
         ],
       ),
@@ -142,7 +162,7 @@ class _RegisterViewState extends State<RegisterView> {
                   Icon(Icons.people, size: 40, color: AppColors.primary),
                   const SizedBox(width: 12),
                   Text(
-                    'Togetherly',
+                    AppLocalizations.instance.tr('auth.register.title'),
                     style: AppTextStyles.displayLarge.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 32,
@@ -153,7 +173,7 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 48),
               // Heading
               Text(
-                'Vamos a registrarte',
+                AppLocalizations.instance.tr('auth.register.heading'),
                 style: AppTextStyles.headlineMedium.copyWith(
                   color: AppColors.textPrimary,
                 ),
@@ -162,7 +182,7 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 32),
               // Display Name field
               Text(
-                'Nombre para mostrar',
+                AppLocalizations.instance.tr('auth.register.label.name'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -171,13 +191,15 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 8),
               AppTextField(
                 controller: _nameController,
-                hintText: 'Ingresa tu nombre',
+                hintText: AppLocalizations.instance.tr(
+                  'auth.register.hint.name',
+                ),
                 keyboardType: TextInputType.name,
               ),
               const SizedBox(height: 20),
               // Email field
               Text(
-                'Correo electrónico',
+                AppLocalizations.instance.tr('auth.register.label.email'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -186,13 +208,15 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 8),
               AppTextField(
                 controller: _emailController,
-                hintText: 'Ingresa tu correo electrónico',
+                hintText: AppLocalizations.instance.tr(
+                  'auth.register.hint.email',
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
               // Password field
               Text(
-                'Contraseña',
+                AppLocalizations.instance.tr('auth.register.label.password'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -201,7 +225,9 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 8),
               AppTextField(
                 controller: _passwordController,
-                hintText: 'Crea una contraseña segura',
+                hintText: AppLocalizations.instance.tr(
+                  'auth.register.hint.password',
+                ),
                 obscureText: _obscurePassword,
                 onSubmitted: (_) => _validateAndRegister(),
                 suffixIcon: _obscurePassword
@@ -215,7 +241,9 @@ class _RegisterViewState extends State<RegisterView> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos',
+                AppLocalizations.instance.tr(
+                  'auth.register.password_instruction',
+                ),
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -223,7 +251,9 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 32),
               // Register button
               AppButton(
-                text: 'Crear cuenta',
+                text: AppLocalizations.instance.tr(
+                  'auth.register.button.create',
+                ),
                 onPressed: _isLoading ? null : _validateAndRegister,
                 isLoading: _isLoading,
               ),
@@ -233,7 +263,9 @@ class _RegisterViewState extends State<RegisterView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '¿Ya tienes una cuenta? ',
+                    AppLocalizations.instance.tr(
+                      'auth.register.link.have_account',
+                    ),
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -241,7 +273,7 @@ class _RegisterViewState extends State<RegisterView> {
                   GestureDetector(
                     onTap: _handleLogin,
                     child: Text(
-                      'Iniciar sesión',
+                      AppLocalizations.instance.tr('auth.register.link.login'),
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,

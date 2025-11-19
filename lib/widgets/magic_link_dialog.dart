@@ -5,6 +5,7 @@ import '../theme/app_text_styles.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 import '../viewmodels/auth_view_model.dart';
+import '../l10n/app_localizations.dart';
 
 /// Modal dialog for requesting a magic link authentication email
 class MagicLinkDialog extends StatefulWidget {
@@ -31,7 +32,9 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
     // Client-side email validation
     if (email.isEmpty) {
       setState(() {
-        _errorMessage = 'Por favor ingresa tu email';
+        _errorMessage = AppLocalizations.instance.tr(
+          'auth.magic_link.validation.email_required',
+        );
       });
       return;
     }
@@ -40,7 +43,9 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
       setState(() {
-        _errorMessage = 'Por favor ingresa un email válido';
+        _errorMessage = AppLocalizations.instance.tr(
+          'auth.magic_link.validation.email_invalid',
+        );
       });
       return;
     }
@@ -67,7 +72,8 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
       // Show error message
       setState(() {
         _errorMessage =
-            authViewModel.errorMessage ?? 'Error al enviar el enlace';
+            authViewModel.errorMessage ??
+            AppLocalizations.instance.tr('auth.magic_link.error.generic');
       });
     }
   }
@@ -78,11 +84,15 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.mark_email_read, color: AppColors.success, size: 28),
-            SizedBox(width: 12),
-            Text('¡Enlace Enviado!'),
+            const Icon(
+              Icons.mark_email_read,
+              color: AppColors.success,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(AppLocalizations.instance.tr('auth.magic_link.success.title')),
           ],
         ),
         content: Column(
@@ -90,7 +100,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hemos enviado un enlace mágico a tu correo electrónico.',
+              AppLocalizations.instance.tr('auth.magic_link.success.message'),
               style: AppTextStyles.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -110,7 +120,9 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Haz clic en el enlace del email para iniciar sesión automáticamente.',
+                      AppLocalizations.instance.tr(
+                        'auth.magic_link.success.instruction',
+                      ),
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.info,
                       ),
@@ -121,7 +133,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
             ),
             const SizedBox(height: 12),
             Text(
-              '💡 El enlace expirará en 15 minutos',
+              AppLocalizations.instance.tr('auth.magic_link.success.expiry'),
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -130,7 +142,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
         ),
         actions: [
           AppButton(
-            text: 'Entendido',
+            text: AppLocalizations.instance.tr('common.button.ok'),
             type: AppButtonType.primary,
             fullWidth: true,
             onPressed: () => Navigator.of(context).pop(),
@@ -170,9 +182,16 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Enlace Mágico', style: AppTextStyles.headlineSmall),
                       Text(
-                        'Inicia sesión sin contraseña',
+                        AppLocalizations.instance.tr(
+                          'auth.magic_link.dialog_title',
+                        ),
+                        style: AppTextStyles.headlineSmall,
+                      ),
+                      Text(
+                        AppLocalizations.instance.tr(
+                          'auth.magic_link.dialog_subtitle',
+                        ),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -195,7 +214,9 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
 
             // Description
             Text(
-              'Te enviaremos un enlace especial a tu email. Solo haz clic en él para iniciar sesión automáticamente.',
+              AppLocalizations.instance.tr(
+                'auth.magic_link.dialog_description',
+              ),
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -205,8 +226,10 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
 
             // Email input
             AppTextField(
-              label: 'Email',
-              hintText: 'tu@email.com',
+              label: AppLocalizations.instance.tr('common.field.email'),
+              hintText: AppLocalizations.instance.tr(
+                'auth.magic_link.hint.email',
+              ),
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               enabled: !_isLoading,
@@ -261,7 +284,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
 
             // Send button
             AppButton(
-              text: 'Enviar Enlace Mágico',
+              text: AppLocalizations.instance.tr('auth.magic_link.button.send'),
               type: AppButtonType.primary,
               fullWidth: true,
               isLoading: _isLoading,
@@ -273,7 +296,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
 
             // Cancel button
             AppButton(
-              text: 'Cancelar',
+              text: AppLocalizations.instance.tr('common.button.cancel'),
               type: AppButtonType.text,
               fullWidth: true,
               onPressed: _isLoading ? null : () => Navigator.of(context).pop(),

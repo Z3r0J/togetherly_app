@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/app_button.dart';
+import '../l10n/app_localizations.dart';
 
 class EmailVerificationDialog extends StatelessWidget {
   final String email;
@@ -34,7 +35,9 @@ class EmailVerificationDialog extends StatelessWidget {
             const SizedBox(height: 24),
             // Title
             Text(
-              '¡Revisa tu correo!',
+              AppLocalizations.instance.tr(
+                'auth.email_verification.dialog_title',
+              ),
               style: AppTextStyles.headlineSmall.copyWith(
                 color: AppColors.textPrimary,
               ),
@@ -43,7 +46,9 @@ class EmailVerificationDialog extends StatelessWidget {
             const SizedBox(height: 16),
             // Message
             Text(
-              'Te hemos enviado un correo de verificación a:',
+              AppLocalizations.instance.tr(
+                'auth.email_verification.dialog_message',
+              ),
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -60,7 +65,9 @@ class EmailVerificationDialog extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Por favor, haz clic en el enlace del correo para verificar tu cuenta y acceder a Togetherly.',
+              AppLocalizations.instance.tr(
+                'auth.email_verification.dialog_instruction',
+              ),
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -69,7 +76,7 @@ class EmailVerificationDialog extends StatelessWidget {
             const SizedBox(height: 32),
             // Close button
             AppButton(
-              text: 'Entendido',
+              text: AppLocalizations.instance.tr('common.button.ok'),
               onPressed: () {
                 // Close dialog and navigate back to login
                 Navigator.pop(context); // Close dialog
@@ -79,7 +86,9 @@ class EmailVerificationDialog extends StatelessWidget {
             const SizedBox(height: 12),
             // Info text
             Text(
-              'El enlace expirará en 24 horas',
+              AppLocalizations.instance.tr(
+                'auth.email_verification.info_expiry',
+              ),
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
                 fontStyle: FontStyle.italic,

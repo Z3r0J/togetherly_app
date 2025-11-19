@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_models.dart';
 import '../models/magic_link_models.dart';
 import '../models/register_models.dart';
+import '../models/api_error.dart';
 import '../config/api_config.dart';
 
 class AuthService {
@@ -15,14 +18,18 @@ class AuthService {
   // Login method
   Future<LoginResponse> login(LoginRequest request) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(request.toJson()),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final loginResponse = LoginResponse.fromJson(jsonDecode(response.body));
+        final loginResponse = LoginResponse.fromJson(responseBody);
 
         // Save tokens to shared preferences
         await _saveTokens(
@@ -33,10 +40,24 @@ class AuthService {
 
         return loginResponse;
       } else {
-        throw Exception('Login failed: ${response.statusCode}');
+        // Parsear error del backend
+        if (ApiError.isErrorResponse(responseBody)) {
+          throw ApiError.fromJson(
+            responseBody,
+            statusCode: response.statusCode,
+          );
+        } else {
+          throw ApiError.unknownError('Login failed: ${response.statusCode}');
+        }
       }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
     } catch (e) {
-      throw Exception('Login error: $e');
+      throw ApiError.unknownError('Login error: $e');
     }
   }
 
@@ -46,29 +67,62 @@ class AuthService {
       final accessToken = await getAccessToken();
 
       if (accessToken == null) {
-        throw Exception('No access token found');
+        throw ApiError(
+          errorCode: 'AUTH_INVALID_TOKEN',
+          message: 'No access token found',
+        );
       }
 
-      final response = await http.get(
-        Uri.parse('$baseUrl/user'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/user'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final userResponse = UserResponse.fromJson(jsonDecode(response.body));
+        final userResponse = UserResponse.fromJson(responseBody);
         return userResponse.data;
       } else if (response.statusCode == 401) {
         // Token expired, clear tokens
         await clearTokens();
-        throw Exception('Session expired');
+        if (ApiError.isErrorResponse(responseBody)) {
+          throw ApiError.fromJson(
+            responseBody,
+            statusCode: response.statusCode,
+          );
+        } else {
+          throw ApiError(
+            errorCode: 'AUTH_SESSION_EXPIRED',
+            message: 'Session expired',
+            statusCode: 401,
+          );
+        }
       } else {
-        throw Exception('Failed to get user data: ${response.statusCode}');
+        if (ApiError.isErrorResponse(responseBody)) {
+          throw ApiError.fromJson(
+            responseBody,
+            statusCode: response.statusCode,
+          );
+        } else {
+          throw ApiError.unknownError(
+            'Failed to get user data: ${response.statusCode}',
+          );
+        }
       }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
     } catch (e) {
-      throw Exception('Get user error: $e');
+      throw ApiError.unknownError('Get user error: $e');
     }
   }
 
@@ -124,21 +178,38 @@ class AuthService {
   // Send magic link to email
   Future<MagicLinkResponse> sendMagicLink(MagicLinkRequest request) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/magic-link'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(request.toJson()),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/magic-link'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return MagicLinkResponse.fromJson(jsonDecode(response.body));
+        return MagicLinkResponse.fromJson(responseBody);
       } else {
-        throw Exception(
-          'Failed to send magic link: ${response.statusCode} - ${response.body}',
-        );
+        if (ApiError.isErrorResponse(responseBody)) {
+          throw ApiError.fromJson(
+            responseBody,
+            statusCode: response.statusCode,
+          );
+        } else {
+          throw ApiError.unknownError(
+            'Failed to send magic link: ${response.statusCode}',
+          );
+        }
       }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
     } catch (e) {
-      throw Exception('Send magic link error: $e');
+      throw ApiError.unknownError('Send magic link error: $e');
     }
   }
 
@@ -159,22 +230,39 @@ class AuthService {
   // Register new user with password
   Future<RegisterResponse> register(RegisterRequest request) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(request.toJson()),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/register'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return RegisterResponse.fromJson(jsonDecode(response.body));
-      } else if (response.statusCode == 400) {
-        final errorBody = jsonDecode(response.body);
-        throw Exception(errorBody['error'] ?? 'Registration failed');
+        return RegisterResponse.fromJson(responseBody);
       } else {
-        throw Exception('Registration failed: ${response.statusCode}');
+        // Parsear error del backend
+        if (ApiError.isErrorResponse(responseBody)) {
+          throw ApiError.fromJson(
+            responseBody,
+            statusCode: response.statusCode,
+          );
+        } else {
+          throw ApiError.unknownError(
+            'Registration failed: ${response.statusCode}',
+          );
+        }
       }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
     } catch (e) {
-      throw Exception('Register error: $e');
+      throw ApiError.unknownError('Register error: $e');
     }
   }
 

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/auth_models.dart';
 import '../models/magic_link_models.dart';
 import '../models/register_models.dart';
+import '../models/api_error.dart';
 import '../services/auth_service.dart';
+import '../l10n/app_localizations.dart';
 
 enum AuthState {
   initial,
@@ -214,39 +216,45 @@ class AuthViewModel extends ChangeNotifier {
 
   // Helper method to get error message
   String _getErrorMessage(dynamic error) {
+    final l10n = AppLocalizations.instance;
+
+    // Si es un ApiError del backend, usar su errorCode para traducir
+    if (error is ApiError) {
+      return l10n.trError(error.errorCode);
+    }
+
+    // Fallback para errores que no son ApiError
     final errorString = error.toString();
 
     if (errorString.contains('SocketException') ||
         errorString.contains('Failed host lookup')) {
-      return 'No se pudo conectar al servidor. Verifica tu conexión.';
-    } else if (errorString.contains('401') ||
-        errorString.contains('Unauthorized')) {
-      return 'Credenciales inválidas. Por favor, intenta de nuevo.';
-    } else if (errorString.contains('Session expired')) {
-      return 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+      return l10n.networkError;
     } else if (errorString.contains('TimeoutException')) {
-      return 'La solicitud tardó demasiado. Por favor, intenta de nuevo.';
+      return l10n.timeoutError;
     } else {
-      return 'Error al iniciar sesión. Por favor, intenta de nuevo.';
+      return l10n.unknownError;
     }
   }
 
   // Helper method to get register error message
   String _getRegisterErrorMessage(dynamic error) {
+    final l10n = AppLocalizations.instance;
+
+    // Si es un ApiError del backend, usar su errorCode para traducir
+    if (error is ApiError) {
+      return l10n.trError(error.errorCode);
+    }
+
+    // Fallback para errores que no son ApiError
     final errorString = error.toString();
 
     if (errorString.contains('SocketException') ||
         errorString.contains('Failed host lookup')) {
-      return 'No se pudo conectar al servidor. Verifica tu conexión.';
-    } else if (errorString.contains('User already exists') ||
-        errorString.contains('Email already in use')) {
-      return 'Este correo electrónico ya está registrado. Por favor, inicia sesión.';
-    } else if (errorString.contains('400')) {
-      return 'Datos inválidos. Por favor, verifica la información.';
+      return l10n.networkError;
     } else if (errorString.contains('TimeoutException')) {
-      return 'La solicitud tardó demasiado. Por favor, intenta de nuevo.';
+      return l10n.timeoutError;
     } else {
-      return 'Error al registrarse. Por favor, intenta de nuevo.';
+      return l10n.unknownError;
     }
   }
 }
