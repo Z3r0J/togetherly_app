@@ -75,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isLoading,
-                onPressed: _handleLogin,
+                onPressed: _isLoading ? null : _handleLogin,
               ),
 
               const SizedBox(height: 16),
@@ -250,41 +250,39 @@ class _LoginViewState extends State<LoginView> {
       return;
     }
 
+    // Solo cambiamos el estado de loading una vez al inicio
+    if (_isLoading) return; // Prevenir múltiples calls
+
     setState(() => _isLoading = true);
 
-    try {
-      final authViewModel = context.read<AuthViewModel>();
+    final authViewModel = context.read<AuthViewModel>();
 
-      final success = await authViewModel.login(
-        _emailController.text,
-        _passwordController.text,
-      );
+    final (success, errorMsg) = await authViewModel.login(
+      _emailController.text,
+      _passwordController.text,
+    );
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      if (success) {
-        // Navegar al dashboard si el login es exitoso
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DashboardView(
-              userName:
-                  authViewModel.currentUser?.name ??
-                  _emailController.text.split('@')[0],
-            ),
+    setState(() => _isLoading = false);
+
+    if (success) {
+      // Navegar al dashboard si el login es exitoso
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashboardView(
+            userName:
+                authViewModel.currentUser?.name ??
+                _emailController.text.split('@')[0],
           ),
-        );
-      } else {
-        _showError(
-          authViewModel.errorMessage ?? l10n.tr('auth.login.error.generic'),
-        );
-      }
-    } catch (e) {
-      _showError('Error al iniciar sesión: ${e.toString()}');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+        ),
+      );
+    } else {
+      // Mostrar error inmediatamente
+      final error = errorMsg ?? l10n.tr('auth.login.error.generic');
+      print('🔴 LoginView - Showing error: $error');
+      _showError(error);
     }
   }
 

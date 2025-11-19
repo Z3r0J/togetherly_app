@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
@@ -20,6 +21,9 @@ void main() async {
 
   // Cargar traducciones antes de iniciar la app
   await AppLocalizations.load();
+
+  // Inicializar formato de fechas para español
+  await initializeDateFormatting('es_ES', null);
 
   runApp(const MyApp());
 }

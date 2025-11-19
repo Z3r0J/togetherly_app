@@ -29,10 +29,10 @@ class AuthViewModel extends ChangeNotifier {
   bool get isLoading => _state == AuthState.loading;
   bool get isAuthenticated => _state == AuthState.authenticated;
 
-  // Login method
-  Future<bool> login(String email, String password) async {
+  // Login method - retorna (success, errorMessage)
+  Future<(bool, String?)> login(String email, String password) async {
     try {
-      _setState(AuthState.loading);
+      // NO llamar _setState para loading - el view maneja su propio loading
       _errorMessage = null;
 
       final loginRequest = LoginRequest(email: email, password: password);
@@ -43,16 +43,21 @@ class AuthViewModel extends ChangeNotifier {
         // Fetch user data after successful login
         _currentUser = await _authService.getUserData();
         _setState(AuthState.authenticated);
-        return true;
+        return (true, null);
       } else {
-        _errorMessage = 'Login failed. Please try again.';
-        _setState(AuthState.error);
-        return false;
+        // NO llamar _setState ni notifyListeners - evita rebuild
+        _state = AuthState.unauthenticated;
+        final errorMsg = 'Login failed. Please try again.';
+        print('🔴 AuthViewModel - Login failed: $errorMsg');
+        return (false, errorMsg);
       }
     } catch (e) {
-      _errorMessage = _getErrorMessage(e);
-      _setState(AuthState.error);
-      return false;
+      // NO llamar _setState ni notifyListeners - evita rebuild
+      _state = AuthState.unauthenticated;
+      final errorMsg = _getErrorMessage(e);
+      print('🔴 AuthViewModel - Login error caught: $errorMsg');
+      print('🔴 AuthViewModel - Original error: $e');
+      return (false, errorMsg);
     }
   }
 
@@ -220,6 +225,16 @@ class AuthViewModel extends ChangeNotifier {
 
     // Si es un ApiError del backend, usar su errorCode para traducir
     if (error is ApiError) {
+      // Para errores de validación, intentar mostrar el primer detalle
+      if (error.errorCode == 'VALIDATION_FAILED' && error.details != null) {
+        final details = error.details!;
+        // Obtener el primer campo con error
+        for (var entry in details.entries) {
+          if (entry.value is List && (entry.value as List).isNotEmpty) {
+            return (entry.value as List).first.toString();
+          }
+        }
+      }
       return l10n.trError(error.errorCode);
     }
 
@@ -242,6 +257,16 @@ class AuthViewModel extends ChangeNotifier {
 
     // Si es un ApiError del backend, usar su errorCode para traducir
     if (error is ApiError) {
+      // Para errores de validación, intentar mostrar el primer detalle
+      if (error.errorCode == 'VALIDATION_FAILED' && error.details != null) {
+        final details = error.details!;
+        // Obtener el primer campo con error
+        for (var entry in details.entries) {
+          if (entry.value is List && (entry.value as List).isNotEmpty) {
+            return (entry.value as List).first.toString();
+          }
+        }
+      }
       return l10n.trError(error.errorCode);
     }
 

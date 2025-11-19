@@ -169,7 +169,7 @@
   },
   "dashboard": {
     "greeting": "Bienvenido de nuevo,",
-    "date": "Hoy, 18 de octubre",
+    "date": "Hoy, {date}",
     "menu": {
       "profile": "Mi Perfil",
       "settings": "Configuración",
@@ -196,6 +196,13 @@
     "empty": {
       "no_events": "No hay eventos próximos",
       "no_circles": "Aún no tienes círculos. ¡Crea tu primer círculo!"
+    },
+    "action": {
+      "retry": "Reintentar"
+    },
+    "dialog": {
+      "logout_title": "Cerrar Sesión",
+      "logout_message": "¿Estás seguro de que quieres cerrar sesión?"
     },
     "error": {
       "loading_circles": "Error al cargar círculos"
@@ -241,6 +248,21 @@
     }
   },
   "circle": {
+    "label": {
+      "members": "miembros",
+      "member": "miembro",
+      "upcoming_events": "eventos próximos",
+      "upcoming_event": "evento próximo",
+      "active": "Activo",
+      "next_event": "PRÓXIMO EVENTO",
+      "view_circle": "Ver Círculo"
+    },
+    "message": {
+      "load_failed": "No se pudieron cargar los círculos. Por favor, intenta de nuevo.",
+      "session_expired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
+      "auth_required": "Autenticación requerida. Por favor, inicia sesión.",
+      "no_token": "No se encontró token de acceso"
+    },
     "error": {
       "CIRCLE_NOT_FOUND": "Círculo no encontrado",
       "CIRCLE_ALREADY_EXISTS": "Ya existe un círculo con este nombre",

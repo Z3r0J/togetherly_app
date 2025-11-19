@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../l10n/app_localizations.dart';
 
 /// Card de círculo/grupo reutilizable
 ///
@@ -78,14 +79,14 @@ class CircleCard extends StatelessWidget {
                     Text(name, style: AppTextStyles.circleTitle),
                     const SizedBox(height: 4),
                     Text(
-                      '$memberCount members, $eventCount ${eventCount == 1 ? 'upcoming event' : 'upcoming events'}',
+                      '$memberCount ${AppLocalizations.instance.tr('circle.label.members')}, $eventCount ${eventCount == 1 ? AppLocalizations.instance.tr('circle.label.upcoming_event') : AppLocalizations.instance.tr('circle.label.upcoming_events')}',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Active $lastActivity',
+                      '${AppLocalizations.instance.tr('circle.label.active')} $lastActivity',
                       style: AppTextStyles.labelSmall.copyWith(
                         color: AppColors.textTertiary,
                       ),
@@ -191,7 +192,7 @@ class CompactCircleCard extends StatelessWidget {
 
                 // Miembros
                 Text(
-                  '$memberCount members',
+                  '$memberCount ${AppLocalizations.instance.tr('circle.label.members')}',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -203,7 +204,7 @@ class CompactCircleCard extends StatelessWidget {
                   const Divider(height: 1),
                   const SizedBox(height: 12),
                   Text(
-                    'NEXT EVENT',
+                    AppLocalizations.instance.tr('circle.label.next_event'),
                     style: AppTextStyles.overline.copyWith(
                       color: AppColors.textTertiary,
                     ),
@@ -243,9 +244,13 @@ class CompactCircleCard extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('View Circle'),
+                          Text(
+                            AppLocalizations.instance.tr(
+                              'circle.label.view_circle',
+                            ),
+                          ),
                           const SizedBox(width: 4),
-                          Icon(Icons.arrow_forward, size: 16),
+                          const Icon(Icons.arrow_forward, size: 16),
                         ],
                       ),
                     ),

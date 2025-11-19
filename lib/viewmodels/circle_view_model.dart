@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/circle_models.dart';
+import '../models/api_error.dart';
 import '../services/circle_service.dart';
+import '../l10n/app_localizations.dart';
 
 enum CircleState { initial, loading, loaded, error }
 
@@ -37,7 +39,9 @@ class CircleViewModel extends ChangeNotifier {
         _circles = circlesResponse.data.circles;
         _setState(CircleState.loaded);
       } else {
-        _errorMessage = 'Failed to load circles';
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.load_failed',
+        );
         _setState(CircleState.error);
       }
     } catch (e) {
@@ -48,14 +52,21 @@ class CircleViewModel extends ChangeNotifier {
 
   // Helper to format error messages
   String _getErrorMessage(dynamic error) {
-    if (error.toString().contains('Session expired')) {
-      return 'Session expired. Please login again.';
-    } else if (error.toString().contains('No access token')) {
-      return 'Authentication required. Please login.';
-    } else if (error.toString().contains('SocketException')) {
-      return 'No internet connection. Please check your network.';
+    final l10n = AppLocalizations.instance;
+
+    if (error is ApiError) {
+      // Try to get localized error message using trError
+      return l10n.trError(error.errorCode);
     }
-    return 'Failed to load circles. Please try again.';
+
+    // Fallback for generic errors
+    if (error.toString().contains('Session expired')) {
+      return l10n.tr('circle.message.session_expired');
+    } else if (error.toString().contains('No access token')) {
+      return l10n.tr('circle.message.auth_required');
+    }
+
+    return l10n.networkError;
   }
 
   // Clear error message

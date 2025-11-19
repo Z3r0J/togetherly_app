@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
 
@@ -16,12 +18,21 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  String _selectedFilter = 'Todos';
-  final List<String> _filters = ['Todos', 'Personal', 'Asistiendo', 'Quizás'];
+  late final AppLocalizations l10n;
+  late final String _selectedFilter;
+  late final List<String> _filters;
 
   @override
   void initState() {
     super.initState();
+    l10n = AppLocalizations.instance;
+    _selectedFilter = l10n.tr('dashboard.filter.all');
+    _filters = [
+      l10n.tr('dashboard.filter.all'),
+      l10n.tr('dashboard.filter.personal'),
+      l10n.tr('dashboard.filter.going'),
+      l10n.tr('dashboard.filter.maybe'),
+    ];
     // Fetch circles on dashboard load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CircleViewModel>().fetchCircles();
@@ -85,7 +96,7 @@ class _DashboardViewState extends State<DashboardView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bienvenido de nuevo,',
+                  l10n.tr('dashboard.greeting'),
                   style: AppTextStyles.headlineMedium,
                 ),
                 Text(
@@ -95,7 +106,15 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Hoy, 18 de octubre',
+                  l10n
+                      .tr('dashboard.date')
+                      .replaceAll(
+                        '{date}',
+                        DateFormat(
+                          'd \'de\' MMMM',
+                          'es_ES',
+                        ).format(DateTime.now()),
+                      ),
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -131,36 +150,36 @@ class _DashboardViewState extends State<DashboardView> {
                   }
                 },
                 itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'profile',
                     child: Row(
                       children: [
-                        Icon(Icons.person_outline),
-                        SizedBox(width: 8),
-                        Text('Mi Perfil'),
+                        const Icon(Icons.person_outline),
+                        const SizedBox(width: 8),
+                        Text(l10n.tr('dashboard.menu.profile')),
                       ],
                     ),
                   ),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'settings',
                     child: Row(
                       children: [
-                        Icon(Icons.settings_outlined),
-                        SizedBox(width: 8),
-                        Text('Configuración'),
+                        const Icon(Icons.settings_outlined),
+                        const SizedBox(width: 8),
+                        Text(l10n.tr('dashboard.menu.settings')),
                       ],
                     ),
                   ),
                   const PopupMenuDivider(),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'logout',
                     child: Row(
                       children: [
-                        Icon(Icons.logout, color: Colors.red),
-                        SizedBox(width: 8),
+                        const Icon(Icons.logout, color: Colors.red),
+                        const SizedBox(width: 8),
                         Text(
-                          'Cerrar Sesión',
-                          style: TextStyle(color: Colors.red),
+                          l10n.tr('dashboard.menu.logout'),
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ],
                     ),
@@ -191,13 +210,16 @@ class _DashboardViewState extends State<DashboardView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Mis Círculos', style: AppTextStyles.headlineSmall),
+                  Text(
+                    l10n.tr('dashboard.section.circles'),
+                    style: AppTextStyles.headlineSmall,
+                  ),
                   TextButton(
                     onPressed: () {
                       // TODO: Navegar a ver todos los círculos
                     },
                     child: Text(
-                      'Ver todo',
+                      l10n.tr('dashboard.link.view_all'),
                       style: AppTextStyles.labelMedium.copyWith(
                         color: AppColors.primary,
                       ),
@@ -233,7 +255,8 @@ class _DashboardViewState extends State<DashboardView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                circleViewModel.errorMessage ?? 'Error loading circles',
+                circleViewModel.errorMessage ??
+                    l10n.tr('dashboard.error.loading_circles'),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.error,
                 ),
@@ -242,7 +265,7 @@ class _DashboardViewState extends State<DashboardView> {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => circleViewModel.fetchCircles(),
-                child: const Text('Retry'),
+                child: Text(l10n.tr('dashboard.action.retry')),
               ),
             ],
           ),
@@ -255,7 +278,7 @@ class _DashboardViewState extends State<DashboardView> {
         height: 165,
         child: Center(
           child: Text(
-            'No circles yet. Create your first circle!',
+            l10n.tr('dashboard.empty.no_circles'),
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -324,7 +347,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
           const SizedBox(height: 3),
           Text(
-            '$memberCount miembros',
+            '$memberCount ${l10n.tr('dashboard.label.members')}',
             style: AppTextStyles.labelSmall.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -334,7 +357,7 @@ class _DashboardViewState extends State<DashboardView> {
           // Próximo evento (only show if available)
           if (eventTitle != null && eventDate != null) ...[
             Text(
-              'PRÓXIMO EVENTO',
+              l10n.tr('dashboard.section.upcoming_event'),
               style: AppTextStyles.labelSmall.copyWith(
                 color: AppColors.textTertiary,
                 fontSize: 10,
@@ -361,7 +384,7 @@ class _DashboardViewState extends State<DashboardView> {
             const SizedBox(height: 6),
           ] else ...[
             Text(
-              'No upcoming events',
+              l10n.tr('dashboard.empty.no_events'),
               style: AppTextStyles.labelSmall.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -371,7 +394,7 @@ class _DashboardViewState extends State<DashboardView> {
 
           // Botón Ver Círculo
           AppButton(
-            text: 'Ver Círculo →',
+            text: l10n.tr('dashboard.link.view_circle'),
             type: AppButtonType.text,
             size: AppButtonSize.small,
             fullWidth: true,
@@ -391,7 +414,10 @@ class _DashboardViewState extends State<DashboardView> {
         // Título
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text('Próximos Eventos', style: AppTextStyles.headlineSmall),
+          child: Text(
+            l10n.tr('dashboard.section.events'),
+            style: AppTextStyles.headlineSmall,
+          ),
         ),
 
         const SizedBox(height: 16),
@@ -604,17 +630,17 @@ class _DashboardViewState extends State<DashboardView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cerrar Sesión'),
-        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        title: Text(l10n.tr('dashboard.dialog.logout_title')),
+        content: Text(l10n.tr('dashboard.dialog.logout_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text(l10n.tr('common.button.cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Cerrar Sesión'),
+            child: Text(l10n.tr('dashboard.menu.logout')),
           ),
         ],
       ),
