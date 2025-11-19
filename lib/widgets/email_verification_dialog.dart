@@ -6,17 +6,12 @@ import '../widgets/app_button.dart';
 class EmailVerificationDialog extends StatelessWidget {
   final String email;
 
-  const EmailVerificationDialog({
-    super.key,
-    required this.email,
-  });
+  const EmailVerificationDialog({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

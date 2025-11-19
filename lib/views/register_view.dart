@@ -107,9 +107,7 @@ class _RegisterViewState extends State<RegisterView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Error'),
         content: Text(message),
         actions: [
@@ -141,11 +139,7 @@ class _RegisterViewState extends State<RegisterView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.people,
-                    size: 40,
-                    color: AppColors.primary,
-                  ),
+                  Icon(Icons.people, size: 40, color: AppColors.primary),
                   const SizedBox(width: 12),
                   Text(
                     'Togetherly',
@@ -210,7 +204,9 @@ class _RegisterViewState extends State<RegisterView> {
                 hintText: 'Crea una contraseña segura',
                 obscureText: _obscurePassword,
                 onSubmitted: (_) => _validateAndRegister(),
-                suffixIcon: _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                suffixIcon: _obscurePassword
+                    ? Icons.visibility_off
+                    : Icons.visibility,
                 onSuffixIconPressed: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;

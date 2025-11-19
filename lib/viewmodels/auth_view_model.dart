@@ -153,7 +153,11 @@ class AuthViewModel extends ChangeNotifier {
       _setState(AuthState.loading);
       _errorMessage = null;
 
-      final request = RegisterRequest(name: name, email: email, password: password);
+      final request = RegisterRequest(
+        name: name,
+        email: email,
+        password: password,
+      );
       final response = await _authService.register(request);
 
       if (response.success) {
