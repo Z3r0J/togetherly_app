@@ -7,6 +7,8 @@ import '../viewmodels/circle_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
+import 'my_circles_view.dart';
+import 'circle_detail_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -216,7 +218,12 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // TODO: Navegar a ver todos los círculos
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyCirclesView(),
+                        ),
+                      );
                     },
                     child: Text(
                       l10n.tr('dashboard.link.view_all'),
@@ -322,7 +329,7 @@ class _DashboardViewState extends State<DashboardView> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -345,7 +352,7 @@ class _DashboardViewState extends State<DashboardView> {
               ),
             ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 8),
           Text(
             '$memberCount ${l10n.tr('dashboard.label.members')}',
             style: AppTextStyles.labelSmall.copyWith(
@@ -354,7 +361,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
           const SizedBox(height: 6),
 
-          // Próximo evento (only show if available)
+          // Próximo evento
           if (eventTitle != null && eventDate != null) ...[
             Text(
               l10n.tr('dashboard.section.upcoming_event'),
@@ -363,7 +370,7 @@ class _DashboardViewState extends State<DashboardView> {
                 fontSize: 10,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               eventTitle,
               style: AppTextStyles.labelMedium.copyWith(
@@ -381,7 +388,7 @@ class _DashboardViewState extends State<DashboardView> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
           ] else ...[
             Text(
               l10n.tr('dashboard.empty.no_events'),
@@ -389,7 +396,7 @@ class _DashboardViewState extends State<DashboardView> {
                 color: AppColors.textTertiary,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 12),
           ],
 
           // Botón Ver Círculo
@@ -399,7 +406,13 @@ class _DashboardViewState extends State<DashboardView> {
             size: AppButtonSize.small,
             fullWidth: true,
             onPressed: () {
-              // TODO: Navegar a detalles del círculo
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CircleDetailView(circleName: name, circleColor: color),
+                ),
+              );
             },
           ),
         ],
