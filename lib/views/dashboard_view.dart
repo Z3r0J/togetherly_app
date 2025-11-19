@@ -370,16 +370,14 @@ class _DashboardViewState extends State<DashboardView> {
           ],
 
           // Botón Ver Círculo
-          SizedBox(
-            height: 30,
-            child: AppButton(
-              text: 'Ver Círculo →',
-              type: AppButtonType.text,
-              fullWidth: true,
-              onPressed: () {
-                // TODO: Navegar a detalles del círculo
-              },
-            ),
+          AppButton(
+            text: 'Ver Círculo →',
+            type: AppButtonType.text,
+            size: AppButtonSize.small,
+            fullWidth: true,
+            onPressed: () {
+              // TODO: Navegar a detalles del círculo
+            },
           ),
         ],
       ),

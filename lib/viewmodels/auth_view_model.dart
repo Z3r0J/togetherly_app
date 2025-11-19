@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/auth_models.dart';
+import '../models/magic_link_models.dart';
 import '../services/auth_service.dart';
 
-enum AuthState { initial, loading, authenticated, unauthenticated, error }
+enum AuthState {
+  initial,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+  magicLinkSent,
+  awaitingEmailConfirmation,
+}
 
 class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -85,6 +94,55 @@ class AuthViewModel extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Failed to refresh user data: ${e.toString()}';
       notifyListeners();
+    }
+  }
+
+  // Send magic link to email
+  Future<bool> sendMagicLink(String email) async {
+    try {
+      _setState(AuthState.loading);
+      _errorMessage = null;
+
+      final request = MagicLinkRequest(email: email);
+      final response = await _authService.sendMagicLink(request);
+
+      if (response.success) {
+        _setState(AuthState.magicLinkSent);
+        return true;
+      } else {
+        _errorMessage = 'No se pudo enviar el enlace mágico';
+        _setState(AuthState.error);
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = _getErrorMessage(e);
+      _setState(AuthState.error);
+      return false;
+    }
+  }
+
+  // Handle deep link authentication (when user clicks magic link)
+  Future<bool> handleDeepLinkAuth(
+    String accessToken,
+    String refreshToken,
+  ) async {
+    try {
+      _setState(AuthState.loading);
+      _errorMessage = null;
+
+      // Save tokens from deep link
+      await _authService.saveMagicLinkTokens(accessToken, refreshToken);
+
+      // Fetch user data using the new tokens
+      _currentUser = await _authService.getUserData();
+
+      _setState(AuthState.authenticated);
+      return true;
+    } catch (e) {
+      _errorMessage = _getErrorMessage(e);
+      await _authService.clearTokens();
+      _setState(AuthState.error);
+      return false;
     }
   }
 

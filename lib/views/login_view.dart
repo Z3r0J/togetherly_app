@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../widgets/magic_link_dialog.dart';
 import '../viewmodels/auth_view_model.dart';
 import 'dashboard_view.dart';
 
@@ -280,27 +281,12 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _handleMagicLink() async {
-    if (_emailController.text.isEmpty) {
-      _showError('Escribe tu correo');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      // Aquí iría la llamada al servicio de magic link
-      await Future.delayed(const Duration(seconds: 2)); // Simulación
-
-      if (!mounted) return;
-
-      _showSuccess('¡Magic link enviado! Revisa tu email');
-    } catch (e) {
-      _showError('Error al enviar magic link');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    // Show magic link dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const MagicLinkDialog(),
+    );
   }
 
   void _handleForgotPassword() {
