@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/circle_view_model.dart';
+import '../l10n/app_localizations.dart';
 
 class CreateCircleView extends StatefulWidget {
   const CreateCircleView({super.key});
@@ -11,6 +14,8 @@ class CreateCircleView extends StatefulWidget {
 class _CreateCircleViewState extends State<CreateCircleView> {
   final _circleNameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  late final AppLocalizations l10n;
+  bool _isLoading = false;
 
   // Colores disponibles para el círculo
   final List<Color> _availableColors = [
@@ -23,7 +28,13 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   ];
 
   Color _selectedColor = AppColors.circlePurple;
-  String _selectedPrivacy = 'inviteOnly'; // 'inviteOnly' o 'public'
+  String _selectedPrivacy = 'invite-only'; // 'invite-only' o 'public'
+
+  @override
+  void initState() {
+    super.initState();
+    l10n = AppLocalizations.instance;
+  }
 
   @override
   void dispose() {
@@ -82,7 +93,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               text: 'Crear Círculo',
               type: AppButtonType.primary,
               fullWidth: true,
-              onPressed: _handleCreateCircle,
+              isLoading: _isLoading,
+              onPressed: _isLoading ? null : _handleCreateCircle,
             ),
 
             const SizedBox(height: 16),
@@ -165,11 +177,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
 
         // Opción: Solo invitaciones
         _buildPrivacyOption(
-          value: 'inviteOnly',
+          value: 'invite-only',
           title: 'Solo Invitaciones',
           description:
               'Los miembros solo pueden unirse mediante invitación directa.',
-          isSelected: _selectedPrivacy == 'inviteOnly',
+          isSelected: _selectedPrivacy == 'invite-only',
         ),
 
         const SizedBox(height: 16),
@@ -259,11 +271,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     );
   }
 
-  void _handleCreateCircle() {
+  void _handleCreateCircle() async {
     if (_circleNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa un nombre para el círculo'),
+        SnackBar(
+          content: Text(l10n.tr('circle.error.CIRCLE_NAME_REQUIRED')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -271,22 +283,69 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       return;
     }
 
-    // Mostrar confirmación
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '¡Círculo "${_circleNameController.text}" creado exitosamente!',
-        ),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ),
+    setState(() {
+      _isLoading = true;
+    });
+
+    final circleViewModel = context.read<CircleViewModel>();
+
+    // Map color to string name
+    String colorName = 'purple';
+    if (_selectedColor == AppColors.circleBlue) {
+      colorName = 'blue';
+    } else if (_selectedColor == AppColors.circleGreen) {
+      colorName = 'green';
+    } else if (_selectedColor == AppColors.circleOrange) {
+      colorName = 'orange';
+    } else if (_selectedColor == AppColors.circlePink) {
+      colorName = 'pink';
+    } else if (_selectedColor == AppColors.circleTeal) {
+      colorName = 'teal';
+    }
+
+    final success = await circleViewModel.createCircle(
+      name: _circleNameController.text,
+      description: _descriptionController.text,
+      color: colorName,
+      privacy: _selectedPrivacy,
     );
 
-    // Regresar a la vista anterior después de 1 segundo
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+    setState(() {
+      _isLoading = false;
     });
+
+    if (!mounted) return;
+
+    if (success) {
+      // Mostrar confirmación
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '¡Círculo "${_circleNameController.text}" creado exitosamente!',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Regresar a la vista anterior
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      });
+    } else {
+      // Mostrar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            circleViewModel.errorMessage ??
+                l10n.tr('circle.message.create_failed'),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

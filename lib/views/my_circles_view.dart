@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/circle_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'circle_detail_view.dart';
 import 'create_circle_view.dart';
 
@@ -11,33 +14,17 @@ class MyCirclesView extends StatefulWidget {
 }
 
 class _MyCirclesViewState extends State<MyCirclesView> {
-  // Datos de ejemplo de círculos
-  final List<Map<String, dynamic>> _circles = [
-    {
-      'name': 'Reunión Familiar',
-      'icon': Icons.groups,
-      'memberCount': 5,
-      'upcomingEvents': 2,
-      'lastActivity': 'hace 2h',
-      'color': AppColors.circlePurple,
-    },
-    {
-      'name': 'Aventureros de Fin de Semana',
-      'icon': Icons.hiking,
-      'memberCount': 8,
-      'upcomingEvents': 1,
-      'lastActivity': 'hace 1d',
-      'color': AppColors.circleGreen,
-    },
-    {
-      'name': 'Club de Lectura',
-      'icon': Icons.book,
-      'memberCount': 12,
-      'upcomingEvents': 4,
-      'lastActivity': 'hace 5d',
-      'color': AppColors.circleOrange,
-    },
-  ];
+  late final AppLocalizations l10n;
+
+  @override
+  void initState() {
+    super.initState();
+    l10n = AppLocalizations.instance;
+    // Fetch circles on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CircleViewModel>().fetchCircles();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,39 +45,129 @@ class _MyCirclesViewState extends State<MyCirclesView> {
             child: AppButton(
               text: '+ Crear Círculo',
               type: AppButtonType.primary,
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CreateCircleView(),
                   ),
                 );
+                if (result == true) {
+                  // Refresh circles after creation
+                  context.read<CircleViewModel>().fetchCircles();
+                }
               },
             ),
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _circles.length,
-        itemBuilder: (context, index) {
-          final circle = _circles[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _buildCircleCard(circle),
+      body: Consumer<CircleViewModel>(
+        builder: (context, circleViewModel, child) {
+          if (circleViewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (circleViewModel.state == CircleState.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    circleViewModel.errorMessage ??
+                        l10n.tr('circle.message.load_failed'),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    text: l10n.tr('common.button.retry'),
+                    type: AppButtonType.primary,
+                    onPressed: () => circleViewModel.fetchCircles(),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (!circleViewModel.hasCircles) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.groups_outlined,
+                    size: 64,
+                    color: AppColors.textTertiary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.tr('dashboard.empty.no_circles'),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    text: '+ Crear Círculo',
+                    type: AppButtonType.primary,
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateCircleView(),
+                        ),
+                      );
+                      if (result == true) {
+                        // Refresh circles after creation
+                        circleViewModel.fetchCircles();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => circleViewModel.fetchCircles(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: circleViewModel.circles.length,
+              itemBuilder: (context, index) {
+                final circle = circleViewModel.circles[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildCircleCard(circle),
+                );
+              },
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildCircleCard(Map<String, dynamic> circle) {
-    final name = circle['name'] as String;
-    final icon = circle['icon'] as IconData;
-    final memberCount = circle['memberCount'] as int;
-    final upcomingEvents = circle['upcomingEvents'] as int;
-    final lastActivity = circle['lastActivity'] as String;
-    final color = circle['color'] as Color;
+  Widget _buildCircleCard(circle) {
+    final id = circle.id;
+    final name = circle.name;
+    final memberCount = circle.memberCountInt;
+    final color = AppColors.getCircleColor(circle.color);
+    final description = circle.description;
+
+    // Default icon based on color
+    IconData icon = Icons.groups;
+    if (color == AppColors.circleGreen) {
+      icon = Icons.hiking;
+    } else if (color == AppColors.circleOrange) {
+      icon = Icons.book;
+    } else if (color == AppColors.circleBlue) {
+      icon = Icons.sports_soccer;
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -105,8 +182,11 @@ class _MyCirclesViewState extends State<MyCirclesView> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    CircleDetailView(circleName: name, circleColor: color),
+                builder: (context) => CircleDetailView(
+                  circleId: id,
+                  circleName: name,
+                  circleColor: color,
+                ),
               ),
             );
           },
@@ -141,17 +221,14 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$memberCount miembros, ${upcomingEvents == 1 ? '$upcomingEvents próximo evento' : '$upcomingEvents próximos eventos'}',
+                        description.isNotEmpty
+                            ? description
+                            : '$memberCount ${l10n.tr('circle.label.members')}',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Activo $lastActivity',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

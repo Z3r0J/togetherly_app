@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/circle_view_model.dart';
+import '../l10n/app_localizations.dart';
 
 class CircleDetailView extends StatefulWidget {
+  final String circleId;
   final String circleName;
   final Color circleColor;
 
   const CircleDetailView({
     super.key,
+    required this.circleId,
     required this.circleName,
     required this.circleColor,
   });
@@ -16,37 +21,17 @@ class CircleDetailView extends StatefulWidget {
 }
 
 class _CircleDetailViewState extends State<CircleDetailView> {
-  // Datos de ejemplo de miembros
-  final List<Map<String, dynamic>> _members = [
-    {'name': 'Alex Roy', 'role': 'Propietario'},
-    {'name': 'Jordan L.', 'role': null},
-    {'name': 'Casey', 'role': null},
-    {'name': 'Morgan', 'role': null},
-  ];
+  late final AppLocalizations l10n;
 
-  // Datos de ejemplo de eventos
-  final List<Map<String, dynamic>> _upcomingEvents = [
-    {
-      'title': 'Fiesta BBQ Anual',
-      'date': 'sábado, 17 de agosto',
-      'time': '2:00 PM - 7:00 PM',
-      'location': 'Patio de Alex',
-      'rsvpStatus': RsvpStatus.going,
-      'going': 4,
-      'maybe': 1,
-      'notGoing': 0,
-    },
-    {
-      'title': 'Noche de Cine',
-      'date': 'viernes, 23 de agosto',
-      'time': '7:30 PM',
-      'location': 'Cine Centro',
-      'rsvpStatus': RsvpStatus.maybe,
-      'going': 2,
-      'maybe': 2,
-      'notGoing': 1,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    l10n = AppLocalizations.instance;
+    // Fetch circle details on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CircleViewModel>().fetchCircleDetail(widget.circleId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,29 +74,74 @@ class _CircleDetailViewState extends State<CircleDetailView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Sección de Miembros
-              _buildMembersSection(),
+      body: Consumer<CircleViewModel>(
+        builder: (context, circleViewModel, child) {
+          if (circleViewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              const SizedBox(height: 4),
+          if (circleViewModel.state == CircleState.error) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    circleViewModel.errorMessage ??
+                        l10n.tr('circle.message.load_failed'),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    text: l10n.tr('common.button.retry'),
+                    type: AppButtonType.primary,
+                    onPressed: () =>
+                        circleViewModel.fetchCircleDetail(widget.circleId),
+                  ),
+                ],
+              ),
+            );
+          }
 
-              // Sección de Próximos Eventos
-              _buildUpcomingEventsSection(),
+          final circleDetail = circleViewModel.currentCircleDetail;
+          if (circleDetail == null) {
+            return Center(
+              child: Text(
+                l10n.tr('circle.error.CIRCLE_NOT_FOUND'),
+                style: AppTextStyles.bodyMedium,
+              ),
+            );
+          }
 
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Sección de Miembros
+                  _buildMembersSection(circleDetail),
+
+                  const SizedBox(height: 4),
+
+                  // Sección de Próximos Eventos
+                  _buildUpcomingEventsSection(circleDetail),
+
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildMembersSection() {
+  Widget _buildMembersSection(circleDetail) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,21 +152,22 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Miembros (${_members.length})',
+                'Miembros (${circleDetail.memberCount})',
                 style: AppTextStyles.headlineSmall,
               ),
-              AppButton(
-                text: '+ Invitar',
-                type: AppButtonType.primary,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Abriendo formulario de invitación...'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              ),
+              if (circleDetail.canEdit)
+                AppButton(
+                  text: '+ Invitar',
+                  type: AppButtonType.primary,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Abriendo formulario de invitación...'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -155,9 +186,9 @@ class _CircleDetailViewState extends State<CircleDetailView> {
               crossAxisSpacing: 8,
               childAspectRatio: 0.8,
             ),
-            itemCount: _members.length,
+            itemCount: circleDetail.members.length,
             itemBuilder: (context, index) {
-              final member = _members[index];
+              final member = circleDetail.members[index];
               return _buildMemberCard(member);
             },
           ),
@@ -166,9 +197,9 @@ class _CircleDetailViewState extends State<CircleDetailView> {
     );
   }
 
-  Widget _buildMemberCard(Map<String, dynamic> member) {
-    final name = member['name'] as String;
-    final role = member['role'] as String?;
+  Widget _buildMemberCard(member) {
+    final name = member.name;
+    final role = member.role;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -185,10 +216,10 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (role != null)
+        if (role == 'owner')
           Flexible(
             child: Text(
-              '($role)',
+              '(Propietario)',
               style: AppTextStyles.labelSmall.copyWith(
                 color: AppColors.textTertiary,
                 fontSize: 10,
@@ -201,7 +232,9 @@ class _CircleDetailViewState extends State<CircleDetailView> {
     );
   }
 
-  Widget _buildUpcomingEventsSection() {
+  Widget _buildUpcomingEventsSection(circleDetail) {
+    final events = circleDetail.events;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -212,18 +245,19 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Próximos Eventos', style: AppTextStyles.headlineSmall),
-              AppButton(
-                text: '+ Crear Evento',
-                type: AppButtonType.primary,
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Abriendo formulario de crear evento...'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              ),
+              if (circleDetail.canEdit)
+                AppButton(
+                  text: '+ Crear Evento',
+                  type: AppButtonType.primary,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Abriendo formulario de crear evento...'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
@@ -231,157 +265,36 @@ class _CircleDetailViewState extends State<CircleDetailView> {
         const SizedBox(height: 16),
 
         // Lista de eventos
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: _upcomingEvents.asMap().entries.map((entry) {
-              final event = entry.value;
-              final isLastEvent = entry.key == _upcomingEvents.length - 1;
-              return Padding(
-                padding: EdgeInsets.only(bottom: isLastEvent ? 0 : 16),
-                child: _buildEventCard(event),
-              );
-            }).toList(),
+        if (events.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Center(
+              child: Text(
+                l10n.tr('dashboard.empty.no_events'),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: events.asMap().entries.map<Widget>((entry) {
+                final event = entry.value;
+                final isLastEvent = entry.key == events.length - 1;
+                return Padding(
+                  padding: EdgeInsets.only(bottom: isLastEvent ? 0 : 16),
+                  child: Text(
+                    'Evento: $event',
+                    style: AppTextStyles.bodyMedium,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
-    );
-  }
-
-  Widget _buildEventCard(Map<String, dynamic> event) {
-    final title = event['title'] as String;
-    final date = event['date'] as String;
-    final time = event['time'] as String;
-    final location = event['location'] as String;
-    final rsvpStatus = event['rsvpStatus'] as RsvpStatus;
-    final going = event['going'] as int;
-    final maybe = event['maybe'] as int;
-    final notGoing = event['notGoing'] as int;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título del evento
-          Text(
-            title,
-            style: AppTextStyles.labelMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Fecha
-          Row(
-            children: [
-              const Icon(
-                Icons.calendar_today_outlined,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                date,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // Hora
-          Row(
-            children: [
-              const Icon(
-                Icons.schedule,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                time,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // Ubicación
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                size: 16,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  location,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Divider
-          Container(height: 1, color: AppColors.border),
-
-          const SizedBox(height: 12),
-
-          // RSVP Status y View Details
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              RsvpBadge(status: rsvpStatus),
-              TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Mostrando detalles de $title...'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                child: Text(
-                  'Ver Detalles →',
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Conteo de RSVPs
-          Text(
-            '$going Asistiendo • $maybe Quizás • $notGoing No va',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

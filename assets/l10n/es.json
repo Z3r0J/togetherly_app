@@ -259,6 +259,7 @@
     },
     "message": {
       "load_failed": "No se pudieron cargar los círculos. Por favor, intenta de nuevo.",
+      "create_failed": "No se pudo crear el círculo. Por favor, intenta de nuevo.",
       "session_expired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
       "auth_required": "Autenticación requerida. Por favor, inicia sesión.",
       "no_token": "No se encontró token de acceso"

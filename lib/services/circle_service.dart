@@ -65,4 +65,132 @@ class CircleService {
       throw ApiError.unknownError(e.toString());
     }
   }
+
+  // Create a new circle
+  Future<CreateCircleResponse> createCircle(CreateCircleRequest request) async {
+    try {
+      final accessToken = await _authService.getAccessToken();
+
+      print(
+        '🔑 CircleService - Access Token: ${accessToken?.substring(0, 20)}...',
+      );
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      print('📤 CircleService - Creating circle: ${request.name}');
+
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.circlesUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 CircleService - Response status: ${response.statusCode}');
+      print('📥 CircleService - Response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final createCircleResponse = CreateCircleResponse.fromJson(
+          jsonDecode(response.body),
+        );
+        return createCircleResponse;
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'CIRCLE_CREATE_FAILED',
+          message: 'Failed to create circle',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  // Get circle details by ID
+  Future<CircleDetailResponse> getCircleDetail(String circleId) async {
+    try {
+      final accessToken = await _authService.getAccessToken();
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.circlesUrl}/$circleId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final circleDetailResponse = CircleDetailResponse.fromJson(
+          jsonDecode(response.body),
+        );
+        return circleDetailResponse;
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else if (response.statusCode == 404) {
+        throw ApiError(
+          errorCode: 'CIRCLE_NOT_FOUND',
+          message: 'Circle not found',
+          statusCode: 404,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'CIRCLE_LOAD_FAILED',
+          message: 'Failed to load circle details',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
 }

@@ -304,6 +304,7 @@ class _DashboardViewState extends State<DashboardView> {
         itemBuilder: (context, index) {
           final circle = circleViewModel.circles[index];
           return _buildCircleCardItem(
+            id: circle.id,
             name: circle.name,
             memberCount: circle.memberCountInt,
             eventTitle: null,
@@ -316,6 +317,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildCircleCardItem({
+    required String id,
     required String name,
     required int memberCount,
     String? eventTitle,
@@ -409,8 +411,11 @@ class _DashboardViewState extends State<DashboardView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      CircleDetailView(circleName: name, circleColor: color),
+                  builder: (context) => CircleDetailView(
+                    circleId: id,
+                    circleName: name,
+                    circleColor: color,
+                  ),
                 ),
               );
             },
