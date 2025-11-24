@@ -272,7 +272,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   void _handleCreateCircle() async {
+    print('🔵 [CREATE CIRCLE] Starting circle creation process');
+
     if (_circleNameController.text.isEmpty) {
+      print('❌ [CREATE CIRCLE] Validation failed: Circle name is empty');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.tr('circle.error.CIRCLE_NAME_REQUIRED')),
@@ -282,6 +285,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       );
       return;
     }
+
+    print('✅ [CREATE CIRCLE] Validation passed');
+    print('   - Circle Name: ${_circleNameController.text}');
+    print('   - Description: ${_descriptionController.text}');
+    print('   - Privacy: $_selectedPrivacy');
 
     setState(() {
       _isLoading = true;
@@ -303,12 +311,22 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       colorName = 'teal';
     }
 
+    print('   - Color: $colorName');
+    print('📤 [CREATE CIRCLE] Calling circleViewModel.createCircle()...');
+
     final success = await circleViewModel.createCircle(
       name: _circleNameController.text,
       description: _descriptionController.text,
       color: colorName,
       privacy: _selectedPrivacy,
     );
+
+    print(
+      '📥 [CREATE CIRCLE] API response received: ${success ? "SUCCESS" : "FAILED"}',
+    );
+    if (!success) {
+      print('   Error message: ${circleViewModel.errorMessage}');
+    }
 
     setState(() {
       _isLoading = false;
@@ -317,6 +335,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     if (!mounted) return;
 
     if (success) {
+      print('✅ [CREATE CIRCLE] Circle created successfully!');
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -331,10 +350,12 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       // Regresar a la vista anterior
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
+          print('🔙 [CREATE CIRCLE] Navigating back to dashboard');
           Navigator.pop(context, true);
         }
       });
     } else {
+      print('❌ [CREATE CIRCLE] Circle creation failed');
       // Mostrar error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

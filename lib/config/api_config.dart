@@ -1,6 +1,6 @@
 class ApiConfig {
   // Base URL for all API endpoints
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'https://togetherly-backend.fly.dev/api';
 
   // Endpoint paths
   static const String authPath = '/auth';

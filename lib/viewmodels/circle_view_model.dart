@@ -85,6 +85,13 @@ class CircleViewModel extends ChangeNotifier {
     required String privacy,
   }) async {
     try {
+      print('🔵 [CircleViewModel] createCircle called');
+      print('   Parameters:');
+      print('   - name: $name');
+      print('   - description: $description');
+      print('   - color: $color');
+      print('   - privacy: $privacy');
+
       _setState(CircleState.loading);
       _errorMessage = null;
 
@@ -95,14 +102,22 @@ class CircleViewModel extends ChangeNotifier {
         privacy: privacy,
       );
 
+      print('📤 [CircleViewModel] Sending request to CircleService...');
       final createResponse = await _circleService.createCircle(request);
+      print('📥 [CircleViewModel] Response received from CircleService');
+      print('   - success: ${createResponse.success}');
+      print('   - timestamp: ${createResponse.timestamp}');
 
       if (createResponse.success) {
+        print('✅ [CircleViewModel] Circle created successfully');
+        print('   - Circle ID: ${createResponse.data.id}');
+        print('   - Circle name: ${createResponse.data.name}');
         // Add the new circle to the list
         _circles.add(createResponse.data);
         _setState(CircleState.loaded);
         return true;
       } else {
+        print('❌ [CircleViewModel] Circle creation failed (success=false)');
         _errorMessage = AppLocalizations.instance.tr(
           'circle.message.create_failed',
         );
@@ -110,6 +125,9 @@ class CircleViewModel extends ChangeNotifier {
         return false;
       }
     } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during createCircle:');
+      print('   - Exception type: ${e.runtimeType}');
+      print('   - Exception message: $e');
       _errorMessage = _getErrorMessage(e);
       _setState(CircleState.error);
       return false;

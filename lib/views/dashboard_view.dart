@@ -4,11 +4,14 @@ import 'package:intl/intl.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
+import '../viewmodels/personal_event_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
 import 'my_circles_view.dart';
 import 'circle_detail_view.dart';
+import 'create_circle_view.dart';
+import 'create_personal_event_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -23,6 +26,7 @@ class _DashboardViewState extends State<DashboardView> {
   late final AppLocalizations l10n;
   late final String _selectedFilter;
   late final List<String> _filters;
+  bool _isFABOpen = false;
 
   @override
   void initState() {
@@ -76,13 +80,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navegar a crear evento
-        },
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: AppColors.textOnPrimary),
-      ),
+      floatingActionButton: _buildSpeedDialFAB(),
     );
   }
 
@@ -675,5 +673,123 @@ class _DashboardViewState extends State<DashboardView> {
         (route) => false,
       );
     }
+  }
+
+  Widget _buildSpeedDialFAB() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (_isFABOpen) ...[
+          // Create Personal Event Option
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  'Create Personal Event',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FloatingActionButton(
+                heroTag: 'create_personal_event',
+                mini: true,
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  setState(() => _isFABOpen = false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => PersonalEventViewModel(),
+                        child: const CreatePersonalEventView(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.event, color: AppColors.textOnPrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Create Circle Option
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  'Create Circle',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FloatingActionButton(
+                heroTag: 'create_circle',
+                mini: true,
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  setState(() => _isFABOpen = false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CreateCircleView()),
+                  );
+                },
+                child: const Icon(
+                  Icons.group_add,
+                  color: AppColors.textOnPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Main FAB
+        FloatingActionButton(
+          heroTag: 'main_fab',
+          onPressed: () {
+            setState(() => _isFABOpen = !_isFABOpen);
+          },
+          backgroundColor: AppColors.primary,
+          child: AnimatedRotation(
+            turns: _isFABOpen ? 0.125 : 0, // 45 degrees when open
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(Icons.add, color: AppColors.textOnPrimary),
+          ),
+        ),
+      ],
+    );
   }
 }

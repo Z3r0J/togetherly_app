@@ -39,6 +39,10 @@ dependencies:
   shared_preferences: 2.2.3
   app_links: 6.2.1
   intl: ^0.19.0
+  google_maps_flutter: 2.7.0
+  geocoding: 2.2.1+1
+  geolocator: 11.1.0
+  flutter_dotenv: 5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +51,9 @@ dev_dependencies:
 dependency_overrides:
   # shared_preferences_android 2.2.3 elimina v1 embedding y usa compileSdk 34 (2.2.2)
   shared_preferences_android: 2.2.3
+  flutter_plugin_android_lifecycle: 2.0.20
+  geolocator_android: 4.6.0
+  google_maps_flutter_android: 2.8.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

@@ -69,20 +69,24 @@ class CircleService {
   // Create a new circle
   Future<CreateCircleResponse> createCircle(CreateCircleRequest request) async {
     try {
+      print('🔵 [CircleService] createCircle started');
       final accessToken = await _authService.getAccessToken();
 
       print(
-        '🔑 CircleService - Access Token: ${accessToken?.substring(0, 20)}...',
+        '🔑 [CircleService] Access Token: ${accessToken != null ? "${accessToken.substring(0, 20)}..." : "NULL"}',
       );
 
       if (accessToken == null) {
+        print('❌ [CircleService] No access token found!');
         throw ApiError(
           errorCode: 'AUTH_SESSION_EXPIRED',
           message: 'No access token found',
         );
       }
 
-      print('📤 CircleService - Creating circle: ${request.name}');
+      print('📤 [CircleService] Creating circle: ${request.name}');
+      print('   API URL: ${ApiConfig.circlesUrl}');
+      print('   Request body: ${jsonEncode(request.toJson())}');
 
       final response = await http
           .post(
@@ -95,15 +99,18 @@ class CircleService {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('📥 CircleService - Response status: ${response.statusCode}');
-      print('📥 CircleService - Response body: ${response.body}');
+      print('📥 [CircleService] Response status: ${response.statusCode}');
+      print('📥 [CircleService] Response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ [CircleService] Success response (${response.statusCode})');
         final createCircleResponse = CreateCircleResponse.fromJson(
           jsonDecode(response.body),
         );
+        print('   Parsed response - success: ${createCircleResponse.success}');
         return createCircleResponse;
       } else if (response.statusCode == 401) {
+        print('❌ [CircleService] Unauthorized (401) - clearing tokens');
         await _authService.clearTokens();
         throw ApiError(
           errorCode: 'AUTH_SESSION_EXPIRED',
@@ -111,10 +118,13 @@ class CircleService {
           statusCode: 401,
         );
       } else {
+        print('❌ [CircleService] Error response (${response.statusCode})');
         final Map<String, dynamic> body = jsonDecode(response.body);
         if (ApiError.isErrorResponse(body)) {
+          print('   API Error detected: ${body}');
           throw ApiError.fromJson(body, statusCode: response.statusCode);
         }
+        print('   Generic error thrown');
         throw ApiError(
           errorCode: 'CIRCLE_CREATE_FAILED',
           message: 'Failed to create circle',
