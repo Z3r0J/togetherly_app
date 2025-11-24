@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
 import 'viewmodels/circle_view_model.dart';
+import 'viewmodels/unified_calendar_view_model.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
@@ -158,6 +159,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => CounterViewModel()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => CircleViewModel()),
+        ChangeNotifierProvider(create: (_) => UnifiedCalendarViewModel()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,

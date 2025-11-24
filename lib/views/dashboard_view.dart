@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../widgets/widgets.dart';
+import '../models/unified_calendar_models.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
 import '../viewmodels/personal_event_view_model.dart';
+import '../viewmodels/unified_calendar_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
@@ -12,6 +14,7 @@ import 'my_circles_view.dart';
 import 'circle_detail_view.dart';
 import 'create_circle_view.dart';
 import 'create_personal_event_view.dart';
+import 'day_events_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -24,29 +27,25 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   late final AppLocalizations l10n;
-  late final String _selectedFilter;
-  late final List<String> _filters;
   bool _isFABOpen = false;
+  String _localFilter = 'all'; // Local filter state for dashboard only
 
   @override
   void initState() {
     super.initState();
     l10n = AppLocalizations.instance;
-    _selectedFilter = l10n.tr('dashboard.filter.all');
-    _filters = [
-      l10n.tr('dashboard.filter.all'),
-      l10n.tr('dashboard.filter.personal'),
-      l10n.tr('dashboard.filter.going'),
-      l10n.tr('dashboard.filter.maybe'),
-    ];
-    // Fetch circles on dashboard load
+    // Fetch circles and calendar on dashboard load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CircleViewModel>().fetchCircles();
+      context.read<UnifiedCalendarViewModel>().loadCurrentMonth();
     });
   }
 
   Future<void> _refreshData() async {
-    await context.read<CircleViewModel>().fetchCircles();
+    await Future.wait([
+      context.read<CircleViewModel>().fetchCircles(),
+      context.read<UnifiedCalendarViewModel>().loadCurrentMonth(),
+    ]);
   }
 
   @override
@@ -424,97 +423,228 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildUpcomingEventsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Título
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            l10n.tr('dashboard.section.events'),
-            style: AppTextStyles.headlineSmall,
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Filtros
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: _filters.map((filter) {
-              final isSelected = filter == _selectedFilter;
-              return Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: FilterChip(
-                  label: Text(filter),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedFilter = filter;
-                    });
-                  },
-                  backgroundColor: AppColors.background,
-                  selectedColor: AppColors.primary,
-                  labelStyle: AppTextStyles.labelMedium.copyWith(
-                    color: isSelected
-                        ? AppColors.textOnPrimary
-                        : AppColors.textPrimary,
+    return Consumer<UnifiedCalendarViewModel>(
+      builder: (context, viewModel, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título con botón Ver Todo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.tr('dashboard.section.events'),
+                    style: AppTextStyles.headlineSmall,
                   ),
-                  side: BorderSide(
-                    color: isSelected ? AppColors.primary : AppColors.border,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider(
+                            create: (_) => UnifiedCalendarViewModel(),
+                            child: const DayEventsView(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Ver Todo',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
+                ],
+              ),
+            ),
 
-        const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-        // Lista de eventos
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              _buildEventItem(
-                title: "Cena de cumpleaños de mamá",
-                date: 'OCT',
-                dateNumber: '20',
-                circle: 'FAMILIA',
-                circleColor: AppColors.circleGreen,
-                time: '7:00 PM @ The Grand Bistro',
-                rsvpStatus: RsvpStatus.going,
-                attendeeCount: 6,
+            // Filtros
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                children: [
+                  _buildFilterChip('Todos', 'all'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Personal', 'personal'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Confirmado', 'going'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Tal vez', 'maybe'),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildEventItem(
-                title: "Discusión de 'La biblioteca de medianoche'",
-                date: 'OCT',
-                dateNumber: '22',
-                circle: 'CLUB DE LECTURA',
-                circleColor: AppColors.circleOrange,
-                time: '6:30 PM @ Biblioteca Central',
-                rsvpStatus: RsvpStatus.maybe,
-                attendeeCount: 9,
-              ),
-              const SizedBox(height: 16),
-              _buildEventItem(
-                title: 'Carrera de trail al amanecer',
-                date: 'OCT',
-                dateNumber: '25',
-                circle: 'AVENTUREROS',
-                circleColor: AppColors.circlePurple,
-                time: '8:00 AM @ North Ridge Trailhead',
-                rsvpStatus: RsvpStatus.going,
-                attendeeCount: 4,
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Lista de eventos (filtrados localmente)
+            Builder(
+              builder: (context) {
+                final allEvents = viewModel.calendarData?.events ?? [];
+                final filteredEvents = _filterEvents(allEvents, _localFilter);
+
+                if (viewModel.isLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (viewModel.error != null) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Text(
+                        'Error al cargar eventos',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  );
+                } else if (filteredEvents.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Text(
+                        'No hay eventos para este filtro',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(children: _buildEventsList(filteredEvents)),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<UnifiedEvent> _filterEvents(List<UnifiedEvent> events, String filter) {
+    switch (filter) {
+      case 'personal':
+        return events.where((e) => e is PersonalUnifiedEvent).toList();
+      case 'going':
+        return events.where((e) {
+          if (e is CircleUnifiedEvent) {
+            return e.rsvpStatus == RsvpStatus.going;
+          }
+          return false;
+        }).toList();
+      case 'maybe':
+        return events.where((e) {
+          if (e is CircleUnifiedEvent) {
+            return e.rsvpStatus == RsvpStatus.maybe;
+          }
+          return false;
+        }).toList();
+      case 'all':
+      default:
+        return events;
+    }
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _localFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _localFilter = value;
+          });
+        }
+      },
+      backgroundColor: AppColors.background,
+      selectedColor: AppColors.primary,
+      labelStyle: AppTextStyles.labelMedium.copyWith(
+        color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : AppColors.border,
+      ),
+    );
+  }
+
+  List<Widget> _buildEventsList(List<dynamic> events) {
+    // Take only first 3 events for dashboard
+    final limitedEvents = events.take(3).toList();
+    final List<Widget> widgets = [];
+
+    for (int i = 0; i < limitedEvents.length; i++) {
+      final event = limitedEvents[i];
+
+      if (event is PersonalUnifiedEvent) {
+        widgets.add(_buildPersonalEventItem(event));
+      } else if (event is CircleUnifiedEvent) {
+        widgets.add(_buildCircleEventItem(event));
+      }
+
+      if (i < limitedEvents.length - 1) {
+        widgets.add(const SizedBox(height: 16));
+      }
+    }
+
+    return widgets;
+  }
+
+  Widget _buildPersonalEventItem(PersonalUnifiedEvent event) {
+    final dateTime = event.startTime;
+    final monthFormat = DateFormat('MMM', 'es_ES');
+    final dayFormat = DateFormat('d');
+
+    return _buildEventItem(
+      title: event.title,
+      date: monthFormat.format(dateTime).toUpperCase(),
+      dateNumber: dayFormat.format(dateTime),
+      circle: 'PERSONAL',
+      circleColor: event.color != null
+          ? Color(int.parse(event.color!.substring(1), radix: 16) + 0xFF000000)
+          : AppColors.primary,
+      time:
+          '${DateFormat('h:mm a').format(dateTime)}${event.location != null ? ' @ ${event.location!.name}' : ''}',
+      rsvpStatus: null,
+      attendeeCount: null,
+      hasConflict: event.hasConflict,
+    );
+  }
+
+  Widget _buildCircleEventItem(CircleUnifiedEvent event) {
+    final dateTime = event.startTime;
+    final monthFormat = DateFormat('MMM', 'es_ES');
+    final dayFormat = DateFormat('d');
+
+    return _buildEventItem(
+      title: event.title,
+      date: monthFormat.format(dateTime).toUpperCase(),
+      dateNumber: dayFormat.format(dateTime),
+      circle: event.circleName.toUpperCase(),
+      circleColor: event.circleColor != null
+          ? Color(
+              int.parse(event.circleColor!.substring(1), radix: 16) +
+                  0xFF000000,
+            )
+          : AppColors.circleBlue,
+      time:
+          '${DateFormat('h:mm a').format(dateTime)}${event.location != null ? ' @ ${event.location!.name}' : ''}',
+      rsvpStatus: event.rsvpStatus,
+      attendeeCount: event.attendeeCount,
+      hasConflict: event.hasConflict,
     );
   }
 
@@ -525,8 +655,9 @@ class _DashboardViewState extends State<DashboardView> {
     required String circle,
     required Color circleColor,
     required String time,
-    required RsvpStatus rsvpStatus,
-    required int attendeeCount,
+    RsvpStatus? rsvpStatus,
+    int? attendeeCount,
+    bool hasConflict = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -613,25 +744,48 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 const SizedBox(height: 12),
 
-                // RSVP y asistentes
-                Row(
-                  children: [
-                    RsvpBadge(status: rsvpStatus),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.people_outline,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$attendeeCount',
-                      style: AppTextStyles.labelSmall.copyWith(
+                // RSVP y asistentes (solo para eventos de círculo)
+                if (rsvpStatus != null && attendeeCount != null)
+                  Row(
+                    children: [
+                      RsvpBadge(status: rsvpStatus),
+                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.people_outline,
+                        size: 16,
                         color: AppColors.textSecondary,
                       ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$attendeeCount',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                // Indicator de conflicto
+                if (hasConflict)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          size: 16,
+                          color: AppColors.warning,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Conflicto',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.warning,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
               ],
             ),
           ),
