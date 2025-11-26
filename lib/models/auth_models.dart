@@ -55,6 +55,7 @@ class User {
   final String id;
   final String email;
   final String name;
+  final String? avatarUrl;
   final bool isEmailVerified;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -63,6 +64,7 @@ class User {
     required this.id,
     required this.email,
     required this.name,
+    this.avatarUrl,
     required this.isEmailVerified,
     required this.createdAt,
     required this.updatedAt,
@@ -73,6 +75,7 @@ class User {
       id: json['id'] ?? '',
       email: json['email'] ?? '',
       name: json['name'] ?? '',
+      avatarUrl: json['avatarUrl'] as String?,
       isEmailVerified: json['isEmailVerified'] ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -88,10 +91,31 @@ class User {
       'id': id,
       'email': email,
       'name': name,
+      'avatarUrl': avatarUrl,
       'isEmailVerified': isEmailVerified,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+  }
+
+  User copyWith({
+    String? id,
+    String? email,
+    String? name,
+    String? avatarUrl,
+    bool? isEmailVerified,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 }
 
