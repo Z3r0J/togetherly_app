@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/circle_view_model.dart';
 import '../l10n/app_localizations.dart';
+import 'invite_members_view.dart';
 
 class CircleDetailView extends StatefulWidget {
   final String circleId;
@@ -160,10 +161,13 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                   text: '+ Invitar',
                   type: AppButtonType.primary,
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Abriendo formulario de invitación...'),
-                        behavior: SnackBarBehavior.floating,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => InviteMembersView(
+                          circleName: widget.circleName,
+                          circleColor: widget.circleColor,
+                        ),
                       ),
                     );
                   },
