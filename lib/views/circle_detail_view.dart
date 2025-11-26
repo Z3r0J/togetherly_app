@@ -5,6 +5,7 @@ import '../viewmodels/circle_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'invite_members_view.dart';
 import 'create_event_view.dart';
+import 'create_circle_view.dart';
 
 class CircleDetailView extends StatefulWidget {
   final String circleId;
@@ -30,6 +31,15 @@ class _CircleDetailViewState extends State<CircleDetailView> {
     super.initState();
     l10n = AppLocalizations.instance;
     // Fetch circle details on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CircleViewModel>().fetchCircleDetail(widget.circleId);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant CircleDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refrescar cuando regresa de editar
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CircleViewModel>().fetchCircleDetail(widget.circleId);
     });
@@ -309,59 +319,125 @@ class _CircleDetailViewState extends State<CircleDetailView> {
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        color: AppColors.background,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Editar Círculo'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Abriendo editor del círculo...'),
-                      behavior: SnackBarBehavior.floating,
+      builder: (context) => Consumer<CircleViewModel>(
+        builder: (context, circleViewModel, child) {
+          final circleDetail = circleViewModel.currentCircleDetail;
+
+          return Container(
+            color: AppColors.background,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Editar Círculo'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateCircleView.edit(
+                            circleId: widget.circleId,
+                            circleName: widget.circleName,
+                            circleColor: widget.circleColor,
+                            description: circleDetail?.description,
+                            privacy: circleDetail?.privacy,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete, color: AppColors.error),
+                    title: const Text(
+                      'Eliminar Círculo',
+                      style: TextStyle(color: AppColors.error),
                     ),
-                  );
-                },
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showDeleteConfirmation();
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Configuración'),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Abriendo configuración...'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: AppColors.error),
-                title: const Text(
-                  'Eliminar Círculo',
-                  style: TextStyle(color: AppColors.error),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Confirmando eliminación del círculo...'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
+        title: const Text('Eliminar Círculo'),
+        content: Text(
+          '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
+          style: AppTextStyles.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _proceedWithDelete();
+            },
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _proceedWithDelete() async {
+    print('🔵 [DELETE CIRCLE] Starting deletion from CircleDetailView');
+
+    final circleViewModel = context.read<CircleViewModel>();
+    final success = await circleViewModel.deleteCircle(widget.circleId);
+
+    if (!mounted) return;
+
+    if (success) {
+      print('✅ [DELETE CIRCLE] Circle deleted successfully!');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Círculo eliminado exitosamente!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          print('🔙 [DELETE CIRCLE] Navigating back to my circles');
+          Navigator.pop(context);
+        }
+      });
+    } else {
+      print('❌ [DELETE CIRCLE] Circle deletion failed');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            circleViewModel.errorMessage ??
+                l10n.tr('circle.message.delete_failed'),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

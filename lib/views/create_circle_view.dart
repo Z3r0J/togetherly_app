@@ -5,7 +5,29 @@ import '../viewmodels/circle_view_model.dart';
 import '../l10n/app_localizations.dart';
 
 class CreateCircleView extends StatefulWidget {
-  const CreateCircleView({super.key});
+  final String? circleId;
+  final String? circleName;
+  final Color? circleColor;
+  final String? description;
+  final String? privacy;
+
+  // Constructor para crear nuevo círculo
+  const CreateCircleView({super.key})
+    : circleId = null,
+      circleName = null,
+      circleColor = null,
+      description = null,
+      privacy = null;
+
+  // Constructor para editar círculo existente
+  const CreateCircleView.edit({
+    super.key,
+    required this.circleId,
+    required this.circleName,
+    required this.circleColor,
+    this.description,
+    this.privacy,
+  });
 
   @override
   State<CreateCircleView> createState() => _CreateCircleViewState();
@@ -16,6 +38,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   final _descriptionController = TextEditingController();
   late final AppLocalizations l10n;
   bool _isLoading = false;
+  late bool _isEditMode;
 
   // Colores disponibles para el círculo
   final List<Color> _availableColors = [
@@ -34,6 +57,25 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   void initState() {
     super.initState();
     l10n = AppLocalizations.instance;
+
+    // Determinar si estamos en modo edición
+    _isEditMode = widget.circleId != null;
+
+    // Si estamos editando, precarga los datos
+    if (_isEditMode) {
+      print('🔄 [INIT STATE] Loading edit mode with data:');
+      print('   - Name: ${widget.circleName}');
+      print('   - Description: ${widget.description}');
+      print('   - Privacy: ${widget.privacy}');
+      print('   - Color: ${widget.circleColor}');
+
+      _circleNameController.text = widget.circleName ?? '';
+      _descriptionController.text = widget.description ?? '';
+      _selectedColor = widget.circleColor ?? AppColors.circlePurple;
+      _selectedPrivacy = widget.privacy ?? 'invite-only';
+
+      print('✅ [INIT STATE] Data loaded into form fields');
+    }
   }
 
   @override
@@ -50,9 +92,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text(
-          'Crear Círculo',
-          style: TextStyle(color: AppColors.textPrimary),
+        title: Text(
+          _isEditMode ? 'Editar Círculo' : 'Crear Círculo',
+          style: const TextStyle(color: AppColors.textPrimary),
         ),
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
@@ -88,14 +130,36 @@ class _CreateCircleViewState extends State<CreateCircleView> {
 
             const SizedBox(height: 48),
 
-            // Botón Crear Círculo
-            AppButton(
-              text: 'Crear Círculo',
-              type: AppButtonType.primary,
-              fullWidth: true,
-              isLoading: _isLoading,
-              onPressed: _isLoading ? null : _handleCreateCircle,
-            ),
+            // Botones de acción
+            if (_isEditMode)
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      text: 'Eliminar',
+                      type: AppButtonType.secondary,
+                      onPressed: _isLoading ? null : _handleDeleteCircle,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: AppButton(
+                      text: 'Guardar Cambios',
+                      type: AppButtonType.primary,
+                      isLoading: _isLoading,
+                      onPressed: _isLoading ? null : _handleSaveCircle,
+                    ),
+                  ),
+                ],
+              )
+            else
+              AppButton(
+                text: 'Crear Círculo',
+                type: AppButtonType.primary,
+                fullWidth: true,
+                isLoading: _isLoading,
+                onPressed: _isLoading ? null : _handleSaveCircle,
+              ),
 
             const SizedBox(height: 16),
           ],
@@ -271,6 +335,14 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     );
   }
 
+  void _handleSaveCircle() async {
+    if (_isEditMode) {
+      _handleUpdateCircle();
+    } else {
+      _handleCreateCircle();
+    }
+  }
+
   void _handleCreateCircle() async {
     print('🔵 [CREATE CIRCLE] Starting circle creation process');
 
@@ -297,27 +369,16 @@ class _CreateCircleViewState extends State<CreateCircleView> {
 
     final circleViewModel = context.read<CircleViewModel>();
 
-    // Map color to string name
-    String colorName = 'purple';
-    if (_selectedColor == AppColors.circleBlue) {
-      colorName = 'blue';
-    } else if (_selectedColor == AppColors.circleGreen) {
-      colorName = 'green';
-    } else if (_selectedColor == AppColors.circleOrange) {
-      colorName = 'orange';
-    } else if (_selectedColor == AppColors.circlePink) {
-      colorName = 'pink';
-    } else if (_selectedColor == AppColors.circleTeal) {
-      colorName = 'teal';
-    }
+    // Convert color to hex format
+    String colorHex = _colorToHex(_selectedColor);
 
-    print('   - Color: $colorName');
+    print('   - Color: $colorHex');
     print('📤 [CREATE CIRCLE] Calling circleViewModel.createCircle()...');
 
     final success = await circleViewModel.createCircle(
       name: _circleNameController.text,
       description: _descriptionController.text,
-      color: colorName,
+      color: colorHex,
       privacy: _selectedPrivacy,
     );
 
@@ -368,5 +429,196 @@ class _CreateCircleViewState extends State<CreateCircleView> {
         ),
       );
     }
+  }
+
+  void _handleUpdateCircle() async {
+    print('🔵 [UPDATE CIRCLE] Starting circle update process');
+
+    if (_circleNameController.text.isEmpty) {
+      print('❌ [UPDATE CIRCLE] Validation failed: Circle name is empty');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.tr('circle.error.CIRCLE_NAME_REQUIRED')),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    print('✅ [UPDATE CIRCLE] Validation passed');
+    print('   - Circle ID: ${widget.circleId}');
+    print('   - Circle Name: ${_circleNameController.text}');
+    print('   - Description: ${_descriptionController.text}');
+    print('   - Privacy: $_selectedPrivacy');
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final circleViewModel = context.read<CircleViewModel>();
+
+    // Convert color to hex format
+    String colorHex = _colorToHex(_selectedColor);
+
+    print('   - Color: $colorHex');
+    print('📤 [UPDATE CIRCLE] Calling circleViewModel.updateCircle()...');
+
+    final success = await circleViewModel.updateCircle(
+      circleId: widget.circleId!,
+      name: _circleNameController.text,
+      description: _descriptionController.text,
+      color: colorHex,
+      privacy: _selectedPrivacy,
+    );
+
+    print(
+      '📥 [UPDATE CIRCLE] API response received: ${success ? "SUCCESS" : "FAILED"}',
+    );
+    if (!success) {
+      print('   Error message: ${circleViewModel.errorMessage}');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!mounted) return;
+
+    if (success) {
+      print('✅ [UPDATE CIRCLE] Circle updated successfully!');
+      // Mostrar confirmación
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Círculo actualizado exitosamente!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Regresar a la vista anterior (CircleDetailView se refrescará automáticamente)
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          print('🔙 [UPDATE CIRCLE] Navigating back to circle detail');
+          Navigator.pop(context, true);
+        }
+      });
+    } else {
+      print('❌ [UPDATE CIRCLE] Circle update failed');
+      // Mostrar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            circleViewModel.errorMessage ??
+                l10n.tr('circle.message.update_failed'),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _handleDeleteCircle() async {
+    print('🔵 [DELETE CIRCLE] Starting circle deletion confirmation');
+
+    // Mostrar diálogo de confirmación
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
+        title: const Text('Eliminar Círculo'),
+        content: Text(
+          '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
+          style: AppTextStyles.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _proceedWithDelete();
+            },
+            child: const Text(
+              'Eliminar',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _proceedWithDelete() async {
+    print('✅ [DELETE CIRCLE] User confirmed deletion');
+    print('   - Circle ID: ${widget.circleId}');
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final circleViewModel = context.read<CircleViewModel>();
+
+    print('📤 [DELETE CIRCLE] Calling circleViewModel.deleteCircle()...');
+
+    final success = await circleViewModel.deleteCircle(widget.circleId!);
+
+    print(
+      '📥 [DELETE CIRCLE] API response received: ${success ? "SUCCESS" : "FAILED"}',
+    );
+    if (!success) {
+      print('   Error message: ${circleViewModel.errorMessage}');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!mounted) return;
+
+    if (success) {
+      print('✅ [DELETE CIRCLE] Circle deleted successfully!');
+      // Mostrar confirmación
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Círculo eliminado exitosamente!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Regresar dos veces (cerrar edit y luego circle detail)
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          print('🔙 [DELETE CIRCLE] Navigating back to my circles');
+          Navigator.pop(context, true);
+          Navigator.pop(context, true);
+        }
+      });
+    } else {
+      print('❌ [DELETE CIRCLE] Circle deletion failed');
+      // Mostrar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            circleViewModel.errorMessage ??
+                l10n.tr('circle.message.delete_failed'),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // Helper para convertir Color a hex format
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 }
