@@ -5,7 +5,6 @@ import '../widgets/widgets.dart';
 import '../models/unified_calendar_models.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
-import '../viewmodels/personal_event_view_model.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
@@ -13,7 +12,7 @@ import 'login_view.dart';
 import 'my_circles_view.dart';
 import 'circle_detail_view.dart';
 import 'create_circle_view.dart';
-import 'create_personal_event_view.dart';
+import 'create_event_view.dart';
 import 'day_events_view.dart';
 
 class DashboardView extends StatefulWidget {
@@ -835,7 +834,7 @@ class _DashboardViewState extends State<DashboardView> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (_isFABOpen) ...[
-          // Create Personal Event Option
+          // Create Event Option
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -856,25 +855,20 @@ class _DashboardViewState extends State<DashboardView> {
                   ],
                 ),
                 child: const Text(
-                  'Create Personal Event',
+                  'Crear Evento',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(width: 12),
               FloatingActionButton(
-                heroTag: 'create_personal_event',
+                heroTag: 'create_event',
                 mini: true,
                 backgroundColor: AppColors.primary,
                 onPressed: () {
                   setState(() => _isFABOpen = false);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => PersonalEventViewModel(),
-                        child: const CreatePersonalEventView(),
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (_) => const CreateEventView()),
                   );
                 },
                 child: const Icon(Icons.event, color: AppColors.textOnPrimary),

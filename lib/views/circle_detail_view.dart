@@ -4,6 +4,7 @@ import '../widgets/widgets.dart';
 import '../viewmodels/circle_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'invite_members_view.dart';
+import 'create_event_view.dart';
 
 class CircleDetailView extends StatefulWidget {
   final String circleId;
@@ -254,10 +255,13 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                   text: '+ Crear Evento',
                   type: AppButtonType.primary,
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Abriendo formulario de crear evento...'),
-                        behavior: SnackBarBehavior.floating,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateEventView(
+                          circleName: widget.circleName,
+                          circleColor: widget.circleColor,
+                        ),
                       ),
                     );
                   },
