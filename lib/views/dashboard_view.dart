@@ -15,6 +15,7 @@ import 'circle_detail_view.dart';
 import 'create_circle_view.dart';
 import 'create_personal_event_view.dart';
 import 'day_events_view.dart';
+import 'profile_settings_view.dart';
 
 class DashboardView extends StatefulWidget {
   final String userName;
@@ -138,7 +139,7 @@ class _DashboardViewState extends State<DashboardView> {
                 },
               ),
               const SizedBox(width: 8),
-              PopupMenuButton<String>(
+                PopupMenuButton<String>(
                 offset: const Offset(0, 60),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -146,6 +147,11 @@ class _DashboardViewState extends State<DashboardView> {
                 onSelected: (value) async {
                   if (value == 'logout') {
                     await _handleLogout();
+                  } else if (value == 'profile' || value == 'settings') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileSettingsView()),
+                    );
                   }
                 },
                 itemBuilder: (BuildContext context) => [

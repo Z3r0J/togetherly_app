@@ -105,6 +105,27 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  // Update local currentUser fields (mock update)
+  Future<bool> updateProfile({String? name, String? email, String? avatarUrl}) async {
+    try {
+      if (_currentUser == null) return false;
+
+      // In a real app this would call AuthService update endpoint.
+      _currentUser = _currentUser!.copyWith(
+        name: name ?? _currentUser!.name,
+        email: email ?? _currentUser!.email,
+        avatarUrl: avatarUrl ?? _currentUser!.avatarUrl,
+      );
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to update profile: ${e.toString()}';
+      notifyListeners();
+      return false;
+    }
+  }
+
   // Send magic link to email
   Future<bool> sendMagicLink(String email) async {
     try {
