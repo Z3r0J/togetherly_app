@@ -256,3 +256,74 @@ class CircleDetailResponse {
     );
   }
 }
+
+// Update Circle Request
+class UpdateCircleRequest {
+  final String name;
+  final String description;
+  final String color;
+  final String privacy;
+
+  UpdateCircleRequest({
+    required this.name,
+    required this.description,
+    required this.color,
+    required this.privacy,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'description': description,
+      'color': color,
+      'privacy': privacy,
+    };
+  }
+}
+
+class UpdateCircleResponse {
+  final bool success;
+  final String message;
+  final String? error;
+  final String timestamp;
+
+  UpdateCircleResponse({
+    required this.success,
+    required this.message,
+    this.error,
+    required this.timestamp,
+  });
+
+  factory UpdateCircleResponse.fromJson(Map<String, dynamic> json) {
+    return UpdateCircleResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      error: json['error'],
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}
+
+// Delete Circle Response
+class DeleteCircleResponse {
+  final bool success;
+  final String message;
+  final String? error;
+  final String timestamp;
+
+  DeleteCircleResponse({
+    required this.success,
+    required this.message,
+    this.error,
+    required this.timestamp,
+  });
+
+  factory DeleteCircleResponse.fromJson(Map<String, dynamic> json) {
+    return DeleteCircleResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      error: json['error'],
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}

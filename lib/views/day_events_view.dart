@@ -6,8 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../models/unified_calendar_models.dart';
-import 'create_personal_event_view.dart';
-import '../viewmodels/personal_event_view_model.dart';
+import 'create_event_view.dart';
 
 /// Vista que muestra los eventos de un día específico.
 /// Reutiliza `CompactEventCard`, `EventCard`, `ConflictBanner` y `AppButton`.
@@ -162,10 +161,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                           child: GestureDetector(
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => ChangeNotifierProvider(
-                                  create: (_) => PersonalEventViewModel(),
-                                  child: const CreatePersonalEventView(),
-                                ),
+                                builder: (_) => const CreateEventView(),
                               ),
                             ),
                             child: Container(

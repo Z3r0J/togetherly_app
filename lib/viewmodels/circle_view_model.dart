@@ -164,4 +164,91 @@ class CircleViewModel extends ChangeNotifier {
     _currentCircleDetail = null;
     notifyListeners();
   }
+
+  // Update circle
+  Future<bool> updateCircle({
+    required String circleId,
+    required String name,
+    required String description,
+    required String color,
+    required String privacy,
+  }) async {
+    try {
+      print('🔵 [CircleViewModel] updateCircle called');
+      print('   - Circle ID: $circleId');
+      print('   - Name: $name');
+      print('   - Description: $description');
+      print('   - Color: $color');
+      print('   - Privacy: $privacy');
+
+      final request = UpdateCircleRequest(
+        name: name,
+        description: description,
+        color: color,
+        privacy: privacy,
+      );
+
+      print('📤 [CircleViewModel] Sending updateCircle request...');
+      final updateResponse = await _circleService.updateCircle(
+        circleId,
+        request,
+      );
+
+      if (updateResponse.success) {
+        print('✅ [CircleViewModel] Circle updated successfully!');
+        // Refresh circle detail to get updated data
+        await fetchCircleDetail(circleId);
+        return true;
+      } else {
+        print(
+          '❌ [CircleViewModel] updateCircle failed: ${updateResponse.error}',
+        );
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.update_failed',
+        );
+        _setState(CircleState.error);
+        return false;
+      }
+    } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during updateCircle:');
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      _setState(CircleState.error);
+      return false;
+    }
+  }
+
+  // Delete circle
+  Future<bool> deleteCircle(String circleId) async {
+    try {
+      print('🔵 [CircleViewModel] deleteCircle called');
+      print('   - Circle ID: $circleId');
+
+      print('📤 [CircleViewModel] Sending deleteCircle request...');
+      final deleteResponse = await _circleService.deleteCircle(circleId);
+
+      if (deleteResponse.success) {
+        print('✅ [CircleViewModel] Circle deleted successfully!');
+        // Refresh circles list
+        await fetchCircles();
+        _currentCircleDetail = null;
+        return true;
+      } else {
+        print(
+          '❌ [CircleViewModel] deleteCircle failed: ${deleteResponse.error}',
+        );
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.delete_failed',
+        );
+        _setState(CircleState.error);
+        return false;
+      }
+    } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during deleteCircle:');
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      _setState(CircleState.error);
+      return false;
+    }
+  }
 }
