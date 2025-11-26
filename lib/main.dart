@@ -16,6 +16,7 @@ import 'views/dashboard_view.dart';
 import 'widgets/auth_wrapper.dart';
 import 'theme/app_theme.dart';
 import 'services/deep_link_service.dart';
+import 'services/invitation_service.dart';
 import 'models/magic_link_models.dart';
 import 'models/register_models.dart';
 import 'l10n/app_localizations.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final DeepLinkService _deepLinkService = DeepLinkService();
+  final InvitationService _invitationService = InvitationService();
 
   @override
   void initState() {
@@ -103,6 +105,12 @@ class _MyAppState extends State<MyApp> {
       }
     };
 
+    // Handle circle invitation deep links
+    _deepLinkService.onInvitationLinkReceived = (String token) async {
+      print('📧 [Main] Invitation link received');
+      await _handleInvitation(token);
+    };
+
     // Handle email verification deep links
     _deepLinkService.onEmailVerificationReceived =
         (EmailVerificationData verificationData) async {
@@ -150,6 +158,97 @@ class _MyAppState extends State<MyApp> {
         };
 
     await _deepLinkService.initialize();
+  }
+
+  Future<void> _handleInvitation(String token) async {
+    print('🔵 [Main] Processing invitation token');
+
+    // Check if user is logged in
+    final isLoggedIn = await _invitationService.isUserLoggedIn();
+
+    if (isLoggedIn && navigatorKey.currentContext != null) {
+      print('✅ [Main] User is logged in - accepting invitation immediately');
+
+      // User is logged in - try to accept immediately
+      final circleViewModel = navigatorKey.currentContext!
+          .read<CircleViewModel>();
+
+      try {
+        final result = await circleViewModel.acceptInvitation(token);
+
+        if (result != null && navigatorKey.currentContext != null) {
+          // Successfully joined circle
+          print('✅ [Main] Invitation accepted - Circle: ${result.circleName}');
+
+          // Show success message
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              content: Text('¡Te uniste a ${result.circleName}!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+
+          // Navigate to circles list or specific circle
+          // The circles list will be automatically refreshed by the viewmodel
+          navigatorKey.currentState?.pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const DashboardView(userName: 'Usuario'),
+            ),
+            (route) => false,
+          );
+        } else if (navigatorKey.currentContext != null) {
+          // Failed to accept invitation
+          print('❌ [Main] Failed to accept invitation');
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              content: Text(
+                circleViewModel.errorMessage ?? 'Error al aceptar invitación',
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        print('❌ [Main] Error accepting invitation: $e');
+        if (navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              content: Text('Error al aceptar invitación: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } else {
+      print('ℹ️ [Main] User is NOT logged in - saving invitation for later');
+
+      // User is NOT logged in - save token and show login with preview
+      await _invitationService.savePendingInvitation(token);
+
+      // Try to fetch invitation details to show preview
+      final details = await _invitationService.getInvitationDetails(token);
+
+      if (navigatorKey.currentContext != null) {
+        // Navigate to login with invitation context
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => LoginView(
+              invitationContext: details != null
+                  ? {
+                      'circleName': details.circle.name,
+                      'inviterName': details.inviter.name,
+                      'invitedEmail': details.invitedEmail,
+                    }
+                  : null,
+            ),
+          ),
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override

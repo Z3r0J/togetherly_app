@@ -327,3 +327,187 @@ class DeleteCircleResponse {
     );
   }
 }
+
+// Circle Invitation Models
+
+// Send Invitation Request
+class SendInvitationRequest {
+  final List<String> emails;
+  final String type;
+
+  SendInvitationRequest({required this.emails, this.type = 'email'});
+
+  Map<String, dynamic> toJson() {
+    return {'emails': emails, 'type': type};
+  }
+}
+
+// Send Invitation Response
+class SendInvitationData {
+  final List<String> success;
+  final List<Map<String, dynamic>> failed;
+
+  SendInvitationData({required this.success, required this.failed});
+
+  factory SendInvitationData.fromJson(Map<String, dynamic> json) {
+    return SendInvitationData(
+      success: List<String>.from(json['success'] ?? []),
+      failed: List<Map<String, dynamic>>.from(json['failed'] ?? []),
+    );
+  }
+}
+
+class SendInvitationResponse {
+  final bool success;
+  final SendInvitationData data;
+  final String timestamp;
+
+  SendInvitationResponse({
+    required this.success,
+    required this.data,
+    required this.timestamp,
+  });
+
+  factory SendInvitationResponse.fromJson(Map<String, dynamic> json) {
+    return SendInvitationResponse(
+      success: json['success'] ?? false,
+      data: SendInvitationData.fromJson(json['data'] as Map<String, dynamic>),
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}
+
+// Invitation Details Models
+class InvitationCircle {
+  final String id;
+  final String name;
+  final String description;
+  final String color;
+  final String privacy;
+
+  InvitationCircle({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.color,
+    required this.privacy,
+  });
+
+  factory InvitationCircle.fromJson(Map<String, dynamic> json) {
+    return InvitationCircle(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      color: json['color'] ?? 'purple',
+      privacy: json['privacy'] ?? 'invite-only',
+    );
+  }
+}
+
+class InvitationInviter {
+  final String id;
+  final String name;
+  final String email;
+
+  InvitationInviter({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  factory InvitationInviter.fromJson(Map<String, dynamic> json) {
+    return InvitationInviter(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+    );
+  }
+}
+
+class InvitationDetails {
+  final InvitationCircle circle;
+  final InvitationInviter inviter;
+  final String invitedEmail;
+  final DateTime expiresAt;
+
+  InvitationDetails({
+    required this.circle,
+    required this.inviter,
+    required this.invitedEmail,
+    required this.expiresAt,
+  });
+
+  factory InvitationDetails.fromJson(Map<String, dynamic> json) {
+    return InvitationDetails(
+      circle: InvitationCircle.fromJson(json['circle'] as Map<String, dynamic>),
+      inviter: InvitationInviter.fromJson(
+        json['inviter'] as Map<String, dynamic>,
+      ),
+      invitedEmail: json['invitedEmail'] ?? '',
+      expiresAt: json['expiresAt'] != null
+          ? DateTime.parse(json['expiresAt'])
+          : DateTime.now(),
+    );
+  }
+}
+
+class InvitationDetailsResponse {
+  final bool success;
+  final InvitationDetails data;
+  final String timestamp;
+
+  InvitationDetailsResponse({
+    required this.success,
+    required this.data,
+    required this.timestamp,
+  });
+
+  factory InvitationDetailsResponse.fromJson(Map<String, dynamic> json) {
+    return InvitationDetailsResponse(
+      success: json['success'] ?? false,
+      data: InvitationDetails.fromJson(json['data'] as Map<String, dynamic>),
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}
+
+// Accept Invitation Response
+class AcceptInvitationData {
+  final String circleId;
+  final String circleName;
+  final String message;
+
+  AcceptInvitationData({
+    required this.circleId,
+    required this.circleName,
+    required this.message,
+  });
+
+  factory AcceptInvitationData.fromJson(Map<String, dynamic> json) {
+    return AcceptInvitationData(
+      circleId: json['circleId'] ?? '',
+      circleName: json['circleName'] ?? '',
+      message: json['message'] ?? '',
+    );
+  }
+}
+
+class AcceptInvitationResponse {
+  final bool success;
+  final AcceptInvitationData data;
+  final String timestamp;
+
+  AcceptInvitationResponse({
+    required this.success,
+    required this.data,
+    required this.timestamp,
+  });
+
+  factory AcceptInvitationResponse.fromJson(Map<String, dynamic> json) {
+    return AcceptInvitationResponse(
+      success: json['success'] ?? false,
+      data: AcceptInvitationData.fromJson(json['data'] as Map<String, dynamic>),
+      timestamp: json['timestamp'] ?? '',
+    );
+  }
+}

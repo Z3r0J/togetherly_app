@@ -348,4 +348,214 @@ class CircleService {
       throw ApiError.unknownError(e.toString());
     }
   }
+
+  // Send circle invitation
+  Future<SendInvitationResponse> sendInvitation(
+    String circleId,
+    SendInvitationRequest request,
+  ) async {
+    try {
+      print('🔵 [CircleService] sendInvitation started');
+      final accessToken = await _authService.getAccessToken();
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      final inviteUrl = '${ApiConfig.circlesUrl}/$circleId/invite';
+      print('📤 [CircleService] Sending invitation to circle: $circleId');
+      print('   API URL: $inviteUrl');
+      print('   Emails: ${request.emails.join(", ")}');
+
+      final response = await http
+          .post(
+            Uri.parse(inviteUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 [CircleService] Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final invitationResponse = SendInvitationResponse.fromJson(
+          jsonDecode(response.body),
+        );
+        print('✅ [CircleService] Invitations sent successfully');
+        print('   Success: ${invitationResponse.data.success.length}');
+        print('   Failed: ${invitationResponse.data.failed.length}');
+        return invitationResponse;
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else if (response.statusCode == 403) {
+        throw ApiError(
+          errorCode: 'FORBIDDEN',
+          message: 'Only circle owner or admin can send invitations',
+          statusCode: 403,
+        );
+      } else if (response.statusCode == 404) {
+        throw ApiError(
+          errorCode: 'CIRCLE_NOT_FOUND',
+          message: 'Circle not found',
+          statusCode: 404,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'INVITATION_SEND_FAILED',
+          message: 'Failed to send invitations',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  // Get invitation details (public endpoint)
+  Future<InvitationDetailsResponse> getInvitationDetails(String token) async {
+    try {
+      print('🔵 [CircleService] getInvitationDetails started');
+      final inviteUrl = '${ApiConfig.circlesUrl}/invitations/$token';
+      print('📤 [CircleService] Getting invitation details');
+      print('   API URL: $inviteUrl');
+
+      final response = await http
+          .get(
+            Uri.parse(inviteUrl),
+            headers: {'Content-Type': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 [CircleService] Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final detailsResponse = InvitationDetailsResponse.fromJson(
+          jsonDecode(response.body),
+        );
+        print('✅ [CircleService] Invitation details retrieved');
+        return detailsResponse;
+      } else if (response.statusCode == 400) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      } else if (response.statusCode == 410) {
+        throw ApiError(
+          errorCode: 'INVITATION_EXPIRED',
+          message: 'This invitation has expired',
+          statusCode: 410,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'INVITATION_LOAD_FAILED',
+          message: 'Failed to load invitation details',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  // Accept invitation
+  Future<AcceptInvitationResponse> acceptInvitation(String token) async {
+    try {
+      print('🔵 [CircleService] acceptInvitation started');
+      final accessToken = await _authService.getAccessToken();
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      final acceptUrl = '${ApiConfig.circlesUrl}/invitations/$token/accept';
+      print('📤 [CircleService] Accepting invitation');
+      print('   API URL: $acceptUrl');
+
+      final response = await http
+          .post(
+            Uri.parse(acceptUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 [CircleService] Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final acceptResponse = AcceptInvitationResponse.fromJson(
+          jsonDecode(response.body),
+        );
+        print('✅ [CircleService] Invitation accepted successfully');
+        return acceptResponse;
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else if (response.statusCode == 400) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      } else if (response.statusCode == 410) {
+        throw ApiError(
+          errorCode: 'INVITATION_EXPIRED',
+          message: 'This invitation has expired',
+          statusCode: 410,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'INVITATION_ACCEPT_FAILED',
+          message: 'Failed to accept invitation',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
 }

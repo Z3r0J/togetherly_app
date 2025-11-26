@@ -176,6 +176,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => InviteMembersView(
+                          circleId: widget.circleId,
                           circleName: widget.circleName,
                           circleColor: widget.circleColor,
                         ),

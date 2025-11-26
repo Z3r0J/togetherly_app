@@ -4,11 +4,14 @@ import '../widgets/widgets.dart';
 import '../widgets/magic_link_dialog.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../l10n/app_localizations.dart';
+import '../services/invitation_service.dart';
 import 'dashboard_view.dart';
 import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  final Map<String, dynamic>? invitationContext;
+
+  const LoginView({super.key, this.invitationContext});
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -36,6 +39,10 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final hasPendingInvitation = widget.invitationContext != null;
+    final circleName = widget.invitationContext?['circleName'];
+    final inviterName = widget.invitationContext?['inviterName'];
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -45,6 +52,12 @@ class _LoginViewState extends State<LoginView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
+
+              // Invitation banner if present
+              if (hasPendingInvitation) ...[
+                _buildInvitationBanner(circleName, inviterName),
+                const SizedBox(height: 24),
+              ],
 
               // Logo y título
               _buildHeader(),
@@ -99,6 +112,55 @@ class _LoginViewState extends State<LoginView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInvitationBanner(String? circleName, String? inviterName) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.mail_outline, size: 48, color: AppColors.primary),
+          const SizedBox(height: 12),
+          Text(
+            '¡Has sido invitado!',
+            style: AppTextStyles.headlineSmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (circleName != null)
+            Text(
+              'Únete a "$circleName"',
+              style: AppTextStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          if (inviterName != null)
+            Text(
+              'Invitado por $inviterName',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: 8),
+          Text(
+            'Inicia sesión para unirte',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -267,17 +329,43 @@ class _LoginViewState extends State<LoginView> {
     setState(() => _isLoading = false);
 
     if (success) {
-      // Navegar al dashboard si el login es exitoso
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashboardView(
-            userName:
-                authViewModel.currentUser?.name ??
-                _emailController.text.split('@')[0],
+      // Check for pending invitation before navigating
+      final invitationService = InvitationService();
+      final invitationData = await invitationService.processPendingInvitation();
+
+      if (invitationData != null) {
+        // Successfully joined circle from invitation
+        print(
+          '✅ [LoginView] Processed pending invitation - Circle: ${invitationData.circleName}',
+        );
+
+        // Show success message
+        _showSuccess('¡Te uniste a ${invitationData.circleName}!');
+
+        // Navigate to dashboard (circles will be refreshed automatically)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardView(
+              userName:
+                  authViewModel.currentUser?.name ??
+                  _emailController.text.split('@')[0],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        // Normal login flow - no pending invitation
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardView(
+              userName:
+                  authViewModel.currentUser?.name ??
+                  _emailController.text.split('@')[0],
+            ),
+          ),
+        );
+      }
     } else {
       // Mostrar error inmediatamente
       final error = errorMsg ?? l10n.tr('auth.login.error.generic');
@@ -322,7 +410,10 @@ class _LoginViewState extends State<LoginView> {
   void _handleSignUp() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const RegisterView()),
+      MaterialPageRoute(
+        builder: (context) =>
+            RegisterView(invitationContext: widget.invitationContext),
+      ),
     );
   }
 

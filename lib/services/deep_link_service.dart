@@ -10,6 +10,7 @@ class DeepLinkService {
   // Callback to handle deep link authentication
   Function(DeepLinkAuthData)? onAuthLinkReceived;
   Function(EmailVerificationData)? onEmailVerificationReceived;
+  Function(String token)? onInvitationLinkReceived;
   Function(String error)? onError;
 
   // Initialize and listen for deep links
@@ -38,6 +39,8 @@ class DeepLinkService {
   // Handle deep link URIs
   void _handleDeepLink(Uri uri) {
     try {
+      print('🔗 [DeepLinkService] Handling deep link: ${uri.toString()}');
+
       // Check if this is a magic link authentication
       // Expected format: togetherly://auth/success?accessToken=xxx&refreshToken=yyy
       if (uri.scheme == 'togetherly' &&
@@ -66,11 +69,34 @@ class DeepLinkService {
         } else {
           onError?.call('Invalid verification tokens in deep link');
         }
+      }
+      // Check if this is a circle invitation
+      // Expected format: togetherly://invite/{token}
+      // OR: https://togetherly.app/invite/{token}
+      else if ((uri.scheme == 'togetherly' && uri.host == 'invite') ||
+          (uri.scheme == 'https' &&
+              uri.host == 'togetherly.app' &&
+              uri.pathSegments.isNotEmpty &&
+              uri.pathSegments.first == 'invite')) {
+        // Extract token from path
+        final token = uri.pathSegments.last;
+        if (token.isNotEmpty && token != 'invite') {
+          print(
+            '📧 [DeepLinkService] Invitation token received: ${token.substring(0, 10)}...',
+          );
+          onInvitationLinkReceived?.call(token);
+        } else {
+          onError?.call('Invalid invitation token in deep link');
+        }
       } else {
         // Unknown deep link format
+        print(
+          '⚠️ [DeepLinkService] Unknown deep link format: ${uri.toString()}',
+        );
         onError?.call('Unknown deep link format: ${uri.toString()}');
       }
     } catch (e) {
+      print('❌ [DeepLinkService] Failed to process deep link: $e');
       onError?.call('Failed to process deep link: $e');
     }
   }

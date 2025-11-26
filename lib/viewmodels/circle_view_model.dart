@@ -251,4 +251,103 @@ class CircleViewModel extends ChangeNotifier {
       return false;
     }
   }
+
+  // Send circle invitation
+  Future<SendInvitationResponse?> sendInvitation(
+    String circleId,
+    List<String> emails,
+  ) async {
+    try {
+      print('🔵 [CircleViewModel] sendInvitation called');
+      print('   - Circle ID: $circleId');
+      print('   - Emails: ${emails.join(", ")}');
+
+      final request = SendInvitationRequest(emails: emails);
+
+      print('📤 [CircleViewModel] Sending invitation request...');
+      final response = await _circleService.sendInvitation(circleId, request);
+
+      if (response.success) {
+        print('✅ [CircleViewModel] Invitations sent successfully');
+        print('   - Success: ${response.data.success.length}');
+        print('   - Failed: ${response.data.failed.length}');
+        return response;
+      } else {
+        print('❌ [CircleViewModel] Invitation sending failed');
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.invitation_failed',
+        );
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during sendInvitation:');
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      notifyListeners();
+      return null;
+    }
+  }
+
+  // Get invitation details
+  Future<InvitationDetails?> getInvitationDetails(String token) async {
+    try {
+      print('🔵 [CircleViewModel] getInvitationDetails called');
+      print('   - Token: ${token.substring(0, 20)}...');
+
+      final response = await _circleService.getInvitationDetails(token);
+
+      if (response.success) {
+        print('✅ [CircleViewModel] Invitation details retrieved');
+        return response.data;
+      } else {
+        print('❌ [CircleViewModel] Failed to get invitation details');
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.invitation_load_failed',
+        );
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      print(
+        '❌ [CircleViewModel] Exception caught during getInvitationDetails:',
+      );
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      notifyListeners();
+      return null;
+    }
+  }
+
+  // Accept invitation
+  Future<AcceptInvitationData?> acceptInvitation(String token) async {
+    try {
+      print('🔵 [CircleViewModel] acceptInvitation called');
+      print('   - Token: ${token.substring(0, 20)}...');
+
+      final response = await _circleService.acceptInvitation(token);
+
+      if (response.success) {
+        print('✅ [CircleViewModel] Invitation accepted successfully');
+        print('   - Circle ID: ${response.data.circleId}');
+        print('   - Circle name: ${response.data.circleName}');
+        // Refresh circles to include the newly joined circle
+        await fetchCircles();
+        return response.data;
+      } else {
+        print('❌ [CircleViewModel] Failed to accept invitation');
+        _errorMessage = AppLocalizations.instance.tr(
+          'circle.message.invitation_accept_failed',
+        );
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during acceptInvitation:');
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      notifyListeners();
+      return null;
+    }
+  }
 }

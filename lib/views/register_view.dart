@@ -6,10 +6,13 @@ import '../viewmodels/auth_view_model.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 import '../widgets/email_verification_dialog.dart';
+import '../services/invitation_service.dart';
 import '../l10n/app_localizations.dart';
 
 class RegisterView extends StatefulWidget {
-  const RegisterView({super.key});
+  final Map<String, dynamic>? invitationContext;
+
+  const RegisterView({super.key, this.invitationContext});
 
   @override
   State<RegisterView> createState() => _RegisterViewState();
@@ -27,6 +30,7 @@ class _RegisterViewState extends State<RegisterView> {
   void initState() {
     super.initState();
     l10n = AppLocalizations.instance;
+    _prefillEmailFromInvitation();
   }
 
   @override
@@ -35,6 +39,19 @@ class _RegisterViewState extends State<RegisterView> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _prefillEmailFromInvitation() async {
+    // If there's invitation context with an invited email, pre-fill it
+    final invitedEmail = widget.invitationContext?['invitedEmail'];
+    if (invitedEmail != null && invitedEmail is String) {
+      setState(() {
+        _emailController.text = invitedEmail;
+      });
+      print(
+        '📧 [RegisterView] Pre-filled email from invitation: $invitedEmail',
+      );
+    }
   }
 
   bool _isValidEmail(String email) {
@@ -108,12 +125,94 @@ class _RegisterViewState extends State<RegisterView> {
     });
 
     if (success && mounted) {
-      // Show email verification dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => EmailVerificationDialog(email: email),
-      );
+      // Check for pending invitation
+      final invitationService = InvitationService();
+      final hasPendingInvitation = await invitationService
+          .getPendingInvitation();
+
+      if (hasPendingInvitation != null) {
+        // User registered with invitation - show different message
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: AppColors.success, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '¡Registro exitoso!',
+                    style: AppTextStyles.headlineSmall,
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hemos enviado un correo de verificación a:',
+                  style: AppTextStyles.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  email,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Después de verificar tu correo, podrás unirte al círculo.',
+                          style: AppTextStyles.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              AppButton(
+                text: 'Entendido',
+                type: AppButtonType.primary,
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Return to login
+                },
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Normal registration - show email verification dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => EmailVerificationDialog(email: email),
+        );
+      }
     } else if (mounted) {
       // Show error message
       final errorMessage =
@@ -140,12 +239,65 @@ class _RegisterViewState extends State<RegisterView> {
     );
   }
 
+  Widget _buildInvitationBanner(String? circleName, String? inviterName) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.group_add, size: 48, color: AppColors.primary),
+          const SizedBox(height: 12),
+          Text(
+            '¡Has sido invitado!',
+            style: AppTextStyles.headlineSmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (circleName != null)
+            Text(
+              'Únete a "$circleName"',
+              style: AppTextStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          if (inviterName != null)
+            Text(
+              'Invitado por $inviterName',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: 8),
+          Text(
+            'Regístrate con el email de la invitación',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   void _handleLogin() {
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final hasPendingInvitation = widget.invitationContext != null;
+    final circleName = widget.invitationContext?['circleName'];
+    final inviterName = widget.invitationContext?['inviterName'];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -155,6 +307,13 @@ class _RegisterViewState extends State<RegisterView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
+
+              // Invitation banner if present
+              if (hasPendingInvitation) ...[
+                _buildInvitationBanner(circleName, inviterName),
+                const SizedBox(height: 24),
+              ],
+
               // Logo and title
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/circle_view_model.dart';
 
 class InviteMembersView extends StatefulWidget {
+  final String circleId;
   final String circleName;
   final Color circleColor;
 
   const InviteMembersView({
     super.key,
+    required this.circleId,
     required this.circleName,
     required this.circleColor,
   });
@@ -17,14 +22,8 @@ class InviteMembersView extends StatefulWidget {
 
 class _InviteMembersViewState extends State<InviteMembersView> {
   final _emailController = TextEditingController();
-  final List<String> _pendingInvites = [
-    'alex@email.com',
-    'jordan@email.com',
-  ];
-  final List<String> _joinedMembers = [
-    'alex@email.com',
-  ];
   final List<String> _sentInvites = [];
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -79,8 +78,8 @@ class _InviteMembersViewState extends State<InviteMembersView> {
 
             const SizedBox(height: 32),
 
-            // Pending Invites Section
-            if (_pendingInvites.isNotEmpty) ...[
+            // Sent Invites Section
+            if (_sentInvites.isNotEmpty) ...[
               _buildPendingInvitesSection(),
               const SizedBox(height: 24),
             ],
@@ -94,10 +93,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Compartir Enlace',
-          style: AppTextStyles.headlineSmall,
-        ),
+        Text('Compartir Enlace', style: AppTextStyles.headlineSmall),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
@@ -128,10 +124,11 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'https://togetherly.app/join/abc123',
+                      'https://togetherly.app/join/${widget.circleId}',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textPrimary,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -144,15 +141,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                     child: AppButton(
                       text: 'Copiar Enlace',
                       type: AppButtonType.secondary,
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Enlace copiado al portapapeles'),
-                            backgroundColor: AppColors.success,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
+                      onPressed: _handleCopyLink,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -161,14 +150,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                       text: 'Compartir',
                       type: AppButtonType.primary,
                       icon: Icons.share,
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Abriendo opciones de compartir...'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
+                      onPressed: _handleShareLink,
                     ),
                   ),
                 ],
@@ -184,10 +166,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'O Escribir Email',
-          style: AppTextStyles.headlineSmall,
-        ),
+        Text('O Escribir Email', style: AppTextStyles.headlineSmall),
         const SizedBox(height: 16),
         AppTextField(
           label: 'Correos Electrónicos',
@@ -197,10 +176,10 @@ class _InviteMembersViewState extends State<InviteMembersView> {
         ),
         const SizedBox(height: 16),
         AppButton(
-          text: 'Enviar Invitación',
+          text: _isLoading ? 'Enviando...' : 'Enviar Invitación',
           type: AppButtonType.primary,
           fullWidth: true,
-          onPressed: _handleSendInvite,
+          onPressed: _isLoading ? null : _handleSendInvite,
         ),
       ],
     );
@@ -210,24 +189,19 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Invitaciones Pendientes',
-          style: AppTextStyles.headlineSmall,
-        ),
+        Text('Invitaciones Enviadas', style: AppTextStyles.headlineSmall),
         const SizedBox(height: 16),
-        ..._pendingInvites.asMap().entries.map((entry) {
+        ..._sentInvites.asMap().entries.map((entry) {
           final email = entry.value;
           final index = entry.key;
-          final isLastItem = index == _pendingInvites.length - 1;
+          final isLastItem = index == _sentInvites.length - 1;
 
           return Padding(
             padding: EdgeInsets.only(bottom: isLastItem ? 0 : 12),
             child: _buildInviteItem(
               email: email,
-              status: _joinedMembers.contains(email) ? 'Joined' : 'Pending',
-              statusColor: _joinedMembers.contains(email)
-                  ? AppColors.success
-                  : AppColors.warning,
+              status: 'Pending',
+              statusColor: AppColors.warning,
             ),
           );
         }).toList(),
@@ -280,43 +254,96 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     );
   }
 
-  void _handleSendInvite() {
+  Future<void> _handleSendInvite() async {
     final email = _emailController.text.trim();
 
+    // Validate email
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa un email'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showSnackBar('Por favor ingresa un email', AppColors.error);
       return;
     }
 
-    if (!email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa un email válido'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
+    if (!_isValidEmail(email)) {
+      _showSnackBar('Por favor ingresa un email válido', AppColors.error);
+      return;
+    }
+
+    if (_sentInvites.contains(email)) {
+      _showSnackBar(
+        'Ya enviaste una invitación a este email',
+        AppColors.warning,
       );
       return;
     }
 
     setState(() {
-      if (!_pendingInvites.contains(email)) {
-        _pendingInvites.add(email);
-        _sentInvites.add(email);
-      }
-      _emailController.clear();
+      _isLoading = true;
     });
 
+    try {
+      final circleViewModel = context.read<CircleViewModel>();
+      final response = await circleViewModel.sendInvitation(widget.circleId, [
+        email,
+      ]);
+
+      if (response != null) {
+        // Check for success and failures
+        if (response.data.success.isNotEmpty) {
+          setState(() {
+            _sentInvites.addAll(response.data.success);
+            _emailController.clear();
+          });
+
+          _showSnackBar(
+            'Invitación enviada a ${response.data.success.join(", ")}',
+            AppColors.success,
+          );
+        }
+
+        if (response.data.failed.isNotEmpty) {
+          final failures = response.data.failed;
+          for (var failure in failures) {
+            _showSnackBar(
+              '${failure['email']}: ${failure['reason']}',
+              AppColors.error,
+            );
+          }
+        }
+      } else {
+        _showSnackBar('Error al enviar invitación', AppColors.error);
+      }
+    } catch (e) {
+      _showSnackBar('Error al enviar invitación: $e', AppColors.error);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _handleCopyLink() {
+    final link = 'https://togetherly.app/join/${widget.circleId}';
+    Clipboard.setData(ClipboardData(text: link));
+    _showSnackBar('Enlace copiado al portapapeles', AppColors.success);
+  }
+
+  void _handleShareLink() {
+    // TODO: Implement share functionality using share_plus package
+    _showSnackBar('Abriendo opciones de compartir...', AppColors.primary);
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Invitación enviada a $email'),
-        backgroundColor: AppColors.success,
+        content: Text(message),
+        backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
       ),
     );
