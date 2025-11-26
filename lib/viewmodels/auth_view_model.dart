@@ -23,11 +23,19 @@ class AuthViewModel extends ChangeNotifier {
   User? _currentUser;
   String? _errorMessage;
 
+  // Callback for notification initialization after login
+  Future<void> Function()? _onLoginSuccess;
+
   AuthState get state => _state;
   User? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _state == AuthState.loading;
   bool get isAuthenticated => _state == AuthState.authenticated;
+
+  // Set callback for notification initialization
+  void setOnLoginSuccess(Future<void> Function()? callback) {
+    _onLoginSuccess = callback;
+  }
 
   // Login method - retorna (success, errorMessage)
   Future<(bool, String?)> login(String email, String password) async {
@@ -43,6 +51,19 @@ class AuthViewModel extends ChangeNotifier {
         // Fetch user data after successful login
         _currentUser = await _authService.getUserData();
         _setState(AuthState.authenticated);
+
+        // Initialize notifications after successful login
+        if (_onLoginSuccess != null) {
+          try {
+            print('🔵 AuthViewModel - Initializing notifications after login');
+            await _onLoginSuccess!();
+            print('✅ AuthViewModel - Notifications initialized successfully');
+          } catch (e) {
+            print('🔴 AuthViewModel - Error initializing notifications: $e');
+            // Don't fail login if notification setup fails
+          }
+        }
+
         return (true, null);
       } else {
         // NO llamar _setState ni notifyListeners - evita rebuild
@@ -72,6 +93,22 @@ class AuthViewModel extends ChangeNotifier {
         // Try to fetch user data
         _currentUser = await _authService.getUserData();
         _setState(AuthState.authenticated);
+
+        // Initialize notifications if user is already authenticated
+        if (_onLoginSuccess != null) {
+          try {
+            print(
+              '🔵 AuthViewModel - Initializing notifications for existing session',
+            );
+            await _onLoginSuccess!();
+            print(
+              '✅ AuthViewModel - Notifications initialized for existing session',
+            );
+          } catch (e) {
+            print('🔴 AuthViewModel - Error initializing notifications: $e');
+            // Don't fail auth check if notification setup fails
+          }
+        }
       } else {
         _setState(AuthState.unauthenticated);
       }

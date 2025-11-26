@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
 import 'viewmodels/circle_view_model.dart';
 import 'viewmodels/unified_calendar_view_model.dart';
+import 'viewmodels/notification_view_model.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
@@ -19,6 +22,9 @@ import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
 
   // Cargar traducciones antes de iniciar la app
   await AppLocalizations.load();
@@ -160,16 +166,49 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => CircleViewModel()),
         ChangeNotifierProvider(create: (_) => UnifiedCalendarViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
       ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        title: 'Togetherly App',
-        theme: AppTheme.lightTheme,
-        debugShowCheckedModeBanner: false,
-        home: AuthWrapper(
-          authenticatedChild: const DashboardView(userName: 'Usuario'),
-          unauthenticatedChild: const LoginView(),
-        ),
+      child: Builder(
+        builder: (context) {
+          // Set up notification initialization callback after providers are available
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final authViewModel = context.read<AuthViewModel>();
+            final notificationViewModel = context.read<NotificationViewModel>();
+
+            // Set callback to initialize notifications after login
+            authViewModel.setOnLoginSuccess(() async {
+              await notificationViewModel.initialize(
+                onMessageTapped: (message) {
+                  // Handle notification tap - navigate to appropriate screen
+                  if (message == null) return;
+
+                  final data = (message as RemoteMessage).data;
+                  final eventId = data['eventId'] as String?;
+                  final circleId = data['circleId'] as String?;
+
+                  if (eventId != null) {
+                    print('🔔 Navigate to event: $eventId');
+                    // TODO: Navigate to event detail
+                  } else if (circleId != null) {
+                    print('🔔 Navigate to circle: $circleId');
+                    // TODO: Navigate to circle detail
+                  }
+                },
+              );
+            });
+          });
+
+          return MaterialApp(
+            navigatorKey: navigatorKey,
+            title: 'Togetherly App',
+            theme: AppTheme.lightTheme,
+            debugShowCheckedModeBanner: false,
+            home: AuthWrapper(
+              authenticatedChild: const DashboardView(userName: 'Usuario'),
+              unauthenticatedChild: const LoginView(),
+            ),
+          );
+        },
       ),
     );
   }

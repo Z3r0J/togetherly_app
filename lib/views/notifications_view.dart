@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
+import '../viewmodels/notification_view_model.dart';
+import '../models/notification_models.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -12,68 +15,41 @@ class _NotificationsViewState extends State<NotificationsView> {
   String _selectedFilter = 'Todos';
   final List<String> _filters = ['Todos', 'Eventos', 'Círculos', 'RSVP'];
 
-  final List<Map<String, dynamic>> _allNotifications = [
-    {
-      'type': NotificationType.reminder,
-      'message':
-          'Recordatorio: La cena familiar es a las 7:00 PM en casa de mamá.',
-      'timeAgo': 'hace 5m',
-      'primaryAction': 'Ver Evento',
-      'secondaryAction': 'Descartar',
-    },
-    {
-      'type': NotificationType.conflict,
-      'message':
-          'Conflicto detectado: "Noche de juegos" choca con "Plazo de proyecto".',
-      'timeAgo': 'hace 12m',
-      'primaryAction': 'Resolver',
-      'secondaryAction': 'Ver',
-    },
-    {
-      'type': NotificationType.rsvpUpdate,
-      'message':
-          'Alex ha actualizado su RSVP para "Almuerzo de equipo" a Asistirá.',
-      'timeAgo': 'hace 2h',
-      'primaryAction': null,
-      'secondaryAction': null,
-    },
-    {
-      'type': NotificationType.invitation,
-      'message':
-          'Sarah te invitó a "Caminata de fin de semana" en el círculo "Aventureros" el 28 de oct.',
-      'timeAgo': 'hace 1d',
-      'primaryAction': 'Establecer RSVP',
-      'secondaryAction': 'Ver',
-    },
-    {
-      'type': NotificationType.circleInvitation,
-      'message':
-          'Michael te ha invitado a unirte al círculo "Club de Lectura".',
-      'timeAgo': 'hace 3d',
-      'primaryAction': 'Aceptar',
-      'secondaryAction': 'Rechazar',
-    },
-  ];
-
-  late List<Map<String, dynamic>> _filteredNotifications;
-
   @override
   void initState() {
     super.initState();
-    _filteredNotifications = List.from(_allNotifications);
+    // Load notifications on first render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationViewModel>().loadNotifications();
+    });
   }
 
   void _filterNotifications(String filter) {
     setState(() {
       _selectedFilter = filter;
-      _filteredNotifications = List.from(_allNotifications);
-
-      // Aquí se pueden agregar filtros específicos según el tipo
-      // Por ahora se muestran todas
     });
+
+    // Map UI filter to backend category
+    String? category;
+    switch (filter) {
+      case 'Eventos':
+        category = 'events';
+        break;
+      case 'Círculos':
+        category = 'circles';
+        break;
+      case 'RSVP':
+        category = 'rsvps';
+        break;
+      default:
+        category = null; // 'Todos' means no category filter
+    }
+
+    context.read<NotificationViewModel>().loadNotifications(category: category);
   }
 
-  void _handleMarkAllRead() {
+  void _handleMarkAllRead(BuildContext context) {
+    context.read<NotificationViewModel>().markAllAsRead();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Todas las notificaciones marcadas como leídas'),
@@ -83,10 +59,8 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
-  void _dismissNotification(int index) {
-    setState(() {
-      _filteredNotifications.removeAt(index);
-    });
+  void _dismissNotification(BuildContext context, String notificationId) {
+    context.read<NotificationViewModel>().dismissNotification(notificationId);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Notificación descartada'),
@@ -95,133 +69,221 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
   }
 
+  // Helper to map backend notification type to UI NotificationType
+  NotificationType _mapNotificationType(String backendType) {
+    switch (backendType) {
+      case 'reminder':
+        return NotificationType.reminder;
+      case 'conflict':
+        return NotificationType.conflict;
+      case 'rsvp_update':
+        return NotificationType.rsvpUpdate;
+      case 'invitation':
+        return NotificationType.invitation;
+      case 'circle_invitation':
+        return NotificationType.circleInvitation;
+      default:
+        return NotificationType.reminder; // fallback
+    }
+  }
+
+  // Helper to format time ago
+  String _formatTimeAgo(DateTime createdAt) {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inMinutes < 60) {
+      return 'hace ${difference.inMinutes}m';
+    } else if (difference.inHours < 24) {
+      return 'hace ${difference.inHours}h';
+    } else {
+      return 'hace ${difference.inDays}d';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Text('Notificaciones', style: AppTextStyles.headlineMedium),
-        actions: [
-          TextButton(
-            onPressed: _handleMarkAllRead,
-            child: Text(
-              'Marcar todo como leído',
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.primary,
+    return Consumer<NotificationViewModel>(
+      builder: (context, viewModel, child) {
+        final notifications = viewModel.notifications;
+        final isLoading = viewModel.isLoading;
+        final error = viewModel.error;
+
+        return Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            title: Text('Notificaciones', style: AppTextStyles.headlineMedium),
+            actions: [
+              TextButton(
+                onPressed: () => _handleMarkAllRead(context),
+                child: Text(
+                  'Marcar todo como leído',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filtros
-          SizedBox(
-            height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              children: _filters.map((filter) {
-                final isSelected = filter == _selectedFilter;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: GestureDetector(
-                    onTap: () => _filterNotifications(filter),
+          body: Column(
+            children: [
+              // Filtros
+              SizedBox(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  children: _filters.map((filter) {
+                    final isSelected = filter == _selectedFilter;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: GestureDetector(
+                        onTap: () => _filterNotifications(filter),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              filter,
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.textSecondary,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                            if (isSelected)
+                              Container(
+                                margin: const EdgeInsets.only(top: 6),
+                                height: 3,
+                                width: 30,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(1.5),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const Divider(height: 1),
+
+              // Loading state
+              if (isLoading && notifications.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    ),
+                  ),
+                )
+              // Error state
+              else if (error != null)
+                Expanded(
+                  child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          filter,
-                          style: AppTextStyles.labelMedium.copyWith(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                          ),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: AppColors.error,
                         ),
-                        if (isSelected)
-                          Container(
-                            margin: const EdgeInsets.only(top: 6),
-                            height: 3,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(1.5),
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          error.message,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        AppButton(
+                          text: 'Reintentar',
+                          type: AppButtonType.primary,
+                          onPressed: () {
+                            viewModel.loadNotifications();
+                          },
+                        ),
                       ],
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-          const Divider(height: 1),
-
-          // Lista de notificaciones
-          if (_filteredNotifications.isEmpty)
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.notifications_off_outlined,
-                      size: 64,
-                      color: AppColors.textTertiary,
+                )
+              // Empty state
+              else if (notifications.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_off_outlined,
+                          size: 64,
+                          color: AppColors.textTertiary,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Sin notificaciones',
+                          style: AppTextStyles.labelMedium.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Sin notificaciones',
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+                  ),
+                )
+              // Notifications list
+              else
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildNotificationCard(
+                          context: context,
+                          notification: notification,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _filteredNotifications.length,
-                itemBuilder: (context, index) {
-                  final notification = _filteredNotifications[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildNotificationCard(
-                      notification: notification,
-                      index: index,
-                    ),
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildNotificationCard({
-    required Map<String, dynamic> notification,
-    required int index,
+    required BuildContext context,
+    required AppNotification notification,
   }) {
-    final type = notification['type'] as NotificationType;
-    final message = notification['message'] as String;
-    final timeAgo = notification['timeAgo'] as String;
-    final primaryAction = notification['primaryAction'] as String?;
-    final secondaryAction = notification['secondaryAction'] as String?;
-
+    final type = _mapNotificationType(notification.type);
     final config = notificationConfigs[type]!;
+    final timeAgo = _formatTimeAgo(notification.createdAt);
+
+    // Extract actions from notification
+    final actionButtons = notification.actionButtons;
+    final primaryAction = actionButtons.isNotEmpty ? actionButtons[0] : null;
+    final secondaryAction = actionButtons.length > 1 ? actionButtons[1] : null;
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: notification.isRead ? AppColors.surface : AppColors.background,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: config.color, width: 4)),
       ),
@@ -251,7 +313,23 @@ class _NotificationsViewState extends State<NotificationsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(message, style: AppTextStyles.bodyMedium),
+                      Text(
+                        notification.title,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: notification.isRead
+                              ? FontWeight.normal
+                              : FontWeight.w600,
+                        ),
+                      ),
+                      if (notification.body.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          notification.body,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       Text(
                         timeAgo,
@@ -273,11 +351,15 @@ class _NotificationsViewState extends State<NotificationsView> {
                   if (primaryAction != null) ...[
                     Expanded(
                       child: AppButton(
-                        text: primaryAction,
+                        text: primaryAction.label,
                         type: _getButtonType(type),
                         fullWidth: true,
                         onPressed: () {
-                          _handleNotificationAction(type, primaryAction);
+                          _handleNotificationAction(
+                            context,
+                            notification,
+                            primaryAction.action,
+                          );
                         },
                       ),
                     ),
@@ -286,16 +368,18 @@ class _NotificationsViewState extends State<NotificationsView> {
                   if (secondaryAction != null)
                     Expanded(
                       child: AppButton(
-                        text: secondaryAction,
-                        type: primaryAction == null
-                            ? AppButtonType.outline
-                            : AppButtonType.outline,
+                        text: secondaryAction.label,
+                        type: AppButtonType.outline,
                         fullWidth: true,
                         onPressed: () {
-                          if (secondaryAction == 'Descartar') {
-                            _dismissNotification(index);
+                          if (secondaryAction.action == 'dismiss') {
+                            _dismissNotification(context, notification.id);
                           } else {
-                            _handleNotificationAction(type, secondaryAction);
+                            _handleNotificationAction(
+                              context,
+                              notification,
+                              secondaryAction.action,
+                            );
                           }
                         },
                       ),
@@ -323,28 +407,37 @@ class _NotificationsViewState extends State<NotificationsView> {
     }
   }
 
-  void _handleNotificationAction(NotificationType type, String action) {
+  void _handleNotificationAction(
+    BuildContext context,
+    AppNotification notification,
+    String action,
+  ) {
+    // Handle the action with the backend
+    context.read<NotificationViewModel>().handleAction(notification.id, action);
+
+    // Show feedback
     String message = '';
     Color color = AppColors.info;
 
     switch (action) {
-      case 'Ver Evento':
+      case 'view_event':
         message = 'Navegando a detalles del evento...';
         color = AppColors.info;
+        // TODO: Navigate to event detail using notification.metadata.eventId
         break;
-      case 'Establecer RSVP':
+      case 'set_rsvp':
         message = 'Abriendo selector de RSVP...';
         color = AppColors.info;
         break;
-      case 'Resolver':
+      case 'resolve_conflict':
         message = 'Abriendo resolución de conflicto...';
         color = AppColors.warning;
         break;
-      case 'Aceptar':
+      case 'accept_invitation':
         message = '¡Invitación de círculo aceptada!';
         color = AppColors.success;
         break;
-      case 'Rechazar':
+      case 'decline_invitation':
         message = 'Invitación de círculo rechazada.';
         color = AppColors.error;
         break;
