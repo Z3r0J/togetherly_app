@@ -474,16 +474,286 @@ class _DashboardViewState extends State<DashboardView> {
 
         const SizedBox(height: 16),
 
-        // Mensaje cuando no hay eventos
+        // Eventos de prueba
         Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Text(
-              'No hay eventos cargados',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              // Evento 1: Reunión de Trabajo
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventDetailTabsView(
+                        event: CircleUnifiedEvent(
+                          id: 'test-1',
+                          title: "Reunión de Equipo",
+                          startTime: DateTime.now().add(const Duration(days: 1)),
+                          endTime: DateTime.now().add(const Duration(days: 1, hours: 1)),
+                          circleId: 'work-circle',
+                          circleName: 'TRABAJO',
+                          circleColor: '#FF6B6B',
+                          rsvpStatus: RsvpStatus.going,
+                          attendeeCount: 5,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('MMM', 'es_ES')
+                                    .format(DateTime.now().add(const Duration(days: 1)))
+                                    .toUpperCase(),
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('d')
+                                    .format(DateTime.now().add(const Duration(days: 1))),
+                                style: AppTextStyles.headlineSmall.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'TRABAJO',
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Reunión de Equipo',
+                                style: AppTextStyles.labelMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '10:00 AM',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  RsvpBadge(status: RsvpStatus.going),
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.people_outline,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '5',
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+
+              // Evento 2: Cena Social
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventDetailTabsView(
+                        event: CircleUnifiedEvent(
+                          id: 'test-2',
+                          title: "Cena Social",
+                          startTime: DateTime.now().add(const Duration(days: 3)),
+                          endTime: DateTime.now().add(const Duration(days: 3, hours: 3)),
+                          circleId: 'social-circle',
+                          circleName: 'AMIGOS',
+                          circleColor: '#4ECDC4',
+                          rsvpStatus: RsvpStatus.maybe,
+                          attendeeCount: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('MMM', 'es_ES')
+                                    .format(DateTime.now().add(const Duration(days: 3)))
+                                    .toUpperCase(),
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('d')
+                                    .format(DateTime.now().add(const Duration(days: 3))),
+                                style: AppTextStyles.headlineSmall.copyWith(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'AMIGOS',
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: Colors.teal,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Cena Social',
+                                style: AppTextStyles.labelMedium.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '7:00 PM',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  RsvpBadge(status: RsvpStatus.maybe),
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.people_outline,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '12',
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
