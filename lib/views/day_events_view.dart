@@ -7,6 +7,7 @@ import '../theme/app_text_styles.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../models/unified_calendar_models.dart';
 import 'create_event_view.dart';
+import 'event_detail_tabs_view.dart';
 
 /// Vista que muestra los eventos de un día específico.
 /// Reutiliza `CompactEventCard`, `EventCard`, `ConflictBanner` y `AppButton`.
@@ -344,8 +345,15 @@ class _DayEventsViewState extends State<DayEventsView> {
       location: event.location?.name,
       colorTag: color,
       rsvpStatus: null,
-      hasConflict: event.conflictsWith.isNotEmpty,
-      onTap: () {},
+      hasConflict: event.hasConflict,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailTabsView(event: event),
+          ),
+        );
+      },
     );
   }
 
@@ -370,13 +378,27 @@ class _DayEventsViewState extends State<DayEventsView> {
             attendeeCount: event.attendeeCount,
             circleLabel: event.circleName,
             circleColor: circleColor,
-            hasConflict: false, // We'll show conflicts separately
-            onTap: () {},
-            onViewDetails: () {},
+            hasConflict: event.hasConflict,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EventDetailTabsView(event: event),
+                ),
+              );
+            },
+            onViewDetails: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EventDetailTabsView(event: event),
+                ),
+              );
+            },
           ),
-          if (event.conflictsWith.isNotEmpty) ...[
+          if (event.hasConflict) ...[
             const SizedBox(height: 8),
-            _buildConflictBanner(event.conflictsWith.first),
+            _buildConflictBanner(),
           ],
         ],
       );
@@ -391,18 +413,25 @@ class _DayEventsViewState extends State<DayEventsView> {
           location: event.location?.name,
           colorTag: circleColor,
           rsvpStatus: event.rsvpStatus,
-          hasConflict: event.conflictsWith.isNotEmpty,
-          onTap: () {},
+          hasConflict: event.hasConflict,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EventDetailTabsView(event: event),
+              ),
+            );
+          },
         ),
-        if (event.conflictsWith.isNotEmpty) ...[
+        if (event.hasConflict) ...[
           const SizedBox(height: 8),
-          _buildConflictBanner(event.conflictsWith.first),
+          _buildConflictBanner(),
         ],
       ],
     );
   }
 
-  Widget _buildConflictBanner(UnifiedEventConflict conflict) {
+  Widget _buildConflictBanner() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
@@ -417,7 +446,7 @@ class _DayEventsViewState extends State<DayEventsView> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Conflicts with "${conflict.title}"',
+              'Event conflicts with another in your calendar',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.warning,
               ),
