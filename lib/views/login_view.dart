@@ -364,10 +364,12 @@ class _LoginViewState extends State<LoginView> {
 
   Future<void> _handleMagicLink() async {
     // Show magic link dialog
+    final authViewModel = context.read<AuthViewModel>();
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const MagicLinkDialog(),
+      builder: (context) => MagicLinkDialog(authViewModel: authViewModel),
     );
   }
 

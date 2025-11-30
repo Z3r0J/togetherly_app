@@ -222,4 +222,52 @@ class EventService {
     }
     return token;
   }
+
+  Future<void> createCircleEvent(Map<String, dynamic> payload) async {
+    final accessToken = await _requireToken();
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/events'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      }
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (ApiError.isErrorResponse(body)) {
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      }
+      throw ApiError(
+        errorCode: 'CIRCLE_EVENT_CREATE_FAILED',
+        message: 'Failed to create circle event',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
 }

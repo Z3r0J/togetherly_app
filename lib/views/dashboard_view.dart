@@ -8,6 +8,7 @@ import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../viewmodels/event_detail_view_model.dart';
+import 'create_event_view.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
@@ -436,6 +437,10 @@ class _DashboardViewState extends State<DashboardView> {
   Widget _buildUpcomingEventsSection() {
     return Consumer<UnifiedCalendarViewModel>(
       builder: (context, viewModel, child) {
+        // Sort events descending by startTime (nearest first, then older)
+        final allEvents = viewModel.calendarData?.events ?? [];
+        allEvents.sort((a, b) => b.startTime.compareTo(a.startTime));
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -497,7 +502,6 @@ class _DashboardViewState extends State<DashboardView> {
             // Lista de eventos (filtrados localmente)
             Builder(
               builder: (context) {
-                final allEvents = viewModel.calendarData?.events ?? [];
                 final filteredEvents = _filterEvents(allEvents, _localFilter);
 
                 if (viewModel.isLoading) {
@@ -593,8 +597,10 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   List<Widget> _buildEventsList(List<dynamic> events) {
-    // Take only first 3 events for dashboard
-    final limitedEvents = events.take(3).toList();
+    // Sort by start time DESC (nearest upcoming first) and take only first 3
+    final sorted = [...events]
+      ..sort((a, b) => b.startTime.toLocal().compareTo(a.startTime.toLocal()));
+    final limitedEvents = sorted.take(3).toList();
     final List<Widget> widgets = [];
 
     for (int i = 0; i < limitedEvents.length; i++) {
@@ -615,7 +621,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildPersonalEventItem(PersonalUnifiedEvent event) {
-    final dateTime = event.startTime;
+    final dateTime = event.startTime.toLocal();
     final monthFormat = DateFormat('MMM', 'es_ES');
     final dayFormat = DateFormat('d');
 
@@ -647,7 +653,7 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildCircleEventItem(CircleUnifiedEvent event) {
-    final dateTime = event.startTime;
+    final dateTime = event.startTime.toLocal();
     final monthFormat = DateFormat('MMM', 'es_ES');
     final dayFormat = DateFormat('d');
 
@@ -903,12 +909,18 @@ class _DashboardViewState extends State<DashboardView> {
                 heroTag: 'create_event',
                 mini: true,
                 backgroundColor: AppColors.primary,
-                onPressed: () {
+                onPressed: () async {
                   setState(() => _isFABOpen = false);
-                  Navigator.push(
+                  final result = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(builder: (_) => const CreateEventView()),
                   );
+                  if (result == true && mounted) {
+                    await context
+                        .read<UnifiedCalendarViewModel>()
+                        .loadCurrentMonth();
+                    await context.read<CircleViewModel>().fetchCircles();
+                  }
                 },
                 child: const Icon(Icons.event, color: AppColors.textOnPrimary),
               ),

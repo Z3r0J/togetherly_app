@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/app_button.dart';
@@ -9,7 +8,9 @@ import '../l10n/app_localizations.dart';
 
 /// Modal dialog for requesting a magic link authentication email
 class MagicLinkDialog extends StatefulWidget {
-  const MagicLinkDialog({super.key});
+  final AuthViewModel authViewModel;
+
+  const MagicLinkDialog({super.key, required this.authViewModel});
 
   @override
   State<MagicLinkDialog> createState() => _MagicLinkDialogState();
@@ -55,7 +56,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
       _errorMessage = null;
     });
 
-    final authViewModel = context.read<AuthViewModel>();
+    final authViewModel = widget.authViewModel;
     final success = await authViewModel.sendMagicLink(email);
 
     if (!mounted) return;

@@ -1,3 +1,5 @@
+import 'location_models.dart';
+
 class Circle {
   final String id;
   final String name;
@@ -181,7 +183,7 @@ class CircleDetail {
   final String privacy;
   final String ownerId;
   final List<CircleMember> members;
-  final List<dynamic> events; // TODO: Create Event model
+  final List<CircleDetailEvent> events;
   final String userRole;
   final bool canEdit;
   final bool canDelete;
@@ -220,7 +222,11 @@ class CircleDetail {
               )
               .toList() ??
           [],
-      events: json['events'] ?? [],
+      events: (json['events'] as List<dynamic>? ?? [])
+          .map(
+            (e) => CircleDetailEvent.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
       userRole: json['userRole'] ?? 'member',
       canEdit: json['canEdit'] ?? false,
       canDelete: json['canDelete'] ?? false,
@@ -234,6 +240,97 @@ class CircleDetail {
   }
 
   int get memberCount => members.length;
+}
+
+class CircleDetailEventTime {
+  final String id;
+  final DateTime startTime;
+  final DateTime endTime;
+
+  CircleDetailEventTime({
+    required this.id,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory CircleDetailEventTime.fromJson(Map<String, dynamic> json) {
+    return CircleDetailEventTime(
+      id: json['id'] ?? '',
+      startTime: DateTime.parse(json['startTime'] as String).toLocal(),
+      endTime: DateTime.parse(json['endTime'] as String).toLocal(),
+    );
+  }
+}
+
+class CircleDetailEvent {
+  final String id;
+  final String circleId;
+  final String title;
+  final String? description;
+  final String? notes;
+  final LocationModel? location;
+  final DateTime? startsAt;
+  final DateTime? endsAt;
+  final bool allDay;
+  final String? color;
+  final String status;
+  final int goingCount;
+  final int maybeCount;
+  final int notGoingCount;
+  final String? rsvpStatus;
+  final List<CircleDetailEventTime> eventTimes;
+
+  CircleDetailEvent({
+    required this.id,
+    required this.circleId,
+    required this.title,
+    this.description,
+    this.notes,
+    this.location,
+    this.startsAt,
+    this.endsAt,
+    this.allDay = false,
+    this.color,
+    required this.status,
+    required this.goingCount,
+    required this.maybeCount,
+    required this.notGoingCount,
+    this.rsvpStatus,
+    this.eventTimes = const [],
+  });
+
+  factory CircleDetailEvent.fromJson(Map<String, dynamic> json) {
+    return CircleDetailEvent(
+      id: json['id'] ?? '',
+      circleId: json['circleId'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] as String?,
+      notes: json['notes'] as String?,
+      location: json['location'] != null
+          ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
+      startsAt: json['startsAt'] != null
+          ? DateTime.parse(json['startsAt'] as String).toLocal()
+          : null,
+      endsAt: json['endsAt'] != null
+          ? DateTime.parse(json['endsAt'] as String).toLocal()
+          : null,
+      allDay: json['allDay'] as bool? ?? false,
+      color: json['color'] as String?,
+      status: json['status'] as String? ?? 'draft',
+      goingCount: json['goingCount'] as int? ?? 0,
+      maybeCount: json['maybeCount'] as int? ?? 0,
+      notGoingCount: json['notGoingCount'] as int? ?? 0,
+      rsvpStatus: json['rsvpStatus'] as String?,
+      eventTimes: (json['eventTimes'] as List<dynamic>? ?? [])
+          .map(
+            (et) => CircleDetailEventTime.fromJson(
+              et as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
 }
 
 // Circle Detail Response

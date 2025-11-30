@@ -9,6 +9,7 @@ import '../models/unified_calendar_models.dart';
 import '../viewmodels/event_detail_view_model.dart';
 import 'create_event_view.dart';
 import 'event_detail_tabs_view.dart';
+import '../widgets/resolve_conflict_dialog.dart';
 
 /// Vista que muestra los eventos de un día específico o en formato calendario.
 /// Reutiliza `CompactEventCard`, `EventCard`, `ConflictBanner` y `AppButton`.
@@ -43,8 +44,84 @@ class _DayEventsViewState extends State<DayEventsView> {
         _localSelectedDate.year,
         _localSelectedDate.month + 1,
         0,
+        23,
+        59,
+        59,
       );
       viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
+    });
+  }
+
+  void _openResolveDialog(UnifiedEvent event) {
+    final conflict = event.conflictsWith.isNotEmpty ? event.conflictsWith.first : null;
+    final timeFormat = DateFormat('h:mm a');
+    String formatRange(DateTime s, DateTime e) => '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
+
+    String personalEventId = '';
+    String circleEventId = '';
+    String personalTitle = '';
+    String circleTitle = '';
+    String personalDate = '';
+    String circleDate = '';
+    String personalLocation = '';
+    String circleLocation = '';
+    String rsvpStatus = '';
+
+    if (event is PersonalUnifiedEvent) {
+      personalEventId = event.id;
+      personalTitle = event.title;
+      personalDate = formatRange(event.startTime, event.endTime);
+      personalLocation = event.location?.name ?? '';
+    } else if (event is CircleUnifiedEvent) {
+      circleEventId = event.id;
+      circleTitle = event.title;
+      circleDate = formatRange(event.startTime, event.endTime);
+      circleLocation = event.location?.name ?? '';
+      rsvpStatus = event.rsvpStatus?.value ?? '';
+    }
+
+    if (conflict != null) {
+      if (conflict.type == UnifiedEventType.personal) {
+        personalEventId = conflict.id;
+        personalTitle = conflict.title;
+        personalDate = formatRange(conflict.startTime, conflict.endTime);
+      } else {
+        circleEventId = conflict.id;
+        circleTitle = conflict.title;
+        circleDate = formatRange(conflict.startTime, conflict.endTime);
+      }
+    }
+
+    showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => ResolveConflictDialog(
+        personalEventId: personalEventId,
+        circleEventId: circleEventId,
+        personalTitle: personalTitle,
+        circleTitle: circleTitle,
+        personalDate: personalDate,
+        circleDate: circleDate,
+        personalLocation: personalLocation,
+        circleLocation: circleLocation,
+        rsvpStatus: rsvpStatus,
+      ),
+    ).then((result) {
+      // If the dialog resolved the conflict (returns true), reload the
+      // currently visible calendar month so all lists update.
+      if (result == true && mounted) {
+        final viewModel = context.read<UnifiedCalendarViewModel>();
+        final firstDay = DateTime(
+          _localSelectedDate.year,
+          _localSelectedDate.month,
+          1,
+        );
+        final lastDay = DateTime(
+          _localSelectedDate.year,
+          _localSelectedDate.month + 1,
+          0,
+        );
+        viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
+      }
     });
   }
 
@@ -81,13 +158,14 @@ class _DayEventsViewState extends State<DayEventsView> {
         // Get all events for the month
         final allEvents = viewModel.calendarData?.events ?? [];
 
-        // Group events by day
+        // Group events by day (use local time to avoid UTC shift)
         final eventsByDay = <DateTime, List<UnifiedEvent>>{};
         for (var event in allEvents) {
+          final localStart = event.startTime.toLocal();
           final dayKey = DateTime(
-            event.startTime.year,
-            event.startTime.month,
-            event.startTime.day,
+            localStart.year,
+            localStart.month,
+            localStart.day,
           );
           eventsByDay.putIfAbsent(dayKey, () => []).add(event);
         }
@@ -251,13 +329,33 @@ class _DayEventsViewState extends State<DayEventsView> {
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                   ),
-                                  child: GestureDetector(
-                                    onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const CreateEventView(),
-                                      ),
-                                    ),
-                                    child: Container(
+                          child: GestureDetector(
+                            onTap: () async {
+                              final result = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const CreateEventView(),
+                                ),
+                              );
+                              if (result == true && mounted) {
+                                final viewModel =
+                                    context.read<UnifiedCalendarViewModel>();
+                                final firstDay = DateTime(
+                                  _localSelectedDate.year,
+                                  _localSelectedDate.month,
+                                  1,
+                                );
+                                final lastDay = DateTime(
+                                  _localSelectedDate.year,
+                                  _localSelectedDate.month + 1,
+                                  0,
+                                );
+                                await viewModel.loadCalendar(
+                                  startDate: firstDay,
+                                  endDate: lastDay,
+                                );
+                              }
+                            },
+                          child: Container(
                                       width: double.infinity,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,
@@ -674,8 +772,8 @@ class _DayEventsViewState extends State<DayEventsView> {
 
   Widget _buildPersonalEventCard(PersonalUnifiedEvent event) {
     final timeFormat = DateFormat('h:mm a');
-    final startTime = timeFormat.format(event.startTime);
-    final endTime = timeFormat.format(event.endTime);
+    final startTime = timeFormat.format(event.startTime.toLocal());
+    final endTime = timeFormat.format(event.endTime.toLocal());
     final color = event.color != null
         ? Color(int.parse(event.color!.replaceFirst('#', '0xFF')))
         : AppColors.primary;
@@ -687,6 +785,7 @@ class _DayEventsViewState extends State<DayEventsView> {
       colorTag: color,
       rsvpStatus: null,
       hasConflict: event.hasConflict,
+      conflictWith: event.conflictsWith.isNotEmpty ? event.conflictsWith.first.title : null,
       onTap: () {
         Navigator.push(
           context,
@@ -703,8 +802,8 @@ class _DayEventsViewState extends State<DayEventsView> {
 
   Widget _buildCircleEventCard(CircleUnifiedEvent event) {
     final timeFormat = DateFormat('h:mm a');
-    final startTime = timeFormat.format(event.startTime);
-    final endTime = timeFormat.format(event.endTime);
+    final startTime = timeFormat.format(event.startTime.toLocal());
+    final endTime = timeFormat.format(event.endTime.toLocal());
     final circleColor = event.circleColor != null
         ? Color(int.parse(event.circleColor!.replaceFirst('#', '0xFF')))
         : AppColors.primary;
@@ -715,7 +814,8 @@ class _DayEventsViewState extends State<DayEventsView> {
         children: [
           EventCard(
             title: event.title,
-            date: DateFormat('EEEE, MMMM d', 'es_ES').format(event.startTime),
+            date: DateFormat('EEEE, MMMM d', 'es_ES')
+                .format(event.startTime.toLocal()),
             time: '$startTime - $endTime',
             location: event.location?.name ?? 'Sin ubicación',
             rsvpStatus: event.rsvpStatus,
@@ -739,10 +839,11 @@ class _DayEventsViewState extends State<DayEventsView> {
                 ),
               );
             },
+            onResolve: () => _openResolveDialog(event),
           ),
           if (event.hasConflict) ...[
             const SizedBox(height: 8),
-            _buildConflictBanner(),
+            _buildConflictBanner(event),
           ],
         ],
       );
@@ -758,6 +859,7 @@ class _DayEventsViewState extends State<DayEventsView> {
           colorTag: circleColor,
           rsvpStatus: event.rsvpStatus,
           hasConflict: event.hasConflict,
+          conflictWith: event.conflictsWith.isNotEmpty ? event.conflictsWith.first.title : null,
           onTap: () {
             Navigator.push(
               context,
@@ -769,16 +871,17 @@ class _DayEventsViewState extends State<DayEventsView> {
               ),
             );
           },
+          onResolve: () => _openResolveDialog(event),
         ),
         if (event.hasConflict) ...[
           const SizedBox(height: 8),
-          _buildConflictBanner(),
+          _buildConflictBanner(event),
         ],
       ],
     );
   }
 
-  Widget _buildConflictBanner() {
+  Widget _buildConflictBanner(UnifiedEvent event) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
@@ -793,14 +896,90 @@ class _DayEventsViewState extends State<DayEventsView> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Event conflicts with another in your calendar',
+              // Show the title of the first conflicting event if available
+              event.conflictsWith.isNotEmpty
+                  ? 'Conflicts with "${event.conflictsWith.first.title}"'
+                  : 'Event conflicts with another in your calendar',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.warning,
               ),
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // Open ResolveConflictDialog (modal) and pass event + first conflict safely
+              final conflict = event.conflictsWith.isNotEmpty ? event.conflictsWith.first : null;
+              final timeFormat = DateFormat('h:mm a');
+              String formatRange(DateTime s, DateTime e) => '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
+
+              // Prepare parameters for dialog
+              String personalEventId = '';
+              String circleEventId = '';
+              String personalTitle = '';
+              String circleTitle = '';
+              String personalDate = '';
+              String circleDate = '';
+              String personalLocation = '';
+              String circleLocation = '';
+              String rsvpStatus = '';
+
+              if (event is PersonalUnifiedEvent) {
+                personalEventId = event.id;
+                personalTitle = event.title;
+                personalDate = formatRange(event.startTime, event.endTime);
+                personalLocation = event.location?.name ?? '';
+              } else if (event is CircleUnifiedEvent) {
+                circleEventId = event.id;
+                circleTitle = event.title;
+                circleDate = formatRange(event.startTime, event.endTime);
+                circleLocation = event.location?.name ?? '';
+                rsvpStatus = event.rsvpStatus?.value ?? '';
+              }
+
+              if (conflict != null) {
+                if (conflict.type == UnifiedEventType.personal) {
+                  personalEventId = conflict.id;
+                  personalTitle = conflict.title;
+                  personalDate = formatRange(conflict.startTime, conflict.endTime);
+                } else {
+                  circleEventId = conflict.id;
+                  circleTitle = conflict.title;
+                  circleDate = formatRange(conflict.startTime, conflict.endTime);
+                }
+              }
+
+              showDialog<bool>(
+                context: context,
+                builder: (dialogContext) => ResolveConflictDialog(
+                  personalEventId: personalEventId,
+                  circleEventId: circleEventId,
+                  personalTitle: personalTitle,
+                  circleTitle: circleTitle,
+                  personalDate: personalDate,
+                  circleDate: circleDate,
+                  personalLocation: personalLocation,
+                  circleLocation: circleLocation,
+                  rsvpStatus: rsvpStatus,
+                ),
+              ).then((result) {
+                // If the dialog resolved the conflict, reload the current
+                // month so that every listing reflects the new response.
+                if (result == true && mounted) {
+                  final viewModel = context.read<UnifiedCalendarViewModel>();
+                  final firstDay = DateTime(
+                    _localSelectedDate.year,
+                    _localSelectedDate.month,
+                    1,
+                  );
+                  final lastDay = DateTime(
+                    _localSelectedDate.year,
+                    _localSelectedDate.month + 1,
+                    0,
+                  );
+                  viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
+                }
+              });
+            },
             child: Text(
               'Resolve',
               style: AppTextStyles.labelMedium.copyWith(

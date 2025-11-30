@@ -54,8 +54,8 @@ class UnifiedEventConflict {
       type: json['type'] == 'personal'
           ? UnifiedEventType.personal
           : UnifiedEventType.circle,
-      startTime: DateTime.parse(json['startTime'] as String),
-      endTime: DateTime.parse(json['endTime'] as String),
+      startTime: DateTime.parse(json['startTime'] as String).toLocal(),
+      endTime: DateTime.parse(json['endTime'] as String).toLocal(),
     );
   }
 }
@@ -105,8 +105,8 @@ class PersonalUnifiedEvent extends UnifiedEvent {
     return PersonalUnifiedEvent(
       id: json['id'] as String,
       title: json['title'] as String,
-      startTime: DateTime.parse(json['startTime'] as String),
-      endTime: DateTime.parse(json['endTime'] as String),
+      startTime: DateTime.parse(json['startTime'] as String).toLocal(),
+      endTime: DateTime.parse(json['endTime'] as String).toLocal(),
       allDay: json['allDay'] as bool? ?? false,
       location: json['location'] != null
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
@@ -157,8 +157,8 @@ class CircleUnifiedEvent extends UnifiedEvent {
       circleId: json['circleId'] as String,
       circleName: json['circleName'] as String,
       circleColor: json['circleColor'] as String?,
-      startTime: DateTime.parse(json['startTime'] as String),
-      endTime: DateTime.parse(json['endTime'] as String),
+      startTime: DateTime.parse(json['startTime'] as String).toLocal(),
+      endTime: DateTime.parse(json['endTime'] as String).toLocal(),
       allDay: json['allDay'] as bool? ?? false,
       location: json['location'] != null
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
@@ -214,9 +214,7 @@ class UnifiedCalendarResponse {
   UnifiedCalendarResponse({required this.events, required this.summary});
 
   factory UnifiedCalendarResponse.fromJson(Map<String, dynamic> json) {
-    final List<UnifiedEvent> events = (json['events'] as List<dynamic>).map((
-      e,
-    ) {
+    final List<UnifiedEvent> events = (json['events'] as List<dynamic>).map((e) {
       final eventMap = e as Map<String, dynamic>;
       if (eventMap['type'] == 'personal') {
         return PersonalUnifiedEvent.fromJson(eventMap);

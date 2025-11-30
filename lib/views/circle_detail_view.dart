@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
+
 import '../widgets/widgets.dart';
+import '../widgets/rsvp_widgets.dart';
+import '../models/circle_models.dart';
+import '../models/unified_calendar_models.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../viewmodels/circle_view_model.dart';
+import '../viewmodels/unified_calendar_view_model.dart';
+import '../viewmodels/event_detail_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'invite_members_view.dart';
 import 'create_event_view.dart';
 import 'create_circle_view.dart';
+import 'event_detail_tabs_view.dart';
 
 class CircleDetailView extends StatefulWidget {
   final String circleId;
@@ -249,7 +259,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
   }
 
   Widget _buildUpcomingEventsSection(circleDetail) {
-    final events = circleDetail.events;
+    final events = circleDetail.events as List<CircleDetailEvent>;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,20 +272,32 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             children: [
               Text('Próximos Eventos', style: AppTextStyles.headlineSmall),
               if (circleDetail.canEdit)
-                AppButton(
-                  text: '+ Crear Evento',
-                  type: AppButtonType.primary,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreateEventView(
-                          circleName: widget.circleName,
-                          circleColor: widget.circleColor,
+                SizedBox(
+                  height: 36,
+                  child: AppButton(
+                    text: '+ Crear Evento',
+                    type: AppButtonType.primary,
+                    onPressed: () async {
+                      final result = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateEventView(
+                            circleId: widget.circleId,
+                            circleName: widget.circleName,
+                            circleColor: widget.circleColor,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                      if (result == true && mounted) {
+                        await context.read<CircleViewModel>().fetchCircleDetail(
+                          widget.circleId,
+                        );
+                        await context
+                            .read<UnifiedCalendarViewModel>()
+                            .loadCurrentMonth();
+                      }
+                    },
+                  ),
                 ),
             ],
           ),
@@ -305,16 +327,288 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                 final isLastEvent = entry.key == events.length - 1;
                 return Padding(
                   padding: EdgeInsets.only(bottom: isLastEvent ? 0 : 16),
-                  child: Text(
-                    'Evento: $event',
-                    style: AppTextStyles.bodyMedium,
-                  ),
+                  child: _buildEventCard(event),
                 );
               }).toList(),
             ),
           ),
       ],
     );
+  }
+
+  Widget _buildEventCard(CircleDetailEvent event) {
+    final firstOption = event.eventTimes.isNotEmpty
+        ? event.eventTimes.first
+        : null;
+    final start = event.startsAt ?? firstOption?.startTime;
+    final end = event.endsAt ?? firstOption?.endTime;
+    final dateText = start != null ? _formatDate(start) : 'Fecha por definir';
+    final timeText = event.allDay
+        ? 'Todo el día'
+        : (start != null && end != null)
+        ? '${_formatTime(start)} - ${_formatTime(end)}'
+        : 'Horario por definir';
+    final rsvpText =
+        '${event.goingCount} Going · ${event.maybeCount} Maybe · ${event.notGoingCount} Not going';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  event.title,
+                  style: AppTextStyles.headlineSmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  _buildStatusChip(event.status),
+                  _buildRsvpChip(event.rsvpStatus),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(
+                Icons.calendar_today,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(dateText, style: AppTextStyles.bodySmall),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(
+                Icons.access_time,
+                size: 16,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(timeText, style: AppTextStyles.bodySmall),
+            ],
+          ),
+          if (event.location != null) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    event.location!.name,
+                    style: AppTextStyles.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Text(
+                  rsvpText,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final startSafe = start ?? DateTime.now();
+                  final endSafe =
+                      end ??
+                      (start != null
+                          ? start.add(const Duration(hours: 1))
+                          : startSafe.add(const Duration(hours: 1)));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChangeNotifierProvider(
+                        create: (_) => EventDetailViewModel(),
+                        child: EventDetailTabsView(
+                          event: CircleUnifiedEvent(
+                            id: event.id,
+                            title: event.title,
+                            circleId: event.circleId,
+                            circleName: widget.circleName,
+                            circleColor: widget.circleColor.value.toRadixString(
+                              16,
+                            ),
+                            startTime: startSafe,
+                            endTime: endSafe,
+                            allDay: event.allDay,
+                            conflictsWith: const [],
+                            status: event.status,
+                            rsvpStatus: RsvpStatusExtension.fromString(
+                              event.rsvpStatus,
+                            ),
+                            attendeeCount:
+                                event.goingCount +
+                                event.maybeCount +
+                                event.notGoingCount,
+                            canChangeRsvp: true,
+                            isCreator: false,
+                            location: event.location,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Ver detalles'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String status) {
+    Color bg = AppColors.background;
+    Color fg = AppColors.textPrimary;
+    switch (status.toLowerCase()) {
+      case 'finalized':
+      case 'locked':
+        bg = AppColors.success.withOpacity(0.15);
+        fg = AppColors.success;
+        break;
+      case 'draft':
+      default:
+        bg = AppColors.warning.withOpacity(0.15);
+        fg = AppColors.warning;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: AppTextStyles.labelSmall.copyWith(
+          fontWeight: FontWeight.w700,
+          color: fg,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRsvpChip(String? rsvp) {
+    if (rsvp == null || rsvp.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final status = RsvpStatusExtension.fromString(rsvp);
+    Color bg = AppColors.background;
+    Color fg = AppColors.textSecondary;
+    String label = 'RSVP';
+
+    switch (status) {
+      case RsvpStatus.going:
+        bg = AppColors.success.withOpacity(0.15);
+        fg = AppColors.success;
+        label = 'Voy';
+        break;
+      case RsvpStatus.maybe:
+        bg = AppColors.warning.withOpacity(0.15);
+        fg = AppColors.warning;
+        label = 'Tal vez';
+        break;
+      case RsvpStatus.notGoing:
+        bg = AppColors.error.withOpacity(0.15);
+        fg = AppColors.error;
+        label = 'No voy';
+        break;
+      case RsvpStatus.none:
+        return const SizedBox.shrink();
+      case null:
+        return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.labelSmall.copyWith(
+          fontWeight: FontWeight.w700,
+          color: fg,
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ];
+    final weekday = [
+      'lunes',
+      'martes',
+      'miércoles',
+      'jueves',
+      'viernes',
+      'sábado',
+      'domingo',
+    ][date.weekday - 1];
+    return '$weekday, ${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   void _showMoreOptions() {

@@ -10,6 +10,38 @@ import 'auth_service.dart';
 class CalendarService {
   final AuthService _authService = AuthService();
 
+  /// Resolve a calendar conflict by calling the backend API.
+  /// If [token] is not provided, the method will attempt to retrieve the
+  /// current access token from [AuthService].
+  Future<http.Response> resolveConflict({
+    String? token,
+    required String eventId,
+    required String eventType,
+    required String action,
+  }) async {
+    final accessToken = token ?? await _authService.getAccessToken() ?? '';
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/calendar/conflicts/resolve');
+    final body = json.encode({
+      'eventId': eventId,
+      'eventType': eventType,
+      'action': action,
+    });
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
+    };
+
+    final resp = await http.post(url, headers: headers, body: body).timeout(const Duration(seconds: 10));
+    print('🔵 [CalendarService] POST $url');
+    print('🔵 [CalendarService] headers: $headers');
+    print('🔵 [CalendarService] body: $body');
+    print('🔵 [CalendarService] Response status: ${resp.statusCode}');
+    return resp;
+  }
+
   Future<UnifiedCalendarResponse> getUnifiedCalendar({
     DateTime? startDate,
     DateTime? endDate,
@@ -28,10 +60,10 @@ class CalendarService {
       // Build query parameters
       final queryParams = <String, String>{};
       if (startDate != null) {
-        queryParams['startDate'] = startDate.toUtc().toIso8601String();
+        queryParams['startDate'] = startDate.toIso8601String();
       }
       if (endDate != null) {
-        queryParams['endDate'] = endDate.toUtc().toIso8601String();
+        queryParams['endDate'] = endDate.toIso8601String();
       }
       if (filter != 'all') {
         queryParams['filter'] = filter;

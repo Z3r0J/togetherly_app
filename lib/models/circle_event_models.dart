@@ -15,10 +15,16 @@ class CircleEventTimeOption {
   });
 
   factory CircleEventTimeOption.fromJson(Map<String, dynamic> json) {
+    final startRaw = json['startTime'];
+    final endRaw = json['endTime'];
     return CircleEventTimeOption(
       id: json['id'] ?? '',
-      startTime: DateTime.parse(json['startTime']),
-      endTime: DateTime.parse(json['endTime']),
+      startTime: startRaw != null
+          ? DateTime.parse(startRaw as String).toLocal()
+          : DateTime.now(),
+      endTime: endRaw != null
+          ? DateTime.parse(endRaw as String).toLocal()
+          : DateTime.now(),
       voteCount: json['voteCount'] is int
           ? json['voteCount'] as int
           : int.tryParse(json['voteCount']?.toString() ?? '0') ?? 0,
@@ -118,21 +124,25 @@ class CircleEventDetail {
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
           : null,
       startsAt: json['startsAt'] != null
-          ? DateTime.parse(json['startsAt'] as String)
+          ? DateTime.parse(json['startsAt'] as String).toLocal()
           : null,
       endsAt: json['endsAt'] != null
-          ? DateTime.parse(json['endsAt'] as String)
+          ? DateTime.parse(json['endsAt'] as String).toLocal()
           : null,
       allDay: json['allDay'] as bool? ?? false,
       color: json['color'] as String?,
       reminderMinutes: json['reminderMinutes'] as int?,
       status: json['status'] as String? ?? 'draft',
-      eventTimes: (json['eventTimes'] as List<dynamic>?)
-              ?.map((e) =>
-                  CircleEventTimeOption.fromJson(e as Map<String, dynamic>))
+      eventTimes:
+          (json['eventTimes'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    CircleEventTimeOption.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      rsvps: (json['rsvps'] as List<dynamic>?)
+      rsvps:
+          (json['rsvps'] as List<dynamic>?)
               ?.map((r) => CircleEventRsvp.fromJson(r as Map<String, dynamic>))
               .toList() ??
           [],

@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
 import 'viewmodels/circle_view_model.dart';
+import 'viewmodels/event_detail_view_model.dart';
 import 'viewmodels/unified_calendar_view_model.dart';
 import 'viewmodels/notification_view_model.dart';
 import 'views/counter_view.dart';
@@ -37,7 +38,9 @@ Future<void> _initializeApp() async {
     if (!kIsWeb) {
       await Firebase.initializeApp();
     } else {
-      debugPrint('ℹ️ Web detected: skipping Firebase.initializeApp due to missing FirebaseOptions');
+      debugPrint(
+        'ℹ️ Web detected: skipping Firebase.initializeApp due to missing FirebaseOptions',
+      );
     }
     await AppLocalizations.load();
     await initializeDateFormatting('es_ES', null);
@@ -109,16 +112,24 @@ class StartupErrorScreen extends StatelessWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              const Text('Error al iniciar la app', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                'Error al iniciar la app',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
-              Text(error, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+              Text(
+                error,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   // Reintentar: reconstruir FutureBuilder creando nuevo Future
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => StartupApp(initialization: _initializeApp()),
+                      builder: (_) =>
+                          StartupApp(initialization: _initializeApp()),
                     ),
                   );
                 },
@@ -398,6 +409,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => CircleViewModel()),
         ChangeNotifierProvider(create: (_) => UnifiedCalendarViewModel()),
         ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+        ChangeNotifierProvider(create: (_) => EventDetailViewModel()),
       ],
       child: Builder(
         builder: (context) {
@@ -410,7 +422,9 @@ class _MyAppState extends State<MyApp> {
             authViewModel.setOnLoginSuccess(() async {
               // Skip notifications on web when Firebase is not initialized
               if (kIsWeb) {
-                debugPrint('ℹ️ Web: skipping NotificationService initialization');
+                debugPrint(
+                  'ℹ️ Web: skipping NotificationService initialization',
+                );
                 return;
               }
               await notificationViewModel.initialize(

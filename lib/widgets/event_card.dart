@@ -53,6 +53,9 @@ class EventCard extends StatelessWidget {
   /// Callback para ver detalles
   final VoidCallback? onViewDetails;
 
+  /// Callback to resolve conflict (open resolver)
+  final VoidCallback? onResolve;
+
   const EventCard({
     super.key,
     required this.title,
@@ -67,6 +70,7 @@ class EventCard extends StatelessWidget {
     this.conflictWith,
     this.onTap,
     this.onViewDetails,
+    this.onResolve,
   });
 
   @override
@@ -214,7 +218,7 @@ class EventCard extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: onResolve ?? () {},
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.warning,
                           padding: EdgeInsets.zero,
@@ -267,6 +271,9 @@ class CompactEventCard extends StatelessWidget {
   /// Si hay conflicto
   final bool hasConflict;
 
+  /// Nombre del evento con el que hay conflicto (opcional)
+  final String? conflictWith;
+
   /// Callback cuando se toca el card
   final VoidCallback? onTap;
 
@@ -279,8 +286,12 @@ class CompactEventCard extends StatelessWidget {
     this.colorTag = AppColors.primary,
     this.rsvpStatus,
     this.hasConflict = false,
+    this.conflictWith,
     this.onTap,
+    this.onResolve,
   });
+  /// Callback to resolve conflict (open resolver)
+  final VoidCallback? onResolve;
 
   @override
   Widget build(BuildContext context) {
@@ -395,15 +406,17 @@ class CompactEventCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
-                          'Conflicts with "Family Movie Night"',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.warning,
-                          ),
-                        ),
+                                child: Text(
+                                  conflictWith != null
+                                      ? 'Conflicts with "${conflictWith}"'
+                                      : 'Schedule conflict detected',
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    color: AppColors.warning,
+                                  ),
+                                ),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: onResolve ?? () {},
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           padding: EdgeInsets.zero,

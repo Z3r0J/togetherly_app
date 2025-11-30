@@ -36,12 +36,12 @@ class PersonalEvent {
       id: json['id'] as String,
       userId: json['userId'] as String,
       title: json['title'] as String,
-      date: DateTime.parse(json['date'] as String),
+      date: DateTime.parse(json['date'] as String).toLocal(),
       startTime: json['startTime'] != null
-          ? DateTime.parse(json['startTime'] as String)
+          ? DateTime.parse(json['startTime'] as String).toLocal()
           : null,
       endTime: json['endTime'] != null
-          ? DateTime.parse(json['endTime'] as String)
+          ? DateTime.parse(json['endTime'] as String).toLocal()
           : null,
       allDay: json['allDay'] as bool? ?? false,
       location: json['location'] != null
@@ -50,8 +50,8 @@ class PersonalEvent {
       notes: json['notes'] as String?,
       color: json['color'] as String?,
       reminderMinutes: json['reminderMinutes'] as int?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt'] as String).toLocal(),
     );
   }
 
@@ -100,9 +100,10 @@ class CreatePersonalEventRequest {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'date': date.toIso8601String(),
-      'startTime': startTime.toIso8601String(),
-      'endTime': endTime.toIso8601String(),
+      // Send as UTC to keep the same wall-clock time after server parses/stores
+      'date': date.toUtc().toIso8601String(),
+      'startTime': startTime.toUtc().toIso8601String(),
+      'endTime': endTime.toUtc().toIso8601String(),
       'allDay': allDay,
       if (location != null) 'location': location!.toJson(),
       if (notes != null && notes!.isNotEmpty) 'notes': notes,

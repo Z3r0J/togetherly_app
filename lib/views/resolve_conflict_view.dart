@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../models/unified_calendar_models.dart';
 
 class ResolveConflictView extends StatelessWidget {
-  const ResolveConflictView({super.key});
+  final UnifiedEvent event;
+  final List<UnifiedEventConflict> conflicts;
+
+  const ResolveConflictView({super.key, required this.event, required this.conflicts});
 
   @override
   Widget build(BuildContext context) {
@@ -29,47 +34,71 @@ class ResolveConflictView extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              const Text(
-                "Resolve Schedule Conflict",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                'Resolve Schedule Conflict',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
-              const Text(
-                "You have 2 overlapping events:",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+              Text(
+                'You have ${conflicts.length} overlapping event${conflicts.length == 1 ? '' : 's'}:',
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
 
               const SizedBox(height: 25),
 
-              _eventCard(
-                title: "Doctor Appointment",
-                type: "Personal Event",
-                icon: Icons.calendar_today,
-                date: "Oct 26, 2:00 PM - 3:00 PM",
-                location: "123 Health St, Medville",
-                actions: [
-                  _redButton("Cancel This Event"),
-                ],
-                sideColor: Colors.grey,
-              ),
+              // Current event (the one we're resolving)
+              Builder(builder: (context) {
+                // Compute location string safely using casts
+                String locationStr = '';
+                if (event is PersonalUnifiedEvent) {
+                  final e = event as PersonalUnifiedEvent;
+                  locationStr = e.location?.name ?? '';
+                } else if (event is CircleUnifiedEvent) {
+                  final e = event as CircleUnifiedEvent;
+                  locationStr = e.circleName;
+                }
+
+                return _eventCard(
+                  title: event.title,
+                  type: event is PersonalUnifiedEvent ? 'Personal Event' : 'Circle Event',
+                  icon: event is PersonalUnifiedEvent ? Icons.calendar_today : Icons.group,
+                  date: _formatRange(event.startTime, event.endTime),
+                  location: locationStr,
+                  actions: [
+                    _redButton('Cancel This Event'),
+                  ],
+                  sideColor: Colors.grey,
+                );
+              }),
 
               const SizedBox(height: 16),
 
-              _eventCard(
-                title: "Family BBQ",
-                type: "Circle Event",
-                icon: Icons.group,
-                date: "Oct 26, 2:30 PM - 5:00 PM",
-                location: "Mom's House",
-                rsvpTag: "Your RSVP: Maybe",
-                rsvpColor: Colors.orange,
-                actions: [
-                  _outlineButton("Change to Maybe"),
-                  const SizedBox(width: 10),
-                  _blueButton("Change to Going"),
-                ],
-                sideColor: Colors.blue,
-              ),
+              // First conflicting event
+              if (conflicts.isNotEmpty)
+                _eventCard(
+                  title: conflicts.first.title,
+                  type: conflicts.first.type == UnifiedEventType.personal ? 'Personal Event' : 'Circle Event',
+                  icon: conflicts.first.type == UnifiedEventType.personal ? Icons.calendar_today : Icons.group,
+                  date: _formatRange(conflicts.first.startTime, conflicts.first.endTime),
+                  location: '',
+                  rsvpTag: null,
+                  rsvpColor: null,
+                  actions: [
+                    _outlineButton('Change to Maybe'),
+                    const SizedBox(width: 10),
+                    _blueButton('Change to Going'),
+                  ],
+                  sideColor: Colors.blue,
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text('No conflicting events found.'),
+                ),
 
               const SizedBox(height: 25),
 
@@ -105,6 +134,11 @@ class ResolveConflictView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatRange(DateTime start, DateTime end) {
+    final timeFormat = DateFormat('h:mm a');
+    return '${timeFormat.format(start.toLocal())} - ${timeFormat.format(end.toLocal())}';
   }
 
   Widget _eventCard({
