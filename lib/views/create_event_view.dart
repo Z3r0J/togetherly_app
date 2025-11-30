@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/widgets.dart';
+import '../services/personal_event_service.dart';
+import '../models/personal_event_models.dart';
+import '../models/location_models.dart';
+import 'location_picker_view.dart';
 
 class CreateEventView extends StatefulWidget {
   final String? circleName;
@@ -23,6 +27,10 @@ class _CreateEventViewState extends State<CreateEventView> {
   bool _isAllDay = false;
   String _selectedReminder = 'Ninguno';
   Color _selectedColorTag = AppColors.primary;
+
+  // New state variables for API integration
+  bool _isLoading = false;
+  LocationModel? _selectedLocation;
 
   @override
   void initState() {
@@ -263,12 +271,37 @@ class _CreateEventViewState extends State<CreateEventView> {
 
             const SizedBox(height: 20),
 
-            // Location
-            AppTextField(
-              label: 'Ubicación',
-              hintText: 'Ej: Sala de conferencias',
-              controller: _locationController,
-              prefixIcon: Icons.location_on_outlined,
+            // Location (with location picker integration)
+            GestureDetector(
+              onTap: () async {
+                final result = await Navigator.push<Map<String, dynamic>>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LocationPickerView(),
+                  ),
+                );
+
+                if (result != null) {
+                  setState(() {
+                    // Convert Map to LocationModel
+                    _selectedLocation = LocationModel(
+                      name: result['name'] as String,
+                      latitude: result['latitude'] as double?,
+                      longitude: result['longitude'] as double?,
+                    );
+                    _locationController.text = result['name'] as String;
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                child: AppTextField(
+                  label: 'Ubicación',
+                  hintText: 'Ej: Sala de conferencias',
+                  controller: _locationController,
+                  prefixIcon: Icons.location_on_outlined,
+                  suffixIcon: Icons.map,
+                ),
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -338,7 +371,8 @@ class _CreateEventViewState extends State<CreateEventView> {
               text: 'Crear Evento',
               type: AppButtonType.primary,
               fullWidth: true,
-              onPressed: _handleCreateEvent,
+              onPressed: _isLoading ? null : _handleCreateEvent,
+              isLoading: _isLoading,
             ),
 
             const SizedBox(height: 16),
@@ -571,7 +605,34 @@ class _CreateEventViewState extends State<CreateEventView> {
     );
   }
 
-  void _handleCreateEvent() {
+  // Helper methods for data conversion
+  DateTime _combineDateAndTime(DateTime date, TimeOfDay time) {
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
+
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+  }
+
+  int? _reminderStringToMinutes(String reminder) {
+    switch (reminder) {
+      case 'Ninguno':
+        return null;
+      case '15 min antes':
+        return 15;
+      case '30 min antes':
+        return 30;
+      case '1 hora antes':
+        return 60;
+      case '1 día antes':
+        return 1440;
+      default:
+        return null;
+    }
+  }
+
+  void _handleCreateEvent() async {
+    // Validation
     if (_eventTitleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -583,20 +644,96 @@ class _CreateEventViewState extends State<CreateEventView> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Evento "${_eventTitleController.text}" creado exitosamente',
+    // Only handle personal events for now
+    if (_selectedTabIndex != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Crear eventos de círculo aún no está implementado'),
+          backgroundColor: AppColors.warning,
+          behavior: SnackBarBehavior.floating,
         ),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      );
+      return;
+    }
 
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      // Combine date and time
+      final startDateTime = _isAllDay
+          ? DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day)
+          : _combineDateAndTime(_selectedDate, _startTime);
+
+      final endDateTime = _isAllDay
+          ? DateTime(
+              _selectedDate.year,
+              _selectedDate.month,
+              _selectedDate.day,
+              23,
+              59,
+            )
+          : _combineDateAndTime(_selectedDate, _endTime);
+
+      // Prepare location
+      LocationModel? location;
+      if (_selectedLocation != null) {
+        location = _selectedLocation;
+      } else if (_locationController.text.isNotEmpty) {
+        location = LocationModel(name: _locationController.text);
+      }
+
+      // Create request
+      final request = CreatePersonalEventRequest(
+        title: _eventTitleController.text.trim(),
+        date: _selectedDate,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        location: location,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        allDay: _isAllDay,
+        reminderMinutes: _reminderStringToMinutes(_selectedReminder),
+        color: _colorToHex(_selectedColorTag),
+      );
+
+      // Call API
+      final service = PersonalEventService();
+      await service.createPersonalEvent(request);
+
+      if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Evento "${_eventTitleController.text}" creado exitosamente',
+          ),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Navigate back
+      Navigator.pop(context, true); // Return true to indicate success
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al crear evento: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }

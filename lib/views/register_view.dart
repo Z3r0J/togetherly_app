@@ -8,6 +8,7 @@ import '../widgets/app_text_field.dart';
 import '../widgets/email_verification_dialog.dart';
 import '../services/invitation_service.dart';
 import '../l10n/app_localizations.dart';
+import 'login_view.dart';
 
 class RegisterView extends StatefulWidget {
   final Map<String, dynamic>? invitationContext;
@@ -289,7 +290,14 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _handleLogin() {
-    Navigator.pop(context);
+    // Navigate to login, passing invitation context if present
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            LoginView(invitationContext: widget.invitationContext),
+      ),
+    );
   }
 
   @override

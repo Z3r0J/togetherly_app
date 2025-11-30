@@ -78,14 +78,24 @@ class DeepLinkService {
               uri.host == 'togetherly.app' &&
               uri.pathSegments.isNotEmpty &&
               uri.pathSegments.first == 'invite')) {
+        print('🔍 [DeepLinkService] Invitation link detected');
+        print('   Scheme: ${uri.scheme}');
+        print('   Host: ${uri.host}');
+        print('   Path segments: ${uri.pathSegments}');
+
         // Extract token from path
         final token = uri.pathSegments.last;
+        print(
+          '   Extracted token: ${token.length > 10 ? token.substring(0, 10) + "..." : token}',
+        );
+
         if (token.isNotEmpty && token != 'invite') {
           print(
-            '📧 [DeepLinkService] Invitation token received: ${token.substring(0, 10)}...',
+            '📧 [DeepLinkService] Valid invitation token - calling callback',
           );
           onInvitationLinkReceived?.call(token);
         } else {
+          print('❌ [DeepLinkService] Invalid invitation token');
           onError?.call('Invalid invitation token in deep link');
         }
       } else {

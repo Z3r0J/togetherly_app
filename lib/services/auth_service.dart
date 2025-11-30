@@ -73,6 +73,10 @@ class AuthService {
         );
       }
 
+      print(
+        '🔑 [AuthService] Getting user data with token: ${accessToken.substring(0, 20)}...',
+      );
+
       final response = await http
           .get(
             Uri.parse('$baseUrl/user'),
@@ -86,7 +90,11 @@ class AuthService {
       final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        print('✅ [AuthService] User data received');
+        print('   Response body: $responseBody');
         final userResponse = UserResponse.fromJson(responseBody);
+        print('   User name: ${userResponse.data.name}');
+        print('   User email: ${userResponse.data.email}');
         return userResponse.data;
       } else if (response.statusCode == 401) {
         // Token expired, clear tokens

@@ -454,6 +454,10 @@ class CircleService {
           jsonDecode(response.body),
         );
         print('✅ [CircleService] Invitation details retrieved');
+        print('   Circle: ${detailsResponse.data.circleName}');
+        print('   Inviter: ${detailsResponse.data.inviterName}');
+        print('   Email: ${detailsResponse.data.invitedEmail}');
+        print('   Is Registered: ${detailsResponse.data.isRegistered}');
         return detailsResponse;
       } else if (response.statusCode == 400) {
         final Map<String, dynamic> body = jsonDecode(response.body);
@@ -499,18 +503,20 @@ class CircleService {
         );
       }
 
+      print('   Access token: ${accessToken.substring(0, 20)}...');
+
       final acceptUrl = '${ApiConfig.circlesUrl}/invitations/$token/accept';
       print('📤 [CircleService] Accepting invitation');
       print('   API URL: $acceptUrl');
 
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      };
+      print('   Headers: ${headers.keys.toList()}');
+
       final response = await http
-          .post(
-            Uri.parse(acceptUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $accessToken',
-            },
-          )
+          .post(Uri.parse(acceptUrl), headers: headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 [CircleService] Response status: ${response.statusCode}');
@@ -522,12 +528,11 @@ class CircleService {
         print('✅ [CircleService] Invitation accepted successfully');
         return acceptResponse;
       } else if (response.statusCode == 401) {
-        await _authService.clearTokens();
-        throw ApiError(
-          errorCode: 'AUTH_SESSION_EXPIRED',
-          message: 'Session expired',
-          statusCode: 401,
-        );
+        // Don't clear tokens here - let the app handle auth globally
+        // The 401 might be from the invitation endpoint, not expired session
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        print('❌ [CircleService] 401 Response body: $body');
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
       } else if (response.statusCode == 400) {
         final Map<String, dynamic> body = jsonDecode(response.body);
         throw ApiError.fromJson(body, statusCode: response.statusCode);

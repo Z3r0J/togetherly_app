@@ -16,9 +16,7 @@ import 'create_event_view.dart';
 import 'day_events_view.dart';
 
 class DashboardView extends StatefulWidget {
-  final String userName;
-
-  const DashboardView({super.key, required this.userName});
+  const DashboardView({super.key});
 
   @override
   State<DashboardView> createState() => _DashboardViewState();
@@ -97,10 +95,16 @@ class _DashboardViewState extends State<DashboardView> {
                   l10n.tr('dashboard.greeting'),
                   style: AppTextStyles.headlineMedium,
                 ),
-                Text(
-                  widget.userName,
-                  style: AppTextStyles.headlineMedium,
-                  overflow: TextOverflow.ellipsis,
+                Consumer<AuthViewModel>(
+                  builder: (context, authViewModel, _) {
+                    final userName =
+                        authViewModel.currentUser?.name ?? 'Usuario';
+                    return Text(
+                      userName,
+                      style: AppTextStyles.headlineMedium,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -183,10 +187,16 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                   ),
                 ],
-                child: UserAvatar(
-                  name: widget.userName,
-                  size: 56,
-                  backgroundColor: AppColors.primary,
+                child: Consumer<AuthViewModel>(
+                  builder: (context, authViewModel, _) {
+                    final userName =
+                        authViewModel.currentUser?.name ?? 'Usuario';
+                    return UserAvatar(
+                      name: userName,
+                      size: 56,
+                      backgroundColor: AppColors.primary,
+                    );
+                  },
                 ),
               ),
             ],

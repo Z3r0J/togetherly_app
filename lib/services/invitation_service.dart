@@ -44,7 +44,7 @@ class InvitationService {
       final response = await _circleService.getInvitationDetails(token);
       if (response.success) {
         print('✅ [InvitationService] Successfully fetched invitation details');
-        print('   Circle: ${response.data.circle.name}');
+        print('   Circle: ${response.data.circleName}');
         print('   Invited email: ${response.data.invitedEmail}');
         return response.data;
       }

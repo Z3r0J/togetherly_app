@@ -345,25 +345,13 @@ class _LoginViewState extends State<LoginView> {
         // Navigate to dashboard (circles will be refreshed automatically)
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => DashboardView(
-              userName:
-                  authViewModel.currentUser?.name ??
-                  _emailController.text.split('@')[0],
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => const DashboardView()),
         );
       } else {
         // Normal login flow - no pending invitation
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => DashboardView(
-              userName:
-                  authViewModel.currentUser?.name ??
-                  _emailController.text.split('@')[0],
-            ),
-          ),
+          MaterialPageRoute(builder: (context) => const DashboardView()),
         );
       }
     } else {

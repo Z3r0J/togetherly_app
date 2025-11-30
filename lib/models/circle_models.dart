@@ -425,28 +425,47 @@ class InvitationInviter {
 }
 
 class InvitationDetails {
-  final InvitationCircle circle;
-  final InvitationInviter inviter;
+  final String invitationId;
+  final String circleName;
+  final String circleDescription;
+  final String circleColor;
+  final String inviterName;
   final String invitedEmail;
   final DateTime expiresAt;
+  final String status;
+  final int memberCount;
+  final bool isExpired;
+  final bool isRegistered;
 
   InvitationDetails({
-    required this.circle,
-    required this.inviter,
+    required this.invitationId,
+    required this.circleName,
+    required this.circleDescription,
+    required this.circleColor,
+    required this.inviterName,
     required this.invitedEmail,
     required this.expiresAt,
+    required this.status,
+    required this.memberCount,
+    required this.isExpired,
+    required this.isRegistered,
   });
 
   factory InvitationDetails.fromJson(Map<String, dynamic> json) {
     return InvitationDetails(
-      circle: InvitationCircle.fromJson(json['circle'] as Map<String, dynamic>),
-      inviter: InvitationInviter.fromJson(
-        json['inviter'] as Map<String, dynamic>,
-      ),
+      invitationId: json['invitationId'] ?? '',
+      circleName: json['circleName'] ?? '',
+      circleDescription: json['circleDescription'] ?? '',
+      circleColor: json['circleColor'] ?? '',
+      inviterName: json['inviterName'] ?? '',
       invitedEmail: json['invitedEmail'] ?? '',
       expiresAt: json['expiresAt'] != null
           ? DateTime.parse(json['expiresAt'])
           : DateTime.now(),
+      status: json['status'] ?? '',
+      memberCount: json['memberCount'] ?? 0,
+      isExpired: json['isExpired'] ?? false,
+      isRegistered: json['isRegistered'] ?? false,
     );
   }
 }
