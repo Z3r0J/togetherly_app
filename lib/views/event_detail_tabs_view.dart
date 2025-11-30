@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/unified_calendar_models.dart';
 import '../models/circle_event_models.dart';
 import '../models/location_models.dart';
@@ -24,11 +27,13 @@ class EventDetailTabsView extends StatefulWidget {
 class _EventDetailTabsViewState extends State<EventDetailTabsView>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  late final bool _isCircleEvent;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _isCircleEvent = widget.event is CircleUnifiedEvent;
+    _tabController = TabController(length: _isCircleEvent ? 3 : 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EventDetailViewModel>().load(widget.event);
     });
@@ -43,7 +48,6 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<EventDetailViewModel>();
-    final isCircleEvent = widget.event is CircleUnifiedEvent;
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy', 'es_ES');
     final timeFormat = DateFormat('h:mm a');
 
@@ -191,46 +195,53 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             ),
           ),
           // Tabs
-          if (isCircleEvent)
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: AppColors.border),
-                ),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                tabs: const [
-                  Tab(text: 'RSVP'),
-                  Tab(text: 'Time Poll'),
-                  Tab(text: 'Map'),
-                ],
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.border),
               ),
             ),
+            child: TabBar(
+              controller: _tabController,
+              tabs: _isCircleEvent
+                  ? const [
+                      Tab(text: 'RSVP'),
+                      Tab(text: 'Time Poll'),
+                      Tab(text: 'Map'),
+                    ]
+                  : const [
+                      Tab(text: 'Details'),
+                      Tab(text: 'Map'),
+                    ],
+            ),
+          ),
           // Contenido de tabs
           Expanded(
-            child: isCircleEvent
-                ? TabBarView(
-                    controller: _tabController,
-                    children: [
+            child: TabBarView(
+              controller: _tabController,
+              children: _isCircleEvent
+                  ? [
                       _buildRsvpTab(circleDetail, unifiedEvent as CircleUnifiedEvent),
                       _buildTimePollTab(circleDetail),
                       _buildMapTab(location),
-                    ],
-                  )
-                : SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDescription(
-                            personalDetail?.notes ?? circleDetail?.description,
+                    ]
+                  : [
+                      SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildDescription(
+                                personalDetail?.notes ?? circleDetail?.description,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                      _buildMapTab(location),
+                    ],
+            ),
           ),
         ],
       ),
@@ -434,42 +445,76 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       );
     }
 
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+    final hasCoords = location.latitude != null && location.longitude != null;
+
+    return Column(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: hasCoords
+                ? GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(location.latitude!, location.longitude!),
+                      zoom: 14,
+                    ),
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('event_location'),
+                        position: LatLng(location.latitude!, location.longitude!),
+                        infoWindow: InfoWindow(title: location.name),
+                      ),
+                    },
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                  )
+                : Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      location.name,
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                  ),
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.map_outlined,
-              size: 32,
-              color: AppColors.textSecondary,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              location.name,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _shareLocation(location),
+                  icon: const Icon(Icons.share_outlined),
+                  label: const Text('Compartir'),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _openExternalMap(location),
+                  icon: const Icon(Icons.directions_outlined),
+                  label: const Text('Directions'),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildTimeOption(
     DateTime start,
     DateTime end,
-    int votes,
-    {VoidCallback? onVote}
-  ) {
+    int votes, {
+    VoidCallback? onVote,
+  }) {
     final timeFormat = DateFormat('h:mm a');
 
     return Container(
@@ -550,5 +595,29 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         RsvpBadge(status: status),
       ],
     );
+  }
+
+  Future<void> _openExternalMap(LocationModel location) async {
+    final hasCoords = location.latitude != null && location.longitude != null;
+    final uri = hasCoords
+        ? Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}')
+        : Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location.name)}');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo abrir mapas')),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareLocation(LocationModel location) async {
+    final hasCoords = location.latitude != null && location.longitude != null;
+    final link = hasCoords
+        ? 'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}'
+        : location.name;
+    await Share.share(link, subject: location.name);
   }
 }
