@@ -6,7 +6,7 @@ import '../services/calendar_service.dart';
 class UnifiedCalendarViewModel extends ChangeNotifier {
   final CalendarService _calendarService = CalendarService();
 
-  UnifiedCalendarResponse? _calendarData;
+  CalendarData? _calendarData;
   bool _isLoading = false;
   ApiError? _error;
   String _currentFilter = 'all';
@@ -14,7 +14,7 @@ class UnifiedCalendarViewModel extends ChangeNotifier {
   DateTime? _endDate;
   DateTime _selectedDate = DateTime.now();
 
-  UnifiedCalendarResponse? get calendarData => _calendarData;
+  CalendarData? get calendarData => _calendarData;
   bool get isLoading => _isLoading;
   ApiError? get error => _error;
   String get currentFilter => _currentFilter;
@@ -134,9 +134,9 @@ class UnifiedCalendarViewModel extends ChangeNotifier {
   // Get events with conflicts
   List<UnifiedEvent> get eventsWithConflicts {
     return _calendarData?.events
-            .where((e) => e.conflictsWith.isNotEmpty)
-            .toList() ??
-        [];
+        .where((e) => e.hasConflict)
+        .toList() ??
+      [];
   }
 
   void clearError() {

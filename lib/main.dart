@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'viewmodels/counter_view_model.dart';
@@ -22,19 +23,113 @@ import 'models/magic_link_models.dart';
 import 'models/register_models.dart';
 import 'l10n/app_localizations.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Usar Future para inicialización asíncrona y mostrar Splash mientras tanto  flutter build apk --debug
+  final initialization = _initializeApp();
+  runApp(StartupApp(initialization: initialization));
+}
 
-  // Cargar traducciones antes de iniciar la app
-  await AppLocalizations.load();
+Future<void> _initializeApp() async {
+  try {
+    // On web, Firebase requires explicit FirebaseOptions. If not available, skip init gracefully.
+    if (!kIsWeb) {
+      await Firebase.initializeApp();
+    } else {
+      debugPrint('ℹ️ Web detected: skipping Firebase.initializeApp due to missing FirebaseOptions');
+    }
+    await AppLocalizations.load();
+    await initializeDateFormatting('es_ES', null);
+  } catch (e) {
+    // Registrar error para diagnóstico
+    debugPrint('🔴 Error durante inicialización: $e');
+    rethrow; // Se manejará en el FutureBuilder
+  }
+}
 
-  // Inicializar formato de fechas para español
-  await initializeDateFormatting('es_ES', null);
+class StartupApp extends StatelessWidget {
+  final Future<void> initialization;
+  const StartupApp({super.key, required this.initialization});
 
-  runApp(const MyApp());
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Togetherly Startup',
+      theme: AppTheme.lightTheme,
+      home: FutureBuilder<void>(
+        future: initialization,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen();
+          }
+          if (snapshot.hasError) {
+            return StartupErrorScreen(error: snapshot.error.toString());
+          }
+          return const MyApp();
+        },
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Inicializando Togetherly...', style: TextStyle(fontSize: 16)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class StartupErrorScreen extends StatelessWidget {
+  final String error;
+  const StartupErrorScreen({super.key, required this.error});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text('Error al iniciar la app', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Text(error, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  // Reintentar: reconstruir FutureBuilder creando nuevo Future
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => StartupApp(initialization: _initializeApp()),
+                    ),
+                  );
+                },
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -313,6 +408,11 @@ class _MyAppState extends State<MyApp> {
 
             // Set callback to initialize notifications after login
             authViewModel.setOnLoginSuccess(() async {
+              // Skip notifications on web when Firebase is not initialized
+              if (kIsWeb) {
+                debugPrint('ℹ️ Web: skipping NotificationService initialization');
+                return;
+              }
               await notificationViewModel.initialize(
                 onMessageTapped: (message) {
                   // Handle notification tap - navigate to appropriate screen
