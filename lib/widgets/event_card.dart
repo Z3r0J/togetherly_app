@@ -290,6 +290,7 @@ class CompactEventCard extends StatelessWidget {
     this.onTap,
     this.onResolve,
   });
+
   /// Callback to resolve conflict (open resolver)
   final VoidCallback? onResolve;
 
@@ -406,14 +407,14 @@ class CompactEventCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                                child: Text(
-                                  conflictWith != null
-                                      ? 'Conflicts with "${conflictWith}"'
-                                      : 'Schedule conflict detected',
-                                  style: AppTextStyles.labelSmall.copyWith(
-                                    color: AppColors.warning,
-                                  ),
-                                ),
+                        child: Text(
+                          conflictWith != null
+                              ? 'Conflicts with "${conflictWith}"'
+                              : 'Schedule conflict detected',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.warning,
+                          ),
+                        ),
                       ),
                       TextButton(
                         onPressed: onResolve ?? () {},

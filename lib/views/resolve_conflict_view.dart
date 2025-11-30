@@ -6,7 +6,11 @@ class ResolveConflictView extends StatelessWidget {
   final UnifiedEvent event;
   final List<UnifiedEventConflict> conflicts;
 
-  const ResolveConflictView({super.key, required this.event, required this.conflicts});
+  const ResolveConflictView({
+    super.key,
+    required this.event,
+    required this.conflicts,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,10 @@ class ResolveConflictView extends StatelessWidget {
 
               Text(
                 'Resolve Schedule Conflict',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -47,29 +54,33 @@ class ResolveConflictView extends StatelessWidget {
               const SizedBox(height: 25),
 
               // Current event (the one we're resolving)
-              Builder(builder: (context) {
-                // Compute location string safely using casts
-                String locationStr = '';
-                if (event is PersonalUnifiedEvent) {
-                  final e = event as PersonalUnifiedEvent;
-                  locationStr = e.location?.name ?? '';
-                } else if (event is CircleUnifiedEvent) {
-                  final e = event as CircleUnifiedEvent;
-                  locationStr = e.circleName;
-                }
+              Builder(
+                builder: (context) {
+                  // Compute location string safely using casts
+                  String locationStr = '';
+                  if (event is PersonalUnifiedEvent) {
+                    final e = event as PersonalUnifiedEvent;
+                    locationStr = e.location?.name ?? '';
+                  } else if (event is CircleUnifiedEvent) {
+                    final e = event as CircleUnifiedEvent;
+                    locationStr = e.circleName;
+                  }
 
-                return _eventCard(
-                  title: event.title,
-                  type: event is PersonalUnifiedEvent ? 'Personal Event' : 'Circle Event',
-                  icon: event is PersonalUnifiedEvent ? Icons.calendar_today : Icons.group,
-                  date: _formatRange(event.startTime, event.endTime),
-                  location: locationStr,
-                  actions: [
-                    _redButton('Cancel This Event'),
-                  ],
-                  sideColor: Colors.grey,
-                );
-              }),
+                  return _eventCard(
+                    title: event.title,
+                    type: event is PersonalUnifiedEvent
+                        ? 'Personal Event'
+                        : 'Circle Event',
+                    icon: event is PersonalUnifiedEvent
+                        ? Icons.calendar_today
+                        : Icons.group,
+                    date: _formatRange(event.startTime, event.endTime),
+                    location: locationStr,
+                    actions: [_redButton('Cancel This Event')],
+                    sideColor: Colors.grey,
+                  );
+                },
+              ),
 
               const SizedBox(height: 16),
 
@@ -77,9 +88,16 @@ class ResolveConflictView extends StatelessWidget {
               if (conflicts.isNotEmpty)
                 _eventCard(
                   title: conflicts.first.title,
-                  type: conflicts.first.type == UnifiedEventType.personal ? 'Personal Event' : 'Circle Event',
-                  icon: conflicts.first.type == UnifiedEventType.personal ? Icons.calendar_today : Icons.group,
-                  date: _formatRange(conflicts.first.startTime, conflicts.first.endTime),
+                  type: conflicts.first.type == UnifiedEventType.personal
+                      ? 'Personal Event'
+                      : 'Circle Event',
+                  icon: conflicts.first.type == UnifiedEventType.personal
+                      ? Icons.calendar_today
+                      : Icons.group,
+                  date: _formatRange(
+                    conflicts.first.startTime,
+                    conflicts.first.endTime,
+                  ),
                   location: '',
                   rsvpTag: null,
                   rsvpColor: null,
@@ -105,7 +123,10 @@ class ResolveConflictView extends StatelessWidget {
               // Keep both
               Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 20,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.grey.shade400),
@@ -180,7 +201,10 @@ class ResolveConflictView extends StatelessWidget {
                     const SizedBox(width: 10),
                     Text(
                       title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -190,14 +214,20 @@ class ResolveConflictView extends StatelessWidget {
 
                 if (rsvpTag != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: rsvpColor!.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       rsvpTag,
-                      style: TextStyle(color: rsvpColor, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: rsvpColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
 
@@ -240,7 +270,10 @@ class ResolveConflictView extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
@@ -260,7 +293,10 @@ class ResolveConflictView extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

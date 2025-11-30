@@ -8,7 +8,8 @@ class ResolveConflictViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? lastMessage;
 
-  ResolveConflictViewModel({CalendarService? api}) : api = api ?? CalendarService();
+  ResolveConflictViewModel({CalendarService? api})
+    : api = api ?? CalendarService();
 
   Future<String?> _getToken() async {
     final auth = AuthService();

@@ -53,9 +53,12 @@ class _DayEventsViewState extends State<DayEventsView> {
   }
 
   void _openResolveDialog(UnifiedEvent event) {
-    final conflict = event.conflictsWith.isNotEmpty ? event.conflictsWith.first : null;
+    final conflict = event.conflictsWith.isNotEmpty
+        ? event.conflictsWith.first
+        : null;
     final timeFormat = DateFormat('h:mm a');
-    String formatRange(DateTime s, DateTime e) => '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
+    String formatRange(DateTime s, DateTime e) =>
+        '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
 
     String personalEventId = '';
     String circleEventId = '';
@@ -329,33 +332,35 @@ class _DayEventsViewState extends State<DayEventsView> {
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                   ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              final result = await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const CreateEventView(),
-                                ),
-                              );
-                              if (result == true && mounted) {
-                                final viewModel =
-                                    context.read<UnifiedCalendarViewModel>();
-                                final firstDay = DateTime(
-                                  _localSelectedDate.year,
-                                  _localSelectedDate.month,
-                                  1,
-                                );
-                                final lastDay = DateTime(
-                                  _localSelectedDate.year,
-                                  _localSelectedDate.month + 1,
-                                  0,
-                                );
-                                await viewModel.loadCalendar(
-                                  startDate: firstDay,
-                                  endDate: lastDay,
-                                );
-                              }
-                            },
-                          child: Container(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      final result = await Navigator.of(context)
+                                          .push(
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const CreateEventView(),
+                                            ),
+                                          );
+                                      if (result == true && mounted) {
+                                        final viewModel = context
+                                            .read<UnifiedCalendarViewModel>();
+                                        final firstDay = DateTime(
+                                          _localSelectedDate.year,
+                                          _localSelectedDate.month,
+                                          1,
+                                        );
+                                        final lastDay = DateTime(
+                                          _localSelectedDate.year,
+                                          _localSelectedDate.month + 1,
+                                          0,
+                                        );
+                                        await viewModel.loadCalendar(
+                                          startDate: firstDay,
+                                          endDate: lastDay,
+                                        );
+                                      }
+                                    },
+                                    child: Container(
                                       width: double.infinity,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,
@@ -785,7 +790,9 @@ class _DayEventsViewState extends State<DayEventsView> {
       colorTag: color,
       rsvpStatus: null,
       hasConflict: event.hasConflict,
-      conflictWith: event.conflictsWith.isNotEmpty ? event.conflictsWith.first.title : null,
+      conflictWith: event.conflictsWith.isNotEmpty
+          ? event.conflictsWith.first.title
+          : null,
       onTap: () {
         Navigator.push(
           context,
@@ -814,8 +821,10 @@ class _DayEventsViewState extends State<DayEventsView> {
         children: [
           EventCard(
             title: event.title,
-            date: DateFormat('EEEE, MMMM d', 'es_ES')
-                .format(event.startTime.toLocal()),
+            date: DateFormat(
+              'EEEE, MMMM d',
+              'es_ES',
+            ).format(event.startTime.toLocal()),
             time: '$startTime - $endTime',
             location: event.location?.name ?? 'Sin ubicación',
             rsvpStatus: event.rsvpStatus,
@@ -859,7 +868,9 @@ class _DayEventsViewState extends State<DayEventsView> {
           colorTag: circleColor,
           rsvpStatus: event.rsvpStatus,
           hasConflict: event.hasConflict,
-          conflictWith: event.conflictsWith.isNotEmpty ? event.conflictsWith.first.title : null,
+          conflictWith: event.conflictsWith.isNotEmpty
+              ? event.conflictsWith.first.title
+              : null,
           onTap: () {
             Navigator.push(
               context,
@@ -908,9 +919,12 @@ class _DayEventsViewState extends State<DayEventsView> {
           TextButton(
             onPressed: () {
               // Open ResolveConflictDialog (modal) and pass event + first conflict safely
-              final conflict = event.conflictsWith.isNotEmpty ? event.conflictsWith.first : null;
+              final conflict = event.conflictsWith.isNotEmpty
+                  ? event.conflictsWith.first
+                  : null;
               final timeFormat = DateFormat('h:mm a');
-              String formatRange(DateTime s, DateTime e) => '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
+              String formatRange(DateTime s, DateTime e) =>
+                  '${timeFormat.format(s.toLocal())} - ${timeFormat.format(e.toLocal())}';
 
               // Prepare parameters for dialog
               String personalEventId = '';
@@ -940,11 +954,17 @@ class _DayEventsViewState extends State<DayEventsView> {
                 if (conflict.type == UnifiedEventType.personal) {
                   personalEventId = conflict.id;
                   personalTitle = conflict.title;
-                  personalDate = formatRange(conflict.startTime, conflict.endTime);
+                  personalDate = formatRange(
+                    conflict.startTime,
+                    conflict.endTime,
+                  );
                 } else {
                   circleEventId = conflict.id;
                   circleTitle = conflict.title;
-                  circleDate = formatRange(conflict.startTime, conflict.endTime);
+                  circleDate = formatRange(
+                    conflict.startTime,
+                    conflict.endTime,
+                  );
                 }
               }
 

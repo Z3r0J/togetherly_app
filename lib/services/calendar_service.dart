@@ -34,7 +34,9 @@ class CalendarService {
       if (accessToken.isNotEmpty) 'Authorization': 'Bearer $accessToken',
     };
 
-    final resp = await http.post(url, headers: headers, body: body).timeout(const Duration(seconds: 10));
+    final resp = await http
+        .post(url, headers: headers, body: body)
+        .timeout(const Duration(seconds: 10));
     print('🔵 [CalendarService] POST $url');
     print('🔵 [CalendarService] headers: $headers');
     print('🔵 [CalendarService] body: $body');
