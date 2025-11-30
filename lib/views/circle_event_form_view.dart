@@ -59,8 +59,12 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   Widget build(BuildContext context) {
     final vm = context.watch<CircleEventViewModel>();
     final circleVm = context.watch<CircleViewModel>();
+    // Ensure we don't leave _selectedCircleId uninitialized; prefer the
+    // provided `widget.circleId`, otherwise we'll pick the first available
+    // circle id. We'll not overwrite an explicit user selection.
     _selectedCircleId ??=
-        widget.circleId ?? (circleVm.circles.isNotEmpty ? circleVm.circles.first.id : null);
+        widget.circleId ??
+        (circleVm.circles.isNotEmpty ? circleVm.circles.first.id : null);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,6 +176,15 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   Widget _buildCircleSelector(CircleViewModel circleVm) {
     final circles = circleVm.circles;
 
+    // Filter out invalid/empty ids and dedupe by id to avoid duplicate
+    // DropdownMenuItem values (this causes the DropdownButton assertion).
+    final seenIds = <String>{};
+    final uniqueCircles = <Circle>[];
+    for (final c in circles) {
+      if (c.id.isEmpty) continue; // skip malformed entries
+      if (seenIds.add(c.id)) uniqueCircles.add(c);
+    }
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -214,8 +227,12 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
             )
           else
             DropdownButtonFormField<String>(
-              value: _selectedCircleId,
-              items: circles
+              // Ensure the selected value exists in the available items; if
+              // not, fall back to the first available circle id (or null).
+              value: uniqueCircles.any((c) => c.id == _selectedCircleId)
+                  ? _selectedCircleId
+                  : (uniqueCircles.isNotEmpty ? uniqueCircles.first.id : null),
+              items: uniqueCircles
                   .map(
                     (Circle c) => DropdownMenuItem<String>(
                       value: c.id,
@@ -264,23 +281,26 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       payload['timeOptions'] = _timeOptions
           .map(
             (o) => {
-              'startTime': _combineDateAndTime(_selectedDate, o.start)
-                  .toUtc()
-                  .toIso8601String(),
-              'endTime': _combineDateAndTime(_selectedDate, o.end)
-                  .toUtc()
-                  .toIso8601String(),
+              'startTime': _combineDateAndTime(
+                _selectedDate,
+                o.start,
+              ).toUtc().toIso8601String(),
+              'endTime': _combineDateAndTime(
+                _selectedDate,
+                o.end,
+              ).toUtc().toIso8601String(),
             },
           )
           .toList();
     } else {
-      payload['startsAt'] =
-          _combineDateAndTime(_selectedDate, _startTime)
-              .toUtc()
-              .toIso8601String();
-      payload['endsAt'] = _combineDateAndTime(_selectedDate, _endTime)
-          .toUtc()
-          .toIso8601String();
+      payload['startsAt'] = _combineDateAndTime(
+        _selectedDate,
+        _startTime,
+      ).toUtc().toIso8601String();
+      payload['endsAt'] = _combineDateAndTime(
+        _selectedDate,
+        _endTime,
+      ).toUtc().toIso8601String();
     }
 
     try {
@@ -344,8 +364,10 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(12),
@@ -359,8 +381,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                           children: [
                             Text(
                               'Opción ${idx + 1}',
-                              style: AppTextStyles.labelMedium
-                                  .copyWith(fontWeight: FontWeight.w600),
+                              style: AppTextStyles.labelMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline),
@@ -385,8 +408,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                             );
                             if (picked != null) {
                               setState(() {
-                                _timeOptions[idx] =
-                                    option.copyWith(start: picked);
+                                _timeOptions[idx] = option.copyWith(
+                                  start: picked,
+                                );
                               });
                             }
                           },
@@ -402,7 +426,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                             );
                             if (picked != null) {
                               setState(() {
-                                _timeOptions[idx] = option.copyWith(end: picked);
+                                _timeOptions[idx] = option.copyWith(
+                                  end: picked,
+                                );
                               });
                             }
                           },
@@ -416,10 +442,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                 onPressed: () {
                   setState(() {
                     _timeOptions.add(
-                      _TimeOption(
-                        start: _startTime,
-                        end: _endTime,
-                      ),
+                      _TimeOption(start: _startTime, end: _endTime),
                     );
                   });
                 },
@@ -552,13 +575,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   }
 
   DateTime _combineDateAndTime(DateTime date, TimeOfDay time) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   String _colorToHex(Color color) {
@@ -573,9 +590,6 @@ class _TimeOption {
   _TimeOption({required this.start, required this.end});
 
   _TimeOption copyWith({TimeOfDay? start, TimeOfDay? end}) {
-    return _TimeOption(
-      start: start ?? this.start,
-      end: end ?? this.end,
-    );
+    return _TimeOption(start: start ?? this.start, end: end ?? this.end);
   }
 }
