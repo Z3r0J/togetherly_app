@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:togetherly_app/views/event_detail_tabs_view.dart';
 import '../widgets/widgets.dart';
 import '../models/unified_calendar_models.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
-import '../viewmodels/personal_event_view_model.dart';
+import '../viewmodels/unified_calendar_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
 import 'my_circles_view.dart';
 import 'circle_detail_view.dart';
 import 'create_circle_view.dart';
-import 'create_personal_event_view.dart';
-import 'event_detail_tabs_view.dart';
+import 'create_event_view.dart';
 import 'day_events_view.dart';
 
 class DashboardView extends StatefulWidget {
@@ -26,20 +26,24 @@ class DashboardView extends StatefulWidget {
 class _DashboardViewState extends State<DashboardView> {
   late final AppLocalizations l10n;
   bool _isFABOpen = false;
-  String _localFilter = 'all';
+  String _localFilter = 'all'; // Local filter state for dashboard only
 
   @override
   void initState() {
     super.initState();
     l10n = AppLocalizations.instance;
-    // Fetch circles on dashboard load
+    // Fetch circles and calendar on dashboard load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CircleViewModel>().fetchCircles();
+      context.read<UnifiedCalendarViewModel>().loadCurrentMonth();
     });
   }
 
   Future<void> _refreshData() async {
-    await context.read<CircleViewModel>().fetchCircles();
+    await Future.wait([
+      context.read<CircleViewModel>().fetchCircles(),
+      context.read<UnifiedCalendarViewModel>().loadCurrentMonth(),
+    ]);
   }
 
   @override
@@ -429,345 +433,139 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildUpcomingEventsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Título con botón Ver Todo
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.tr('dashboard.section.events'),
-                style: AppTextStyles.headlineSmall,
+    return Consumer<UnifiedCalendarViewModel>(
+      builder: (context, viewModel, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título con botón Ver Todo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.tr('dashboard.section.events'),
+                    style: AppTextStyles.headlineSmall,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider(
+                            create: (_) => UnifiedCalendarViewModel(),
+                            child: const DayEventsView(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Ver Todo',
+                      style: AppTextStyles.labelLarge.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const DayEventsView(),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Filtros
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                children: [
+                  _buildFilterChip('Todos', 'all'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Personal', 'personal'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Confirmado', 'going'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Tal vez', 'maybe'),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Lista de eventos (filtrados localmente)
+            Builder(
+              builder: (context) {
+                final allEvents = viewModel.calendarData?.events ?? [];
+                final filteredEvents = _filterEvents(allEvents, _localFilter);
+
+                if (viewModel.isLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: CircularProgressIndicator(),
                     ),
                   );
-                },
-                child: Text(
-                  'Ver Todo',
-                  style: AppTextStyles.labelLarge.copyWith(
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Filtros
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: [
-              _buildFilterChip('Todos', 'all'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Personal', 'personal'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Confirmado', 'going'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Tal vez', 'maybe'),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Eventos de prueba
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              // Evento 1: Reunión de Trabajo
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EventDetailTabsView(
-                        event: CircleUnifiedEvent(
-                          id: 'test-1',
-                          title: "Reunión de Equipo",
-                          startTime: DateTime.now().add(const Duration(days: 1)),
-                          endTime: DateTime.now().add(const Duration(days: 1, hours: 1)),
-                          circleId: 'work-circle',
-                          circleName: 'TRABAJO',
-                          circleColor: '#FF6B6B',
-                          rsvpStatus: RsvpStatus.going,
-                          attendeeCount: 5,
+                } else if (viewModel.error != null) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Text(
+                        'Error al cargar eventos',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.error,
                         ),
                       ),
                     ),
                   );
-                },
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                DateFormat('MMM', 'es_ES')
-                                    .format(DateTime.now().add(const Duration(days: 1)))
-                                    .toUpperCase(),
-                                style: AppTextStyles.labelSmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              Text(
-                                DateFormat('d')
-                                    .format(DateTime.now().add(const Duration(days: 1))),
-                                style: AppTextStyles.headlineSmall.copyWith(
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'TRABAJO',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Reunión de Equipo',
-                                style: AppTextStyles.labelMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '10:00 AM',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  RsvpBadge(status: RsvpStatus.going),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.people_outline,
-                                    size: 16,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '5',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Evento 2: Cena Social
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EventDetailTabsView(
-                        event: CircleUnifiedEvent(
-                          id: 'test-2',
-                          title: "Cena Social",
-                          startTime: DateTime.now().add(const Duration(days: 3)),
-                          endTime: DateTime.now().add(const Duration(days: 3, hours: 3)),
-                          circleId: 'social-circle',
-                          circleName: 'AMIGOS',
-                          circleColor: '#4ECDC4',
-                          rsvpStatus: RsvpStatus.maybe,
-                          attendeeCount: 12,
+                } else if (filteredEvents.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Text(
+                        'No hay eventos para este filtro',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
                   );
-                },
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                DateFormat('MMM', 'es_ES')
-                                    .format(DateTime.now().add(const Duration(days: 3)))
-                                    .toUpperCase(),
-                                style: AppTextStyles.labelSmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              Text(
-                                DateFormat('d')
-                                    .format(DateTime.now().add(const Duration(days: 3))),
-                                style: AppTextStyles.headlineSmall.copyWith(
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.teal,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'AMIGOS',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: Colors.teal,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Cena Social',
-                                style: AppTextStyles.labelMedium.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '7:00 PM',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  RsvpBadge(status: RsvpStatus.maybe),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.people_outline,
-                                    size: 16,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '12',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(children: _buildEventsList(filteredEvents)),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  List<UnifiedEvent> _filterEvents(List<UnifiedEvent> events, String filter) {
+    switch (filter) {
+      case 'personal':
+        return events.where((e) => e is PersonalUnifiedEvent).toList();
+      case 'going':
+        return events.where((e) {
+          if (e is CircleUnifiedEvent) {
+            return e.rsvpStatus == RsvpStatus.going;
+          }
+          return false;
+        }).toList();
+      case 'maybe':
+        return events.where((e) {
+          if (e is CircleUnifiedEvent) {
+            return e.rsvpStatus == RsvpStatus.maybe;
+          }
+          return false;
+        }).toList();
+      case 'all':
+      default:
+        return events;
+    }
   }
 
   Widget _buildFilterChip(String label, String value) {
@@ -789,6 +587,240 @@ class _DashboardViewState extends State<DashboardView> {
       ),
       side: BorderSide(
         color: isSelected ? AppColors.primary : AppColors.border,
+      ),
+    );
+  }
+
+  List<Widget> _buildEventsList(List<dynamic> events) {
+    // Take only first 3 events for dashboard
+    final limitedEvents = events.take(3).toList();
+    final List<Widget> widgets = [];
+
+    for (int i = 0; i < limitedEvents.length; i++) {
+      final event = limitedEvents[i];
+
+      if (event is PersonalUnifiedEvent) {
+        widgets.add(_buildPersonalEventItem(event));
+      } else if (event is CircleUnifiedEvent) {
+        widgets.add(_buildCircleEventItem(event));
+      }
+
+      if (i < limitedEvents.length - 1) {
+        widgets.add(const SizedBox(height: 16));
+      }
+    }
+
+    return widgets;
+  }
+
+  Widget _buildPersonalEventItem(PersonalUnifiedEvent event) {
+    final dateTime = event.startTime;
+    final monthFormat = DateFormat('MMM', 'es_ES');
+    final dayFormat = DateFormat('d');
+
+    return _buildEventItem(
+      title: event.title,
+      date: monthFormat.format(dateTime).toUpperCase(),
+      dateNumber: dayFormat.format(dateTime),
+      circle: 'PERSONAL',
+      circleColor: event.color != null
+          ? Color(int.parse(event.color!.substring(1), radix: 16) + 0xFF000000)
+          : AppColors.primary,
+      time:
+          '${DateFormat('h:mm a').format(dateTime)}${event.location != null ? ' @ ${event.location!.name}' : ''}',
+      rsvpStatus: null,
+      attendeeCount: null,
+      hasConflict: event.hasConflict,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailTabsView(event: event),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCircleEventItem(CircleUnifiedEvent event) {
+    final dateTime = event.startTime;
+    final monthFormat = DateFormat('MMM', 'es_ES');
+    final dayFormat = DateFormat('d');
+
+    return _buildEventItem(
+      title: event.title,
+      date: monthFormat.format(dateTime).toUpperCase(),
+      dateNumber: dayFormat.format(dateTime),
+      circle: event.circleName.toUpperCase(),
+      circleColor: event.circleColor != null
+          ? Color(
+              int.parse(event.circleColor!.substring(1), radix: 16) +
+                  0xFF000000,
+            )
+          : AppColors.circleBlue,
+      time:
+          '${DateFormat('h:mm a').format(dateTime)}${event.location != null ? ' @ ${event.location!.name}' : ''}',
+      rsvpStatus: event.rsvpStatus,
+      attendeeCount: event.attendeeCount,
+      hasConflict: event.hasConflict,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailTabsView(event: event),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEventItem({
+    required String title,
+    required String date,
+    required String dateNumber,
+    required String circle,
+    required Color circleColor,
+    required String time,
+    RsvpStatus? rsvpStatus,
+    int? attendeeCount,
+    bool hasConflict = false,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Fecha
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    date,
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    dateNumber,
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            // Contenido del evento
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Círculo/Categoría
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: circleColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        circle,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: circleColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Título
+                  Text(
+                    title,
+                    style: AppTextStyles.labelMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Hora y lugar
+                  Text(
+                    time,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // RSVP y asistentes (solo para eventos de círculo)
+                  if (rsvpStatus != null && attendeeCount != null)
+                    Row(
+                      children: [
+                        RsvpBadge(status: rsvpStatus),
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.people_outline,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$attendeeCount',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  // Indicator de conflicto
+                  if (hasConflict)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            size: 16,
+                            color: AppColors.warning,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Conflicto',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.warning,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -834,7 +866,7 @@ class _DashboardViewState extends State<DashboardView> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (_isFABOpen) ...[
-          // Create Personal Event Option
+          // Create Event Option
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -848,32 +880,27 @@ class _DashboardViewState extends State<DashboardView> {
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: const Text(
-                  'Create Personal Event',
+                  'Crear Evento',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(width: 12),
               FloatingActionButton(
-                heroTag: 'create_personal_event',
+                heroTag: 'create_event',
                 mini: true,
                 backgroundColor: AppColors.primary,
                 onPressed: () {
                   setState(() => _isFABOpen = false);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => PersonalEventViewModel(),
-                        child: const CreatePersonalEventView(),
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (_) => const CreateEventView()),
                   );
                 },
                 child: const Icon(Icons.event, color: AppColors.textOnPrimary),
@@ -896,7 +923,7 @@ class _DashboardViewState extends State<DashboardView> {
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

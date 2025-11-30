@@ -1,199 +1,235 @@
 import 'location_models.dart';
-import '../widgets/rsvp_widgets.dart';
+import '../widgets/rsvp_widgets.dart' show RsvpStatus;
 
-// Re-export RsvpStatus from widgets
+enum UnifiedEventType { personal, circle }
 
-// Base class for unified events
+extension RsvpStatusExtension on RsvpStatus {
+  String get value {
+    switch (this) {
+      case RsvpStatus.going:
+        return 'going';
+      case RsvpStatus.maybe:
+        return 'maybe';
+      case RsvpStatus.notGoing:
+        return 'not going';
+      case RsvpStatus.none:
+        return 'none';
+    }
+  }
+
+  static RsvpStatus? fromString(String? value) {
+    if (value == null) return null;
+    switch (value) {
+      case 'going':
+        return RsvpStatus.going;
+      case 'maybe':
+        return RsvpStatus.maybe;
+      case 'not going':
+        return RsvpStatus.notGoing;
+      default:
+        return null;
+    }
+  }
+}
+
+class UnifiedEventConflict {
+  final String id;
+  final String title;
+  final UnifiedEventType type;
+  final DateTime startTime;
+  final DateTime endTime;
+
+  UnifiedEventConflict({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory UnifiedEventConflict.fromJson(Map<String, dynamic> json) {
+    return UnifiedEventConflict(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      type: json['type'] == 'personal'
+          ? UnifiedEventType.personal
+          : UnifiedEventType.circle,
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+    );
+  }
+}
+
 abstract class UnifiedEvent {
   final String id;
+  final UnifiedEventType type;
   final String title;
   final DateTime startTime;
   final DateTime endTime;
-  final String? description;
-  final LocationModel? location;
-  final bool hasConflict;
+  final bool allDay;
+  final List<UnifiedEventConflict> conflictsWith;
 
   UnifiedEvent({
     required this.id,
+    required this.type,
     required this.title,
     required this.startTime,
     required this.endTime,
-    this.description,
-    this.location,
-    this.hasConflict = false,
+    required this.allDay,
+    required this.conflictsWith,
   });
+
+  bool get hasConflict => conflictsWith.isNotEmpty;
 }
 
-// Personal event
 class PersonalUnifiedEvent extends UnifiedEvent {
+  final LocationModel? location;
   final String? color;
+  final String? notes;
+  final int? reminderMinutes;
 
   PersonalUnifiedEvent({
-    required String id,
-    required String title,
-    required DateTime startTime,
-    required DateTime endTime,
-    String? description,
-    LocationModel? location,
+    required super.id,
+    required super.title,
+    required super.startTime,
+    required super.endTime,
+    required super.allDay,
+    required super.conflictsWith,
+    this.location,
     this.color,
-    bool hasConflict = false,
-  }) : super(
-    id: id,
-    title: title,
-    startTime: startTime,
-    endTime: endTime,
-    description: description,
-    location: location,
-    hasConflict: hasConflict,
-  );
+    this.notes,
+    this.reminderMinutes,
+  }) : super(type: UnifiedEventType.personal);
+
+  factory PersonalUnifiedEvent.fromJson(Map<String, dynamic> json) {
+    return PersonalUnifiedEvent(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      allDay: json['allDay'] as bool? ?? false,
+      location: json['location'] != null
+          ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
+      color: json['color'] as String?,
+      notes: json['notes'] as String?,
+      reminderMinutes: json['reminderMinutes'] as int?,
+      conflictsWith: (json['conflictsWith'] as List<dynamic>? ?? [])
+          .map((c) => UnifiedEventConflict.fromJson(c as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
-// Circle event
 class CircleUnifiedEvent extends UnifiedEvent {
   final String circleId;
   final String circleName;
   final String? circleColor;
-  final RsvpStatus rsvpStatus;
+  final LocationModel? location;
+  final String status;
+  final RsvpStatus? rsvpStatus;
   final int attendeeCount;
+  final bool canChangeRsvp;
+  final bool isCreator;
 
   CircleUnifiedEvent({
-    required String id,
-    required String title,
-    required DateTime startTime,
-    required DateTime endTime,
+    required super.id,
+    required super.title,
+    required super.startTime,
+    required super.endTime,
+    required super.allDay,
+    required super.conflictsWith,
     required this.circleId,
     required this.circleName,
-    String? description,
-    LocationModel? location,
     this.circleColor,
-    this.rsvpStatus = RsvpStatus.none,
-    this.attendeeCount = 0,
-    bool hasConflict = false,
-  }) : super(
-    id: id,
-    title: title,
-    startTime: startTime,
-    endTime: endTime,
-    description: description,
-    location: location,
-    hasConflict: hasConflict,
-  );
-}
+    this.location,
+    required this.status,
+    this.rsvpStatus,
+    required this.attendeeCount,
+    required this.canChangeRsvp,
+    required this.isCreator,
+  }) : super(type: UnifiedEventType.circle);
 
-// Calendar data structure
-class CalendarData {
-  final List<UnifiedEvent> events;
-  final DateTime currentMonth;
-
-  CalendarData({
-    required this.events,
-    required this.currentMonth,
-  });
-
-  factory CalendarData.fromJson(Map<String, dynamic> json) {
-    return CalendarData(
-      events: (json['events'] as List<dynamic>?)
-              ?.map((e) => _eventFromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      currentMonth: json['currentMonth'] != null
-          ? DateTime.parse(json['currentMonth'] as String)
-          : DateTime.now(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'events': events.map((e) {
-        if (e is CircleUnifiedEvent) {
-          return {
-            'type': 'circle',
-            'id': e.id,
-            'title': e.title,
-            'startTime': e.startTime.toIso8601String(),
-            'endTime': e.endTime.toIso8601String(),
-            'description': e.description,
-            'circleId': e.circleId,
-            'circleName': e.circleName,
-            'circleColor': e.circleColor,
-            'rsvpStatus': e.rsvpStatus.toString(),
-            'attendeeCount': e.attendeeCount,
-            'location': e.location?.toJson(),
-            'hasConflict': e.hasConflict,
-          };
-        } else if (e is PersonalUnifiedEvent) {
-          return {
-            'type': 'personal',
-            'id': e.id,
-            'title': e.title,
-            'startTime': e.startTime.toIso8601String(),
-            'endTime': e.endTime.toIso8601String(),
-            'description': e.description,
-            'color': e.color,
-            'location': e.location?.toJson(),
-            'hasConflict': e.hasConflict,
-          };
-        }
-        return {};
-      }).toList(),
-      'currentMonth': currentMonth.toIso8601String(),
-    };
-  }
-}
-
-UnifiedEvent _eventFromJson(Map<String, dynamic> json) {
-  final type = json['type'] as String?;
-
-  if (type == 'circle') {
+  factory CircleUnifiedEvent.fromJson(Map<String, dynamic> json) {
     return CircleUnifiedEvent(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      startTime: json['startTime'] != null
-          ? DateTime.parse(json['startTime'] as String)
-          : DateTime.now(),
-      endTime: json['endTime'] != null
-          ? DateTime.parse(json['endTime'] as String)
-          : DateTime.now(),
-      description: json['description'] as String?,
-      circleId: json['circleId'] as String? ?? '',
-      circleName: json['circleName'] as String? ?? '',
+      id: json['id'] as String,
+      title: json['title'] as String,
+      circleId: json['circleId'] as String,
+      circleName: json['circleName'] as String,
       circleColor: json['circleColor'] as String?,
-      rsvpStatus: _rsvpStatusFromString(json['rsvpStatus'] as String?),
-      attendeeCount: json['attendeeCount'] as int? ?? 0,
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      allDay: json['allDay'] as bool? ?? false,
       location: json['location'] != null
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
           : null,
-      hasConflict: json['hasConflict'] as bool? ?? false,
+      status: json['status'] as String,
+      rsvpStatus: RsvpStatusExtension.fromString(json['rsvpStatus'] as String?),
+      attendeeCount: json['attendeeCount'] as int,
+      canChangeRsvp: json['canChangeRsvp'] as bool,
+      isCreator: json['isCreator'] as bool,
+      conflictsWith: (json['conflictsWith'] as List<dynamic>? ?? [])
+          .map((c) => UnifiedEventConflict.fromJson(c as Map<String, dynamic>))
+          .toList(),
     );
   }
-
-  return PersonalUnifiedEvent(
-    id: json['id'] as String? ?? '',
-    title: json['title'] as String? ?? '',
-    startTime: json['startTime'] != null
-        ? DateTime.parse(json['startTime'] as String)
-        : DateTime.now(),
-    endTime: json['endTime'] != null
-        ? DateTime.parse(json['endTime'] as String)
-        : DateTime.now(),
-    description: json['description'] as String?,
-    color: json['color'] as String?,
-    location: json['location'] != null
-        ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
-        : null,
-    hasConflict: json['hasConflict'] as bool? ?? false,
-  );
 }
 
-RsvpStatus _rsvpStatusFromString(String? status) {
-  switch (status) {
-    case 'RsvpStatus.going':
-      return RsvpStatus.going;
-    case 'RsvpStatus.maybe':
-      return RsvpStatus.maybe;
-    case 'RsvpStatus.notGoing':
-      return RsvpStatus.notGoing;
-    default:
-      return RsvpStatus.none;
+class UnifiedCalendarSummary {
+  final int totalEvents;
+  final int personalEvents;
+  final int circleEvents;
+  final int goingCount;
+  final int maybeCount;
+  final int notGoingCount;
+  final int conflictsCount;
+
+  UnifiedCalendarSummary({
+    required this.totalEvents,
+    required this.personalEvents,
+    required this.circleEvents,
+    required this.goingCount,
+    required this.maybeCount,
+    required this.notGoingCount,
+    required this.conflictsCount,
+  });
+
+  factory UnifiedCalendarSummary.fromJson(Map<String, dynamic> json) {
+    return UnifiedCalendarSummary(
+      totalEvents: json['totalEvents'] as int,
+      personalEvents: json['personalEvents'] as int,
+      circleEvents: json['circleEvents'] as int,
+      goingCount: json['goingCount'] as int,
+      maybeCount: json['maybeCount'] as int,
+      notGoingCount: json['notGoingCount'] as int,
+      conflictsCount: json['conflictsCount'] as int,
+    );
+  }
+}
+
+class UnifiedCalendarResponse {
+  final List<UnifiedEvent> events;
+  final UnifiedCalendarSummary summary;
+
+  UnifiedCalendarResponse({required this.events, required this.summary});
+
+  factory UnifiedCalendarResponse.fromJson(Map<String, dynamic> json) {
+    final List<UnifiedEvent> events = (json['events'] as List<dynamic>).map((
+      e,
+    ) {
+      final eventMap = e as Map<String, dynamic>;
+      if (eventMap['type'] == 'personal') {
+        return PersonalUnifiedEvent.fromJson(eventMap);
+      } else {
+        return CircleUnifiedEvent.fromJson(eventMap);
+      }
+    }).toList();
+
+    return UnifiedCalendarResponse(
+      events: events,
+      summary: UnifiedCalendarSummary.fromJson(
+        json['summary'] as Map<String, dynamic>,
+      ),
+    );
   }
 }
