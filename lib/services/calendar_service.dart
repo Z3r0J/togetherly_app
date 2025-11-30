@@ -10,7 +10,7 @@ import 'auth_service.dart';
 class CalendarService {
   final AuthService _authService = AuthService();
 
-  Future<CalendarData> getUnifiedCalendar({
+  Future<UnifiedCalendarResponse> getUnifiedCalendar({
     DateTime? startDate,
     DateTime? endDate,
     String filter = 'all',
@@ -59,8 +59,9 @@ class CalendarService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
         print('✅ [CalendarService] Calendar fetched successfully');
-        final data = jsonData['data'] as Map<String, dynamic>;
-        return CalendarData.fromJson(data);
+        return UnifiedCalendarResponse.fromJson(
+          jsonData['data'] as Map<String, dynamic>,
+        );
       } else if (response.statusCode == 401) {
         await _authService.clearTokens();
         throw ApiError(
