@@ -7,6 +7,7 @@ import '../models/unified_calendar_models.dart';
 import '../viewmodels/auth_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
+import '../viewmodels/event_detail_view_model.dart';
 import '../l10n/app_localizations.dart';
 import 'notifications_view.dart';
 import 'login_view.dart';
@@ -635,7 +636,10 @@ class _DashboardViewState extends State<DashboardView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => EventDetailTabsView(event: event),
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => EventDetailViewModel(),
+              child: EventDetailTabsView(event: event),
+            ),
           ),
         );
       },
@@ -667,7 +671,10 @@ class _DashboardViewState extends State<DashboardView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => EventDetailTabsView(event: event),
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => EventDetailViewModel(),
+              child: EventDetailTabsView(event: event),
+            ),
           ),
         );
       },

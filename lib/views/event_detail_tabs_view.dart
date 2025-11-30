@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/unified_calendar_models.dart';
+import '../models/circle_event_models.dart';
+import '../models/location_models.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../viewmodels/event_detail_view_model.dart';
+import '../widgets/rsvp_widgets.dart';
 
 class EventDetailTabsView extends StatefulWidget {
   final UnifiedEvent event;
@@ -24,6 +29,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<EventDetailViewModel>().load(widget.event);
+    });
   }
 
   @override
@@ -34,9 +42,59 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<EventDetailViewModel>();
     final isCircleEvent = widget.event is CircleUnifiedEvent;
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy', 'es_ES');
     final timeFormat = DateFormat('h:mm a');
+
+    if (vm.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (vm.error != null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text('Event Details'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  vm.error!.message,
+                  style: AppTextStyles.bodyMedium
+                      .copyWith(color: AppColors.error),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => vm.load(widget.event),
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final unifiedEvent = widget.event;
+    final circleDetail = vm.circleEvent;
+    final personalDetail = vm.personalEvent;
+    final baseLocation = unifiedEvent is CircleUnifiedEvent
+        ? unifiedEvent.location
+        : (unifiedEvent is PersonalUnifiedEvent
+            ? unifiedEvent.location
+            : null);
+    final location = circleDetail?.location ?? personalDetail?.location ?? baseLocation;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -62,7 +120,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.event.title,
+                  circleDetail?.title ??
+                      personalDetail?.title ??
+                      unifiedEvent.title,
                   style: AppTextStyles.headlineMedium,
                 ),
                 const SizedBox(height: 12),
@@ -75,7 +135,12 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      dateFormat.format(widget.event.startTime),
+                      dateFormat.format(
+                        (circleDetail?.startsAt ??
+                                personalDetail?.startTime ??
+                                unifiedEvent.startTime)
+                            .toLocal(),
+                      ),
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -92,14 +157,14 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${timeFormat.format(widget.event.startTime)} - ${timeFormat.format(widget.event.endTime)}',
+                      '${timeFormat.format((circleDetail?.startsAt ?? personalDetail?.startTime ?? unifiedEvent.startTime).toLocal())} - ${timeFormat.format((circleDetail?.endsAt ?? personalDetail?.endTime ?? unifiedEvent.endTime).toLocal())}',
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
-                if (widget.event.location != null) ...[
+                if (location != null) ...[
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -111,7 +176,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          widget.event.location!.name,
+                          location.name,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -148,9 +213,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 ? TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildRsvpTab(widget.event as CircleUnifiedEvent),
-                      _buildTimePollTab(widget.event as CircleUnifiedEvent),
-                      _buildMapTab(),
+                      _buildRsvpTab(circleDetail, unifiedEvent as CircleUnifiedEvent),
+                      _buildTimePollTab(circleDetail),
+                      _buildMapTab(location),
                     ],
                   )
                 : SingleChildScrollView(
@@ -159,18 +224,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (widget.event.description != null)
-                            Text(
-                              'Description',
-                              style: AppTextStyles.headlineSmall,
-                            ),
-                          if (widget.event.description != null)
-                            const SizedBox(height: 12),
-                          if (widget.event.description != null)
-                            Text(
-                              widget.event.description!,
-                              style: AppTextStyles.bodyMedium,
-                            ),
+                          _buildDescription(
+                            personalDetail?.notes ?? circleDetail?.description,
+                          ),
                         ],
                       ),
                     ),
@@ -181,167 +237,159 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     );
   }
 
-  Widget _buildRsvpTab(CircleUnifiedEvent event) {
+  Widget _buildDescription(String? text) {
+    if (text == null || text.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Description',
+          style: AppTextStyles.headlineSmall,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          text,
+          style: AppTextStyles.bodyMedium,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRsvpTab(
+    CircleEventDetail? detail,
+    CircleUnifiedEvent fallback,
+  ) {
+    final attendees = detail?.rsvps ?? [];
+    final conflict = fallback.hasConflict;
+    final eventId = detail?.id ?? fallback.id;
+    final vm = context.read<EventDetailViewModel>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Your RSVP section
           Text(
             'Your RSVP',
             style: AppTextStyles.headlineSmall,
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+          if (conflict) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Conflict Detected',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'You have another event at this time.',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: AppColors.warning,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Conflict Detected',
-                      style: AppTextStyles.labelMedium.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'You have another event at this time. Your RSVP status may have been automatically set to Not Going.',
-                  style: AppTextStyles.bodySmall,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                        ),
-                        child: Text(
-                          'Resolve Conflict',
-                          style: AppTextStyles.labelMedium.copyWith(
-                            color: AppColors.textOnPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Change RSVP',
-                          style: AppTextStyles.labelMedium,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
+            const SizedBox(height: 24),
+          ],
+
           // Who's Coming section
           Text(
-            'Who\'s Coming?',
+            'Who\'s Coming',
             style: AppTextStyles.headlineSmall,
           ),
-          const SizedBox(height: 16),
-          // Going
-          _buildRsvpGroup(
-            'Going',
-            '(1)',
-            AppColors.primary,
-            isExpanded: true,
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: vm.isActionLoading
+                      ? null
+                      : () => vm.updateRsvp(eventId, RsvpStatus.going),
+                  child: const Text('Going'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: vm.isActionLoading
+                      ? null
+                      : () => vm.updateRsvp(eventId, RsvpStatus.maybe),
+                  child: const Text('Maybe'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: vm.isActionLoading
+                      ? null
+                      : () => vm.updateRsvp(eventId, RsvpStatus.notGoing),
+                  child: const Text('Not going'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          // Maybe
-          _buildRsvpGroup(
-            'Maybe',
-            '(2)',
-            AppColors.warning,
-          ),
-          const SizedBox(height: 16),
-          // Not Going
-          _buildRsvpGroup(
-            'Not Going',
-            '(1)',
-            AppColors.error,
-          ),
+          if (attendees.isEmpty)
+            Text(
+              'No RSVPs yet',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            )
+          else
+            Column(
+              children: attendees
+                  .map(
+                    (a) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildAttendeeRow(
+                        a.username ?? a.email ?? 'Miembro',
+                        a.status,
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildRsvpGroup(
-    String status,
-    String count,
-    Color color, {
-    bool isExpanded = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              '$status $count',
-              style: AppTextStyles.labelMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        if (isExpanded)
-          Row(
-            children: [
-              _buildAvatarPlaceholder('A'),
-              const SizedBox(width: 8),
-              _buildAvatarPlaceholder('B'),
-              const SizedBox(width: 8),
-              _buildAvatarPlaceholder('+1'),
-            ],
-          ),
-      ],
-    );
-  }
+  Widget _buildTimePollTab(CircleEventDetail? detail) {
+    final options = detail?.eventTimes ?? [];
+    final eventId = detail?.id;
+    final vm = context.read<EventDetailViewModel>();
 
-  Widget _buildAvatarPlaceholder(String initial) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.2),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
+    if (options.isEmpty) {
+      return Center(
         child: Text(
-          initial,
-          style: AppTextStyles.labelSmall.copyWith(
-            fontWeight: FontWeight.w600,
+          'No time options',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildTimePollTab(CircleUnifiedEvent event) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -351,154 +399,156 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             'Time Poll',
             style: AppTextStyles.headlineSmall,
           ),
-          const SizedBox(height: 16),
-          _buildPollOption('10:00 AM', 3),
           const SizedBox(height: 12),
-          _buildPollOption('11:00 AM', 5, isSelected: true),
-          const SizedBox(height: 12),
-          _buildPollOption('12:00 PM', 1),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child: Text(
-                'Vote or Change Vote',
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.textOnPrimary,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Time Confirmed: 11:00 AM\nYesterday by Alex',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primary,
+          Column(
+            children: options
+                .map(
+                  (o) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildTimeOption(
+                      o.startTime,
+                      o.endTime,
+                      o.voteCount,
+                      onVote: eventId == null || vm.isActionLoading
+                          ? null
+                          : () => vm.voteTimeOption(eventId, o.id),
                     ),
                   ),
-                ),
-              ],
-            ),
+                )
+                .toList(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPollOption(String time, int votes, {bool isSelected = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              time,
-              style: AppTextStyles.labelMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              '$votes votes',
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: votes / 10,
-            minHeight: 8,
-            backgroundColor: AppColors.border,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.5),
-            ),
+  Widget _buildMapTab(LocationModel? location) {
+    if (location == null) {
+      return Center(
+        child: Text(
+          'Sin ubicación',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
           ),
         ),
-      ],
-    );
-  }
+      );
+    }
 
-  Widget _buildMapTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: double.infinity,
-              height: 300,
-              color: AppColors.border,
-              child: Center(
-                child: Text(
-                  'Map Placeholder',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.map_outlined,
+              size: 32,
+              color: AppColors.textSecondary,
             ),
-          ),
-          const SizedBox(height: 24),
-          if (widget.event.location != null) ...[
+            const SizedBox(height: 12),
             Text(
-              widget.event.location!.name,
-              style: AppTextStyles.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coordinates: ${widget.event.location!.latitude}, ${widget.event.location!.longitude}',
+              location.name,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.map_outlined),
-                    label: const Text('View Full Map'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.directions_outlined),
-                    label: const Text('Get Directions'),
-                  ),
-                ),
-              ],
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeOption(
+    DateTime start,
+    DateTime end,
+    int votes,
+    {VoidCallback? onVote}
+  ) {
+    final timeFormat = DateFormat('h:mm a');
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '${timeFormat.format(start)} - ${timeFormat.format(end)}',
+            style: AppTextStyles.labelMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: onVote,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: Text(
+                  'Vote',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.textOnPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.how_to_vote_outlined,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$votes votos',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAttendeeRow(String name, RsvpStatus status) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 16,
+          backgroundColor: AppColors.primary.withOpacity(0.15),
+          child: Text(
+            name.isNotEmpty ? name[0].toUpperCase() : '?',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            name,
+            style: AppTextStyles.bodyMedium,
+          ),
+        ),
+        RsvpBadge(status: status),
+      ],
     );
   }
 }

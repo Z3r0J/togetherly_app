@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../models/unified_calendar_models.dart';
+import '../viewmodels/event_detail_view_model.dart';
 import 'create_event_view.dart';
 import 'event_detail_tabs_view.dart';
 
@@ -350,7 +351,10 @@ class _DayEventsViewState extends State<DayEventsView> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => EventDetailTabsView(event: event),
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => EventDetailViewModel(),
+              child: EventDetailTabsView(event: event),
+            ),
           ),
         );
       },
@@ -418,7 +422,10 @@ class _DayEventsViewState extends State<DayEventsView> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => EventDetailTabsView(event: event),
+                builder: (_) => ChangeNotifierProvider(
+                  create: (_) => EventDetailViewModel(),
+                  child: EventDetailTabsView(event: event),
+                ),
               ),
             );
           },
