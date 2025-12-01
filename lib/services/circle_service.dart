@@ -599,6 +599,66 @@ class CircleService {
     }
   }
 
+  // Generate share link for a circle
+  Future<GenerateShareLinkResult> generateShareLink(String circleId) async {
+    try {
+      final accessToken = await _authService.getAccessToken();
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.circlesUrl}/$circleId/share-link'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return GenerateShareLinkResult.fromJson(body['data']);
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else if (response.statusCode == 403) {
+        throw ApiError(
+          errorCode: 'CIRCLE_MEMBER_PERMISSION_DENIED',
+          message: 'Only circle owner or admin can generate share link',
+          statusCode: 403,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'GENERATE_SHARE_LINK_FAILED',
+          message: 'Failed to generate share link',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
   // Join a circle via share token (requires auth)
   Future<JoinCircleResult> joinCircleViaShareLink(String shareToken) async {
     try {

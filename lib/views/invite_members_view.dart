@@ -26,6 +26,56 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   final _emailController = TextEditingController();
   final List<String> _sentInvites = [];
   bool _isLoading = false;
+  String? _currentShareToken;
+  bool _isGeneratingToken = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentShareToken = widget.shareToken;
+    // If no shareToken, generate one
+    if (_currentShareToken == null || _currentShareToken!.isEmpty) {
+      _generateShareToken();
+    }
+  }
+
+  Future<void> _generateShareToken() async {
+    if (_isGeneratingToken) return;
+
+    setState(() {
+      _isGeneratingToken = true;
+    });
+
+    try {
+      final result = await context.read<CircleViewModel>().generateShareLink(
+        widget.circleId,
+      );
+
+      if (result != null) {
+        setState(() {
+          _currentShareToken = result.shareToken;
+          _isGeneratingToken = false;
+        });
+      } else {
+        setState(() {
+          _isGeneratingToken = false;
+        });
+        if (mounted) {
+          _showSnackBar(
+            'Error al generar enlace de invitación',
+            AppColors.error,
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isGeneratingToken = false;
+      });
+      if (mounted) {
+        _showSnackBar('Error al generar enlace: $e', AppColors.error);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -104,61 +154,68 @@ class _InviteMembersViewState extends State<InviteMembersView> {
             border: Border.all(color: AppColors.border),
           ),
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Link icon and URL
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.link,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
+          child: _isGeneratingToken
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: CircularProgressIndicator(),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _getShareLink(),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Link icon and URL
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.link,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _getShareLink(),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Copy Link and Share buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      text: 'Copiar Enlace',
-                      type: AppButtonType.secondary,
-                      onPressed: _handleCopyLink,
+                    const SizedBox(height: 16),
+                    // Copy Link and Share buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            text: 'Copiar Enlace',
+                            type: AppButtonType.secondary,
+                            onPressed: _handleCopyLink,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppButton(
+                            text: 'Compartir',
+                            type: AppButtonType.primary,
+                            icon: Icons.share,
+                            onPressed: _handleShareLink,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppButton(
-                      text: 'Compartir',
-                      type: AppButtonType.primary,
-                      icon: Icons.share,
-                      onPressed: _handleShareLink,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
         ),
       ],
     );
@@ -324,10 +381,10 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   }
 
   String _getShareLink() {
-    if (widget.shareToken != null && widget.shareToken!.isNotEmpty) {
-      return 'https://togetherly-backend.fly.dev/api/circles/share/${widget.shareToken}/join';
+    if (_currentShareToken != null && _currentShareToken!.isNotEmpty) {
+      return 'https://togetherly-backend.fly.dev/api/circles/share/$_currentShareToken/join';
     }
-    return 'https://togetherly-backend.fly.dev/join/${widget.circleId}';
+    return 'https://togetherly.app/join/${widget.circleId}';
   }
 
   void _handleCopyLink() {

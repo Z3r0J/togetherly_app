@@ -677,3 +677,18 @@ class JoinCircleResult {
     );
   }
 }
+
+// Generate Share Link Result
+class GenerateShareLinkResult {
+  final String shareToken;
+  final String shareLink;
+
+  GenerateShareLinkResult({required this.shareToken, required this.shareLink});
+
+  factory GenerateShareLinkResult.fromJson(Map<String, dynamic> json) {
+    return GenerateShareLinkResult(
+      shareToken: json['shareToken'] ?? '',
+      shareLink: json['shareLink'] ?? '',
+    );
+  }
+}

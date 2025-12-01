@@ -350,4 +350,28 @@ class CircleViewModel extends ChangeNotifier {
       return null;
     }
   }
+
+  // Generate share link for a circle
+  Future<GenerateShareLinkResult?> generateShareLink(String circleId) async {
+    try {
+      print('🔵 [CircleViewModel] generateShareLink called');
+      print('   - Circle ID: $circleId');
+
+      final result = await _circleService.generateShareLink(circleId);
+
+      print('✅ [CircleViewModel] Share link generated successfully');
+      print('   - Share token: ${result.shareToken.substring(0, 20)}...');
+
+      // Refresh circle detail to update with the new shareToken
+      await fetchCircleDetail(circleId);
+
+      return result;
+    } catch (e) {
+      print('❌ [CircleViewModel] Exception caught during generateShareLink:');
+      print('   - Exception message: $e');
+      _errorMessage = _getErrorMessage(e);
+      notifyListeners();
+      return null;
+    }
+  }
 }
