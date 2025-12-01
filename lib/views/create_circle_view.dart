@@ -93,12 +93,17 @@ class _CreateCircleViewState extends State<CreateCircleView> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         title: Text(
-          _isEditMode ? 'Editar Círculo' : 'Crear Círculo',
+          _isEditMode
+              ? l10n.tr('circle.create.dialog.title_edit')
+              : l10n.tr('circle.create.dialog.title_create'),
           style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancelar', style: TextStyle(color: AppColors.primary)),
+          child: Text(
+            l10n.tr('circle.create.dialog.cancel'),
+            style: TextStyle(color: AppColors.primary),
+          ),
         ),
         leadingWidth: 100,
       ),
@@ -133,7 +138,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                 children: [
                   Expanded(
                     child: AppButton(
-                      text: 'Eliminar',
+                      text: l10n.tr('circle.create.dialog.delete'),
                       type: AppButtonType.secondary,
                       onPressed: _isLoading ? null : _handleDeleteCircle,
                     ),
@@ -141,7 +146,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: AppButton(
-                      text: 'Guardar Cambios',
+                      text: l10n.tr('circle.create.button.save'),
                       type: AppButtonType.primary,
                       isLoading: _isLoading,
                       onPressed: _isLoading ? null : _handleSaveCircle,
@@ -151,7 +156,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               )
             else
               AppButton(
-                text: 'Crear Círculo',
+                text: l10n.tr('circle.create.button.create'),
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isLoading,
@@ -179,8 +184,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Color del Círculo', style: AppTextStyles.titleSmall),
-        const SizedBox(height: 16),
+        Text(
+          l10n.tr('circle.create.label.color'),
+          style: AppTextStyles.titleSmall,
+        ),
+        const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -497,8 +505,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       print('✅ [UPDATE CIRCLE] Circle updated successfully!');
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Círculo actualizado exitosamente!'),
+        SnackBar(
+          content: Text(l10n.tr('circle.create.update_success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -535,16 +543,16 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        title: Text('Eliminar Círculo'),
+        title: Text(l10n.tr('circle.create.dialog.delete_title')),
         content: Text(
-          '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
+          l10n.tr('circle.create.dialog.delete_message'),
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              l10n.tr('circle.create.dialog.cancel'),
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -555,7 +563,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               Navigator.pop(context);
               _proceedWithDelete();
             },
-            child: Text('Eliminar', style: TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.tr('circle.create.dialog.delete'),
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -593,8 +604,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       print('✅ [DELETE CIRCLE] Circle deleted successfully!');
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Círculo eliminado exitosamente!'),
+        SnackBar(
+          content: Text(l10n.tr('circle.detail.delete_success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),

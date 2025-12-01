@@ -570,17 +570,17 @@ class _CircleDetailViewState extends State<CircleDetailView> {
       case RsvpStatus.going:
         bg = AppColors.success.withOpacity(0.15);
         fg = AppColors.success;
-        label = 'Voy';
+        label = l10n.tr('event.detail.rsvp.going_label');
         break;
       case RsvpStatus.maybe:
         bg = AppColors.warning.withOpacity(0.15);
         fg = AppColors.warning;
-        label = 'Tal vez';
+        label = l10n.tr('event.detail.rsvp.maybe_label');
         break;
       case RsvpStatus.notGoing:
         bg = AppColors.error.withOpacity(0.15);
         fg = AppColors.error;
-        label = 'No voy';
+        label = l10n.tr('event.detail.rsvp.not_going_label');
         break;
       case RsvpStatus.none:
         return const SizedBox.shrink();
@@ -613,27 +613,27 @@ class _CircleDetailViewState extends State<CircleDetailView> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'enero',
-      'febrero',
-      'marzo',
-      'abril',
-      'mayo',
-      'junio',
-      'julio',
-      'agosto',
-      'septiembre',
-      'octubre',
-      'noviembre',
-      'diciembre',
+      l10n.tr('calendar.months.january'),
+      l10n.tr('calendar.months.february'),
+      l10n.tr('calendar.months.march'),
+      l10n.tr('calendar.months.april'),
+      l10n.tr('calendar.months.may'),
+      l10n.tr('calendar.months.june'),
+      l10n.tr('calendar.months.july'),
+      l10n.tr('calendar.months.august'),
+      l10n.tr('calendar.months.september'),
+      l10n.tr('calendar.months.october'),
+      l10n.tr('calendar.months.november'),
+      l10n.tr('calendar.months.december'),
     ];
     final weekday = [
-      'lunes',
-      'martes',
-      'miércoles',
-      'jueves',
-      'viernes',
-      'sábado',
-      'domingo',
+      l10n.tr('calendar.weekday_names.monday'),
+      l10n.tr('calendar.weekday_names.tuesday'),
+      l10n.tr('calendar.weekday_names.wednesday'),
+      l10n.tr('calendar.weekday_names.thursday'),
+      l10n.tr('calendar.weekday_names.friday'),
+      l10n.tr('calendar.weekday_names.saturday'),
+      l10n.tr('calendar.weekday_names.sunday'),
     ][date.weekday - 1];
     return '$weekday, ${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -662,7 +662,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                           : Theme.of(context).colorScheme.outline,
                     ),
                     title: Text(
-                      'Editar Círculo',
+                      l10n.tr('circle.detail.edit_circle'),
                       style: TextStyle(
                         color: canEdit
                             ? AppColors.textPrimary
@@ -696,7 +696,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                           : Theme.of(context).colorScheme.outline,
                     ),
                     title: Text(
-                      'Eliminar Círculo',
+                      l10n.tr('circle.detail.delete_circle'),
                       style: TextStyle(
                         color: canDelete
                             ? AppColors.error
@@ -725,16 +725,16 @@ class _CircleDetailViewState extends State<CircleDetailView> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        title: Text('Eliminar Círculo'),
+        title: Text(l10n.tr('circle.create.dialog.delete_title')),
         content: Text(
-          '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
+          l10n.tr('circle.detail.delete_confirmation'),
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              l10n.tr('circle.create.dialog.cancel'),
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -745,7 +745,10 @@ class _CircleDetailViewState extends State<CircleDetailView> {
               Navigator.pop(context);
               _proceedWithDelete();
             },
-            child: Text('Eliminar', style: TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.tr('circle.create.dialog.delete'),
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -763,8 +766,8 @@ class _CircleDetailViewState extends State<CircleDetailView> {
     if (success) {
       print('✅ [DELETE CIRCLE] Circle deleted successfully!');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Círculo eliminado exitosamente!'),
+        SnackBar(
+          content: Text(l10n.tr('circle.detail.delete_success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),

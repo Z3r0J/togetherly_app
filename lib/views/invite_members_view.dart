@@ -150,10 +150,14 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   }
 
   Widget _buildShareLinkSection() {
+    final l10n = AppLocalizations.instance;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Compartir Enlace', style: AppTextStyles.headlineSmall),
+        Text(
+          l10n.tr('circle.invite.share_link'),
+          style: AppTextStyles.headlineSmall,
+        ),
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
@@ -206,7 +210,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                       children: [
                         Expanded(
                           child: AppButton(
-                            text: 'Copiar Enlace',
+                            text: l10n.tr('circle.invite.button.copy_link'),
                             type: AppButtonType.secondary,
                             onPressed: _handleCopyLink,
                           ),
@@ -259,10 +263,14 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   }
 
   Widget _buildPendingInvitesSection() {
+    final l10n = AppLocalizations.instance;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Invitaciones Enviadas', style: AppTextStyles.headlineSmall),
+        Text(
+          l10n.tr('circle.invite.invitations_sent'),
+          style: AppTextStyles.headlineSmall,
+        ),
         const SizedBox(height: 16),
         ..._sentInvites.asMap().entries.map((entry) {
           final email = entry.value;
@@ -287,6 +295,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     required String status,
     required Color statusColor,
   }) {
+    final l10n = AppLocalizations.instance;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -310,7 +319,9 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                 Container(),
               const SizedBox(width: 6),
               Text(
-                status == 'Joined' ? 'Unido ✓' : 'Pendiente',
+                status == 'Joined'
+                    ? l10n.tr('circle.invite.status.joined')
+                    : l10n.tr('circle.invite.status.pending'),
                 style: AppTextStyles.labelSmall.copyWith(
                   color: statusColor,
                   fontWeight: FontWeight.w600,
@@ -417,8 +428,12 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   }
 
   void _handleShareLink() {
+    final l10n = AppLocalizations.instance;
     // TODO: Implement share functionality using share_plus package
-    _showSnackBar('Abriendo opciones de compartir...', AppColors.primary);
+    _showSnackBar(
+      l10n.tr('circle.invite.message.opening_share'),
+      AppColors.primary,
+    );
   }
 
   bool _isValidEmail(String email) {
