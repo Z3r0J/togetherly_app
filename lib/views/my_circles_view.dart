@@ -39,25 +39,13 @@ class _MyCirclesViewState extends State<MyCirclesView> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-<<<<<<< HEAD
-          'Mis Círculos',
+          l10n.tr('circle.my_circles.title'),
           style: AppTextStyles.headlineMedium.copyWith(fontSize: 20),
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-=======
-          l10n.tr('circle.my_circles.title'),
-          style: AppTextStyles.headlineMedium,
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: AppButton(
-              text: l10n.tr('circle.create.button.create_short'),
-              type: AppButtonType.primary,
->>>>>>> 176d63962583bf7e35fe586d75ae5a3d8bc6ffec
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -71,7 +59,11 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                 }
               },
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Crear'),
+              label: Text(
+                l10n
+                    .tr('circle.create.button.create_short')
+                    .replaceAll('+ ', ''),
+              ),
               style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
           ),

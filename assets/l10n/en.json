@@ -51,13 +51,23 @@
       "join_error": "Error accepting invitation",
       "login_required": "You must log in to join the circle",
       "initializing": "Initializing Togetherly...",
-      "init_error": "Error initializing app",
+      "init_error": "Error starting the app",
       "profile_updated": "Profile updated",
       "profile_update_failed": "Failed to update profile",
       "registration_success": "Registration successful!",
       "registration_info": "We have sent a verification email to:",
-      "registration_instruction": "After verifying your email, you can join the circle.",
-      "understood": "Got it"
+      "registration_instruction": "After verifying your email, you will be able to join the circle.",
+      "understood": "Understood"
+    },
+    "theme": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "system": "System",
+      "spanish": "Español",
+      "english": "English"
     }
   },
   "auth": {

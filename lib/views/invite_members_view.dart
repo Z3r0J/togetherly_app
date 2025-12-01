@@ -218,7 +218,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: AppButton(
-                            text: 'Compartir',
+                            text: l10n.tr('circle.invite.button.share'),
                             type: AppButtonType.primary,
                             icon: Icons.share,
                             onPressed: _handleShareLink,

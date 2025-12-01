@@ -58,6 +58,16 @@
       "registration_info": "Hemos enviado un correo de verificación a:",
       "registration_instruction": "Después de verificar tu correo, podrás unirte al círculo.",
       "understood": "Entendido"
+    },
+    "theme": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "language": {
+      "system": "Sistema",
+      "spanish": "Español",
+      "english": "English"
     }
   },
   "auth": {

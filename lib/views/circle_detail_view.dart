@@ -278,10 +278,13 @@ class _CircleDetailViewState extends State<CircleDetailView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                l10n.tr('circle.detail.upcoming_events'),
-                style: AppTextStyles.headlineSmall,
+              Expanded(
+                child: Text(
+                  l10n.tr('circle.detail.upcoming_events'),
+                  style: AppTextStyles.headlineSmall,
+                ),
               ),
+              const SizedBox(width: 8),
               // Todos los miembros pueden crear eventos, no sólo owner/admin
               SizedBox(
                 height: 36,
@@ -444,25 +447,31 @@ class _CircleDetailViewState extends State<CircleDetailView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
                   ),
-                ),
-                child: Text(
-                  rsvpText,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  child: Text(
+                    rsvpText,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               TextButton(
                 onPressed: () {
                   final startSafe = start ?? DateTime.now();
