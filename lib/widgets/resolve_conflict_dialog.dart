@@ -64,89 +64,140 @@ class ResolveConflictDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Personal event card
-                _eventCard(
-                  title: personalTitle,
-                  type: 'Personal Event',
-                  date: personalDate,
-                  location: personalLocation,
-                  sideColor: Colors.grey,
-                  actionsBuilder: (vm) => [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                // Personal event card (only when present)
+                if (personalEventId.isNotEmpty)
+                  _eventCard(
+                    title: personalTitle,
+                    type: 'Personal Event',
+                    date: personalDate,
+                    location: personalLocation,
+                    sideColor: Colors.grey,
+                    actionsBuilder: (vm) => [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          onPressed: vm.isLoading
+                              ? null
+                              : () async {
+                                  // Debug: log event being cancelled
+                                  // ignore: avoid_print
+                                  print(
+                                    '[ResolveDialog] cancelling personal event: $personalEventId',
+                                  );
+                                  final ok = await vm.resolveConflict(
+                                    eventId: personalEventId,
+                                    eventType: 'personal',
+                                    action: 'cancel_personal',
+                                  );
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop(ok);
+                                },
+                          child: const Text('Cancel This Event'),
                         ),
-                        onPressed: vm.isLoading
-                            ? null
-                            : () async {
-                                final ok = await vm.resolveConflict(
-                                  eventId: personalEventId,
-                                  eventType: 'personal',
-                                  action: 'cancel_personal',
-                                );
-                                Navigator.of(context).pop(ok);
-                              },
-                        child: const Text('Cancel This Event'),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
                 const SizedBox(height: 12),
 
-                // Circle event card
-                _eventCard(
-                  title: circleTitle,
-                  type: 'Circle Event',
-                  date: circleDate,
-                  location: circleLocation,
-                  sideColor: Colors.blue,
-                  rsvpTag: 'Your RSVP: ',
-                  rsvpValue: rsvpStatus,
-                  actionsBuilder: (vm) => [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: vm.isLoading
-                            ? null
-                            : () async {
-                                final ok = await vm.resolveConflict(
-                                  eventId: circleEventId,
-                                  eventType: 'circle',
-                                  action: 'change_rsvp_maybe',
-                                );
-                                Navigator.of(context).pop(ok);
-                              },
-                        child: const Text('Change to Maybe'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: vm.isLoading
-                            ? null
-                            : () async {
-                                final ok = await vm.resolveConflict(
-                                  eventId: circleEventId,
-                                  eventType: 'circle',
-                                  action: 'change_rsvp_going',
-                                );
-                                Navigator.of(context).pop(ok);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3A58FF),
+                // Circle event card (only when present)
+                if (circleEventId.isNotEmpty)
+                  _eventCard(
+                    title: circleTitle,
+                    type: 'Circle Event',
+                    date: circleDate,
+                    location: circleLocation,
+                    sideColor: Colors.blue,
+                    rsvpTag: 'Your RSVP: ',
+                    rsvpValue: rsvpStatus,
+                    actionsBuilder: (vm) => [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: vm.isLoading
+                              ? null
+                              : () async {
+                                  // ignore: avoid_print
+                                  print(
+                                    '[ResolveDialog] change RSVP to maybe for: $circleEventId',
+                                  );
+                                  final ok = await vm.resolveConflict(
+                                    eventId: circleEventId,
+                                    eventType: 'circle',
+                                    action: 'change_rsvp_maybe',
+                                  );
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop(ok);
+                                },
+                          child: const Text('Change to Maybe'),
                         ),
-                        child: const Text('Change to Going'),
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: vm.isLoading
+                              ? null
+                              : () async {
+                                  // ignore: avoid_print
+                                  print(
+                                    '[ResolveDialog] change RSVP to going for: $circleEventId',
+                                  );
+                                  final ok = await vm.resolveConflict(
+                                    eventId: circleEventId,
+                                    eventType: 'circle',
+                                    action: 'change_rsvp_going',
+                                  );
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop(ok);
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3A58FF),
+                          ),
+                          child: const Text('Change to Going'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: vm.isLoading
+                              ? null
+                              : () async {
+                                  // ignore: avoid_print
+                                  print(
+                                    '[ResolveDialog] change RSVP to not going for: $circleEventId',
+                                  );
+                                  final ok = await vm.resolveConflict(
+                                    eventId: circleEventId,
+                                    eventType: 'circle',
+                                    action: 'change_rsvp_not_going',
+                                  );
+                                  Navigator.of(
+                                    context,
+                                    rootNavigator: true,
+                                  ).pop(ok);
+                                },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
+                          child: const Text('Not Going'),
+                        ),
+                      ),
+                    ],
+                  ),
 
                 const SizedBox(height: 16),
 
                 Center(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(true),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
@@ -160,7 +211,8 @@ class ResolveConflictDialog extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(false),
                     child: const Text('View Both in Calendar'),
                   ),
                 ),

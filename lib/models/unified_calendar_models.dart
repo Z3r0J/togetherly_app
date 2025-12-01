@@ -87,6 +87,7 @@ class PersonalUnifiedEvent extends UnifiedEvent {
   final String? color;
   final String? notes;
   final int? reminderMinutes;
+  final bool cancelled;
 
   PersonalUnifiedEvent({
     required super.id,
@@ -99,6 +100,7 @@ class PersonalUnifiedEvent extends UnifiedEvent {
     this.color,
     this.notes,
     this.reminderMinutes,
+    this.cancelled = false,
   }) : super(type: UnifiedEventType.personal);
 
   factory PersonalUnifiedEvent.fromJson(Map<String, dynamic> json) {
@@ -114,6 +116,7 @@ class PersonalUnifiedEvent extends UnifiedEvent {
       color: json['color'] as String?,
       notes: json['notes'] as String?,
       reminderMinutes: json['reminderMinutes'] as int?,
+      cancelled: json['cancelled'] as bool? ?? false,
       conflictsWith: (json['conflictsWith'] as List<dynamic>? ?? [])
           .map((c) => UnifiedEventConflict.fromJson(c as Map<String, dynamic>))
           .toList(),
@@ -214,7 +217,9 @@ class UnifiedCalendarResponse {
   UnifiedCalendarResponse({required this.events, required this.summary});
 
   factory UnifiedCalendarResponse.fromJson(Map<String, dynamic> json) {
-    final List<UnifiedEvent> events = (json['events'] as List<dynamic>).map((e) {
+    final List<UnifiedEvent> events = (json['events'] as List<dynamic>).map((
+      e,
+    ) {
       final eventMap = e as Map<String, dynamic>;
       if (eventMap['type'] == 'personal') {
         return PersonalUnifiedEvent.fromJson(eventMap);

@@ -15,10 +15,7 @@ import '../widgets/rsvp_widgets.dart';
 class EventDetailTabsView extends StatefulWidget {
   final UnifiedEvent event;
 
-  const EventDetailTabsView({
-    super.key,
-    required this.event,
-  });
+  const EventDetailTabsView({super.key, required this.event});
 
   @override
   State<EventDetailTabsView> createState() => _EventDetailTabsViewState();
@@ -52,9 +49,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final timeFormat = DateFormat('h:mm a');
 
     if (vm.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (vm.error != null) {
@@ -74,8 +69,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               children: [
                 Text(
                   vm.error!.message,
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.error),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.error,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
@@ -95,10 +91,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final personalDetail = vm.personalEvent;
     final baseLocation = unifiedEvent is CircleUnifiedEvent
         ? unifiedEvent.location
-        : (unifiedEvent is PersonalUnifiedEvent
-            ? unifiedEvent.location
-            : null);
-    final location = circleDetail?.location ?? personalDetail?.location ?? baseLocation;
+        : (unifiedEvent is PersonalUnifiedEvent ? unifiedEvent.location : null);
+    final location =
+        circleDetail?.location ?? personalDetail?.location ?? baseLocation;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -109,10 +104,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Event Details',
-          style: AppTextStyles.headlineSmall,
-        ),
+        title: Text('Event Details', style: AppTextStyles.headlineSmall),
         centerTitle: false,
       ),
       body: Column(
@@ -129,6 +121,26 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       unifiedEvent.title,
                   style: AppTextStyles.headlineMedium,
                 ),
+                const SizedBox(height: 8),
+                if ((personalDetail != null && personalDetail.cancelled) ||
+                    (unifiedEvent is PersonalUnifiedEvent &&
+                        unifiedEvent.cancelled))
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Cancelled',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -197,9 +209,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           // Tabs
           Container(
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppColors.border),
-              ),
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: TabBar(
               controller: _tabController,
@@ -209,10 +219,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       Tab(text: 'Time Poll'),
                       Tab(text: 'Map'),
                     ]
-                  : const [
-                      Tab(text: 'Details'),
-                      Tab(text: 'Map'),
-                    ],
+                  : const [Tab(text: 'Details'), Tab(text: 'Map')],
             ),
           ),
           // Contenido de tabs
@@ -221,7 +228,10 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               controller: _tabController,
               children: _isCircleEvent
                   ? [
-                      _buildRsvpTab(circleDetail, unifiedEvent as CircleUnifiedEvent),
+                      _buildRsvpTab(
+                        circleDetail,
+                        unifiedEvent as CircleUnifiedEvent,
+                      ),
                       _buildTimePollTab(circleDetail),
                       _buildMapTab(location),
                     ]
@@ -233,7 +243,8 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildDescription(
-                                personalDetail?.notes ?? circleDetail?.description,
+                                personalDetail?.notes ??
+                                    circleDetail?.description,
                               ),
                             ],
                           ),
@@ -253,23 +264,14 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Description',
-          style: AppTextStyles.headlineSmall,
-        ),
+        Text('Description', style: AppTextStyles.headlineSmall),
         const SizedBox(height: 12),
-        Text(
-          text,
-          style: AppTextStyles.bodyMedium,
-        ),
+        Text(text, style: AppTextStyles.bodyMedium),
       ],
     );
   }
 
-  Widget _buildRsvpTab(
-    CircleEventDetail? detail,
-    CircleUnifiedEvent fallback,
-  ) {
+  Widget _buildRsvpTab(CircleEventDetail? detail, CircleUnifiedEvent fallback) {
     final attendees = detail?.rsvps ?? [];
     final conflict = fallback.hasConflict;
     final eventId = detail?.id ?? fallback.id;
@@ -280,10 +282,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Your RSVP',
-            style: AppTextStyles.headlineSmall,
-          ),
+          Text('Your RSVP', style: AppTextStyles.headlineSmall),
           const SizedBox(height: 16),
           if (conflict) ...[
             Container(
@@ -323,10 +322,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           ],
 
           // Who's Coming section
-          Text(
-            'Who\'s Coming',
-            style: AppTextStyles.headlineSmall,
-          ),
+          Text('Who\'s Coming', style: AppTextStyles.headlineSmall),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -406,10 +402,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Time Poll',
-            style: AppTextStyles.headlineSmall,
-          ),
+          Text('Time Poll', style: AppTextStyles.headlineSmall),
           const SizedBox(height: 12),
           Column(
             children: options
@@ -461,7 +454,10 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     markers: {
                       Marker(
                         markerId: const MarkerId('event_location'),
-                        position: LatLng(location.latitude!, location.longitude!),
+                        position: LatLng(
+                          location.latitude!,
+                          location.longitude!,
+                        ),
                         infoWindow: InfoWindow(title: location.name),
                       ),
                     },
@@ -476,10 +472,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       border: Border.all(color: AppColors.border),
                     ),
                     padding: const EdgeInsets.all(16),
-                    child: Text(
-                      location.name,
-                      style: AppTextStyles.bodyMedium,
-                    ),
+                    child: Text(location.name, style: AppTextStyles.bodyMedium),
                   ),
           ),
         ),
@@ -586,12 +579,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            name,
-            style: AppTextStyles.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(name, style: AppTextStyles.bodyMedium)),
         RsvpBadge(status: status),
       ],
     );
@@ -601,14 +589,16 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final hasCoords = location.latitude != null && location.longitude != null;
     final uri = hasCoords
         ? Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}')
+            'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}',
+          )
         : Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location.name)}');
+            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location.name)}',
+          );
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo abrir mapas')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No se pudo abrir mapas')));
       }
     }
   }

@@ -14,6 +14,7 @@ class PersonalEvent {
   final int? reminderMinutes;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool cancelled;
 
   PersonalEvent({
     required this.id,
@@ -29,6 +30,7 @@ class PersonalEvent {
     this.reminderMinutes,
     required this.createdAt,
     required this.updatedAt,
+    this.cancelled = false,
   });
 
   factory PersonalEvent.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,7 @@ class PersonalEvent {
       reminderMinutes: json['reminderMinutes'] as int?,
       createdAt: DateTime.parse(json['createdAt'] as String).toLocal(),
       updatedAt: DateTime.parse(json['updatedAt'] as String).toLocal(),
+      cancelled: json['cancelled'] as bool? ?? false,
     );
   }
 

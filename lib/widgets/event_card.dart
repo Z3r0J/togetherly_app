@@ -44,6 +44,9 @@ class EventCard extends StatelessWidget {
   /// Si hay conflicto de horario
   final bool hasConflict;
 
+  /// Si el evento está cancelado (solo aplicable a eventos personales)
+  final bool cancelled;
+
   /// Evento con el que hay conflicto
   final String? conflictWith;
 
@@ -67,6 +70,7 @@ class EventCard extends StatelessWidget {
     this.circleLabel,
     this.circleColor,
     this.hasConflict = false,
+    this.cancelled = false,
     this.conflictWith,
     this.onTap,
     this.onViewDetails,
@@ -85,7 +89,32 @@ class EventCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Título
-              Text(title, style: AppTextStyles.eventTitle),
+              Row(
+                children: [
+                  Expanded(child: Text(title, style: AppTextStyles.eventTitle)),
+                  if (cancelled)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.error.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelled',
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(height: 12),
 
               // Fecha
@@ -287,12 +316,14 @@ class CompactEventCard extends StatelessWidget {
     this.rsvpStatus,
     this.hasConflict = false,
     this.conflictWith,
+    this.cancelled = false,
     this.onTap,
     this.onResolve,
   });
 
   /// Callback to resolve conflict (open resolver)
   final VoidCallback? onResolve;
+  final bool cancelled;
 
   @override
   Widget build(BuildContext context) {
@@ -328,7 +359,34 @@ class CompactEventCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(title, style: AppTextStyles.titleMedium),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: AppTextStyles.titleMedium,
+                            ),
+                          ),
+                          if (cancelled)
+                            Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'Cancelled',
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.more_vert),

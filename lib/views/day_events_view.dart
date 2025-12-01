@@ -122,6 +122,9 @@ class _DayEventsViewState extends State<DayEventsView> {
           _localSelectedDate.year,
           _localSelectedDate.month + 1,
           0,
+          23,
+          59,
+          59,
         );
         viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
       }
@@ -147,6 +150,9 @@ class _DayEventsViewState extends State<DayEventsView> {
       _localSelectedDate.year,
       _localSelectedDate.month + 1,
       0,
+      23,
+      59,
+      59,
     );
     viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
   }
@@ -440,7 +446,14 @@ class _DayEventsViewState extends State<DayEventsView> {
     Map<DateTime, List<UnifiedEvent>> eventsByDay,
   ) {
     final firstDay = DateTime(currentDate.year, currentDate.month, 1);
-    final lastDay = DateTime(currentDate.year, currentDate.month + 1, 0);
+    final lastDay = DateTime(
+      currentDate.year,
+      currentDate.month + 1,
+      0,
+      23,
+      59,
+      59,
+    );
     final daysInMonth = lastDay.day;
     final firstWeekday = firstDay.weekday;
 
@@ -547,7 +560,14 @@ class _DayEventsViewState extends State<DayEventsView> {
     DateTime currentDate,
     Map<DateTime, List<UnifiedEvent>> eventsByDay,
   ) {
-    final lastDayOfMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
+    final lastDayOfMonth = DateTime(
+      currentDate.year,
+      currentDate.month + 1,
+      0,
+      23,
+      59,
+      59,
+    );
     final daysInMonth = <DateTime>[];
     for (int day = 1; day <= lastDayOfMonth.day; day++) {
       daysInMonth.add(DateTime(currentDate.year, currentDate.month, day));
@@ -793,6 +813,7 @@ class _DayEventsViewState extends State<DayEventsView> {
       conflictWith: event.conflictsWith.isNotEmpty
           ? event.conflictsWith.first.title
           : null,
+      cancelled: event.cancelled,
       onTap: () {
         Navigator.push(
           context,
@@ -829,6 +850,7 @@ class _DayEventsViewState extends State<DayEventsView> {
             location: event.location?.name ?? 'Sin ubicación',
             rsvpStatus: event.rsvpStatus,
             attendeeCount: event.attendeeCount,
+            cancelled: false,
             circleLabel: event.circleName,
             circleColor: circleColor,
             hasConflict: event.hasConflict,
@@ -995,6 +1017,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                     _localSelectedDate.year,
                     _localSelectedDate.month + 1,
                     0,
+                    23,
+                    59,
+                    59,
                   );
                   viewModel.loadCalendar(startDate: firstDay, endDate: lastDay);
                 }

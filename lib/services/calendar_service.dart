@@ -41,6 +41,11 @@ class CalendarService {
     print('🔵 [CalendarService] headers: $headers');
     print('🔵 [CalendarService] body: $body');
     print('🔵 [CalendarService] Response status: ${resp.statusCode}');
+    // Print response body to help debug server errors
+    if (resp.body.isNotEmpty) {
+      // ignore: avoid_print
+      print('🔵 [CalendarService] Response body: ${resp.body}');
+    }
     return resp;
   }
 
