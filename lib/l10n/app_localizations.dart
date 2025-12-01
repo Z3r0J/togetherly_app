@@ -21,22 +21,38 @@ class AppLocalizations {
 
   Map<String, dynamic> _localizedStrings = {};
   bool _isLoaded = false;
+  String _currentLocale = 'es';
+
+  /// Idiomas soportados
+  static const List<String> supportedLocales = ['es', 'en'];
+
+  /// Obtiene el idioma actual
+  String get currentLocale => _currentLocale;
 
   /// Carga el archivo JSON de traducciones
-  /// Por ahora solo carga es.json
+  /// Soporta: 'es' (español) y 'en' (inglés)
   static Future<void> load({String locale = 'es'}) async {
     _instance = AppLocalizations._();
 
     try {
+      // Validar que el locale esté soportado
+      final validLocale = supportedLocales.contains(locale) ? locale : 'es';
+
       final jsonString = await rootBundle.loadString(
-        'assets/l10n/$locale.json',
+        'assets/l10n/$validLocale.json',
       );
       final Map<String, dynamic> jsonMap = json.decode(jsonString);
       _instance!._localizedStrings = jsonMap;
+      _instance!._currentLocale = validLocale;
       _instance!._isLoaded = true;
     } catch (e) {
       throw Exception('Error cargando archivo de traducción: $e');
     }
+  }
+
+  /// Cambia el idioma dinámicamente
+  static Future<void> changeLocale(String locale) async {
+    await load(locale: locale);
   }
 
   /// Traduce una clave usando notación punto

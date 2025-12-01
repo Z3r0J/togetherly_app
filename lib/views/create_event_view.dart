@@ -5,6 +5,7 @@ import '../theme/app_text_styles.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/personal_event_view_model.dart';
 import '../viewmodels/circle_event_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'personal_event_form_view.dart';
 import 'circle_event_form_view.dart';
 
@@ -35,31 +36,30 @@ class _CreateEventViewState extends State<CreateEventView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PersonalEventViewModel()),
         ChangeNotifierProvider(create: (_) => CircleEventViewModel()),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.surface,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
           elevation: 0,
           leading: TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancelar',
+              l10n.tr('common.button.cancel'),
               style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           leadingWidth: 100,
           title: Text(
-            'Crear Evento',
+            l10n.tr('event.create.title'),
             style: AppTextStyles.headlineSmall.copyWith(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -71,7 +71,9 @@ class _CreateEventViewState extends State<CreateEventView> {
               _buildTabSelector(),
               const SizedBox(height: 24),
               _selectedTabIndex == 0
-                  ? PersonalEventFormView(onSuccess: () => Navigator.pop(context, true))
+                  ? PersonalEventFormView(
+                      onSuccess: () => Navigator.pop(context, true),
+                    )
                   : CircleEventFormView(
                       circleId: widget.circleId ?? '',
                       onSuccess: () => Navigator.pop(context, true),
@@ -84,18 +86,19 @@ class _CreateEventViewState extends State<CreateEventView> {
   }
 
   Widget _buildTabSelector() {
+    final l10n = AppLocalizations.instance;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       padding: const EdgeInsets.all(6),
       child: Row(
         children: [
           Expanded(
             child: _buildTab(
-              label: 'Evento Personal',
+              label: l10n.tr('event.create.type.personal'),
               icon: Icons.calendar_today,
               index: 0,
             ),
@@ -103,7 +106,7 @@ class _CreateEventViewState extends State<CreateEventView> {
           const SizedBox(width: 8),
           Expanded(
             child: _buildTab(
-              label: 'Evento de Círculo',
+              label: l10n.tr('event.create.type.circle'),
               icon: Icons.people,
               index: 1,
             ),
@@ -128,12 +131,12 @@ class _CreateEventViewState extends State<CreateEventView> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                     blurRadius: 4,
                   ),
                 ]
@@ -146,8 +149,8 @@ class _CreateEventViewState extends State<CreateEventView> {
               icon,
               size: 18,
               color: isSelected
-                  ? AppColors.textOnPrimary
-                  : AppColors.textPrimary,
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(width: 6),
             Flexible(
@@ -155,8 +158,8 @@ class _CreateEventViewState extends State<CreateEventView> {
                 label,
                 style: AppTextStyles.labelSmall.copyWith(
                   color: isSelected
-                      ? AppColors.textOnPrimary
-                      : AppColors.textPrimary,
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),

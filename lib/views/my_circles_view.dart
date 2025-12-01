@@ -29,16 +29,17 @@ class _MyCirclesViewState extends State<MyCirclesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
+<<<<<<< HEAD
           'Mis Círculos',
           style: AppTextStyles.headlineMedium.copyWith(fontSize: 20),
         ),
@@ -46,6 +47,17 @@ class _MyCirclesViewState extends State<MyCirclesView> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
+=======
+          l10n.tr('circle.my_circles.title'),
+          style: AppTextStyles.headlineMedium,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: AppButton(
+              text: l10n.tr('circle.create.button.create_short'),
+              type: AppButtonType.primary,
+>>>>>>> 176d63962583bf7e35fe586d75ae5a3d8bc6ffec
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -105,19 +117,21 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                   Icon(
                     Icons.groups_outlined,
                     size: 64,
-                    color: AppColors.textTertiary,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.tr('dashboard.empty.no_circles'),
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   AppButton(
-                    text: '+ Crear Círculo',
+                    text: l10n.tr('circle.create.button.create_short'),
                     type: AppButtonType.primary,
                     onPressed: () async {
                       final result = await Navigator.push(
@@ -175,9 +189,9 @@ class _MyCirclesViewState extends State<MyCirclesView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Material(
         color: Colors.transparent,
@@ -232,7 +246,7 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                             ? description
                             : '$memberCount ${l10n.tr('circle.label.members')}',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 3,
                         overflow: TextOverflow.visible,
@@ -242,7 +256,12 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                 ),
 
                 // Flecha de navegación
-                Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                ),
               ],
             ),
           ),

@@ -39,7 +39,7 @@ class ResolveConflictDialog extends StatelessWidget {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
@@ -85,24 +85,26 @@ class ResolveConflictDialog extends StatelessWidget {
                             'Conflicto de Horario',
                             style: AppTextStyles.headlineSmall.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Tienes eventos que se superponen',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close),
                       onPressed: () =>
                           Navigator.of(context, rootNavigator: true).pop(false),
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -122,7 +124,7 @@ class ResolveConflictDialog extends StatelessWidget {
                           title: personalTitle,
                           date: personalDate,
                           location: personalLocation,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           icon: Icons.person,
                           label: 'EVENTO PERSONAL',
                           actions: (vm) => [
@@ -156,7 +158,7 @@ class ResolveConflictDialog extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Divider(
-                                color: AppColors.border,
+                                color: Theme.of(context).colorScheme.outline,
                                 thickness: 1,
                               ),
                             ),
@@ -170,22 +172,28 @@ class ResolveConflictDialog extends StatelessWidget {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.surface,
+                                  color: Theme.of(context).colorScheme.surface,
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppColors.border),
+                                  border: Border.all(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline,
+                                  ),
                                 ),
                                 child: Text(
                                   'VS',
                                   style: AppTextStyles.labelSmall.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textSecondary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(
                               child: Divider(
-                                color: AppColors.border,
+                                color: Theme.of(context).colorScheme.outline,
                                 thickness: 1,
                               ),
                             ),
@@ -271,7 +279,7 @@ class ResolveConflictDialog extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(24),
                     bottomRight: Radius.circular(24),
@@ -286,15 +294,20 @@ class ResolveConflictDialog extends StatelessWidget {
                           context,
                           rootNavigator: true,
                         ).pop(true),
-                        icon: const Icon(Icons.event_available),
-                        label: const Text('Mantener ambos eventos'),
+                        icon: Icon(Icons.event_available),
+                        label: Text('Mantener ambos eventos'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: AppColors.border, width: 1.5),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 1.5,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          foregroundColor: AppColors.textPrimary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -305,12 +318,12 @@ class ResolveConflictDialog extends StatelessWidget {
                       icon: Icon(
                         Icons.calendar_month,
                         size: 18,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       label: Text(
                         'Ver en calendario',
                         style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -339,7 +352,7 @@ class ResolveConflictDialog extends StatelessWidget {
       builder: (context, vm, _) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: color.withOpacity(0.3), width: 2),
             boxShadow: [
@@ -391,7 +404,7 @@ class ResolveConflictDialog extends StatelessWidget {
                             title,
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -448,14 +461,14 @@ class ResolveConflictDialog extends StatelessWidget {
                         Icon(
                           Icons.access_time,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             date,
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -467,14 +480,14 @@ class ResolveConflictDialog extends StatelessWidget {
                         Icon(
                           Icons.location_on_outlined,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             location,
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

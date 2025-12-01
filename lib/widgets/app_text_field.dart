@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// Widget de campo de texto personalizado
@@ -83,6 +82,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -105,14 +105,16 @@ class AppTextField extends StatelessWidget {
             hintText: hintText,
             errorText: errorText,
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: AppColors.textSecondary)
+                ? Icon(prefixIcon, color: theme.colorScheme.onSurfaceVariant)
                 : null,
             prefix: prefix,
             suffixIcon: suffixIcon != null || suffix != null
-                ? _buildSuffixIcon()
+                ? _buildSuffixIcon(context)
                 : null,
             filled: true,
-            fillColor: enabled ? AppColors.surfaceVariant : AppColors.divider,
+            fillColor: enabled
+                ? theme.colorScheme.surfaceContainerHighest
+                : theme.disabledColor.withOpacity(0.1),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 18,
@@ -127,15 +129,18 @@ class AppTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.error, width: 1),
+              borderSide: BorderSide(color: theme.colorScheme.error, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
+              borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
             ),
           ),
         ),
@@ -143,7 +148,8 @@ class AppTextField extends StatelessWidget {
     );
   }
 
-  Widget? _buildSuffixIcon() {
+  Widget? _buildSuffixIcon(BuildContext context) {
+    final theme = Theme.of(context);
     if (suffix != null) {
       return suffix;
     }
@@ -153,10 +159,10 @@ class AppTextField extends StatelessWidget {
         return IconButton(
           icon: Icon(suffixIcon),
           onPressed: onSuffixIconPressed,
-          color: AppColors.textSecondary,
+          color: theme.colorScheme.onSurfaceVariant,
         );
       }
-      return Icon(suffixIcon, color: AppColors.textSecondary);
+      return Icon(suffixIcon, color: theme.colorScheme.onSurfaceVariant);
     }
 
     return null;
@@ -195,6 +201,7 @@ class SearchTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextField(
       controller: controller,
       onChanged: onChanged,
@@ -202,9 +209,12 @@ class SearchTextField extends StatelessWidget {
       style: AppTextStyles.bodyLarge,
       decoration: InputDecoration(
         hintText: hintText,
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        prefixIcon: Icon(
+          Icons.search,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
         filled: true,
-        fillColor: AppColors.surfaceVariant,
+        fillColor: theme.colorScheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 14,
@@ -219,7 +229,7 @@ class SearchTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(100),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
       ),
     );

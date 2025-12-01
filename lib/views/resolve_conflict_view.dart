@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/unified_calendar_models.dart';
+import '../l10n/app_localizations.dart';
 
 class ResolveConflictView extends StatelessWidget {
   final UnifiedEvent event;
@@ -14,8 +15,9 @@ class ResolveConflictView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -39,7 +41,7 @@ class ResolveConflictView extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text(
-                'Resolve Schedule Conflict',
+                l10n.tr('event.conflict.title'),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -47,7 +49,9 @@ class ResolveConflictView extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'You have ${conflicts.length} overlapping event${conflicts.length == 1 ? '' : 's'}:',
+                l10n
+                    .tr('event.conflict.overlapping_events')
+                    .replaceAll('{count}', '${conflicts.length}'),
                 style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
 
@@ -66,18 +70,22 @@ class ResolveConflictView extends StatelessWidget {
                     locationStr = e.circleName;
                   }
 
+                  final l10n = AppLocalizations.instance;
                   return _eventCard(
+                    context: context,
                     title: event.title,
                     type: event is PersonalUnifiedEvent
-                        ? 'Personal Event'
-                        : 'Circle Event',
+                        ? l10n.tr('event.create.type.personal')
+                        : l10n.tr('event.create.type.circle'),
                     icon: event is PersonalUnifiedEvent
                         ? Icons.calendar_today
                         : Icons.group,
                     date: _formatRange(event.startTime, event.endTime),
                     location: locationStr,
-                    actions: [_redButton('Cancel This Event')],
-                    sideColor: Colors.grey,
+                    actions: [
+                      _redButton(l10n.tr('event.conflict.button.cancel_event')),
+                    ],
+                    sideColor: Theme.of(context).colorScheme.outline,
                   );
                 },
               ),
@@ -87,10 +95,11 @@ class ResolveConflictView extends StatelessWidget {
               // First conflicting event
               if (conflicts.isNotEmpty)
                 _eventCard(
+                  context: context,
                   title: conflicts.first.title,
                   type: conflicts.first.type == UnifiedEventType.personal
-                      ? 'Personal Event'
-                      : 'Circle Event',
+                      ? l10n.tr('event.create.type.personal')
+                      : l10n.tr('event.create.type.circle'),
                   icon: conflicts.first.type == UnifiedEventType.personal
                       ? Icons.calendar_today
                       : Icons.group,
@@ -102,20 +111,24 @@ class ResolveConflictView extends StatelessWidget {
                   rsvpTag: null,
                   rsvpColor: null,
                   actions: [
-                    _outlineButton('Change to Maybe'),
+                    _outlineButton(
+                      l10n.tr('event.conflict.button.change_maybe'),
+                    ),
                     const SizedBox(width: 10),
-                    _blueButton('Change to Going'),
+                    _blueButton(l10n.tr('event.conflict.button.change_going')),
                   ],
-                  sideColor: Colors.blue,
+                  sideColor: Theme.of(context).colorScheme.primary,
                 )
               else
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text('No conflicting events found.'),
+                  child: Text(l10n.tr('event.conflict.no_conflicts')),
                 ),
 
               const SizedBox(height: 25),
@@ -129,12 +142,17 @@ class ResolveConflictView extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade400),
-                    color: Colors.white,
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    color: Theme.of(context).colorScheme.surface,
                   ),
-                  child: const Text(
-                    "Keep Both As-Is",
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  child: Text(
+                    l10n.tr('event.conflict.button.keep_both'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
@@ -144,8 +162,11 @@ class ResolveConflictView extends StatelessWidget {
               // View both in calendar
               Center(
                 child: Text(
-                  "View Both in Calendar",
-                  style: TextStyle(fontSize: 16, color: Colors.blue.shade700),
+                  l10n.tr('event.conflict.button.view_calendar'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
 
@@ -163,6 +184,7 @@ class ResolveConflictView extends StatelessWidget {
   }
 
   Widget _eventCard({
+    required BuildContext context,
     required String title,
     required String type,
     required IconData icon,
@@ -176,7 +198,7 @@ class ResolveConflictView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -197,11 +219,15 @@ class ResolveConflictView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(icon, size: 22, color: Colors.grey[700]),
+                    Icon(
+                      icon,
+                      size: 22,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 10),
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -209,7 +235,12 @@ class ResolveConflictView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(type, style: const TextStyle(color: Colors.black45)),
+                Text(
+                  type,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 const SizedBox(height: 10),
 
                 if (rsvpTag != null)
@@ -235,7 +266,7 @@ class ResolveConflictView extends StatelessWidget {
 
                 Row(
                   children: [
-                    const Icon(Icons.access_time, size: 18),
+                    Icon(Icons.access_time, size: 18),
                     const SizedBox(width: 8),
                     Text(date),
                   ],
@@ -243,7 +274,7 @@ class ResolveConflictView extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 18),
+                    Icon(Icons.location_on_outlined, size: 18),
                     const SizedBox(width: 8),
                     Text(location),
                   ],
@@ -261,18 +292,20 @@ class ResolveConflictView extends StatelessWidget {
 
   Widget _redButton(String text) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+      child: Builder(
+        builder: (context) => Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.error,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onError,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -282,20 +315,20 @@ class ResolveConflictView extends StatelessWidget {
 
   Widget _blueButton(String text) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF596CFF), Color(0xFF3A58FF)],
+      child: Builder(
+        builder: (context) => Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: BorderRadius.circular(20),
           ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -305,16 +338,18 @@ class ResolveConflictView extends StatelessWidget {
 
   Widget _outlineButton(String text) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+      child: Builder(
+        builder: (context) => Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ),
       ),

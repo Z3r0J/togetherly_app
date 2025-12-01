@@ -88,18 +88,20 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         title: Text(
-          _isEditMode ? 'Editar Círculo' : 'Crear Círculo',
-          style: const TextStyle(color: AppColors.textPrimary),
+          _isEditMode
+              ? l10n.tr('circle.create.dialog.title_edit')
+              : l10n.tr('circle.create.dialog.title_create'),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Cancelar',
+          child: Text(
+            l10n.tr('circle.create.dialog.cancel'),
             style: TextStyle(color: AppColors.primary),
           ),
         ),
@@ -136,7 +138,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                 children: [
                   Expanded(
                     child: AppButton(
-                      text: 'Eliminar',
+                      text: l10n.tr('circle.create.dialog.delete'),
                       type: AppButtonType.secondary,
                       onPressed: _isLoading ? null : _handleDeleteCircle,
                     ),
@@ -144,7 +146,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: AppButton(
-                      text: 'Guardar Cambios',
+                      text: l10n.tr('circle.create.button.save'),
                       type: AppButtonType.primary,
                       isLoading: _isLoading,
                       onPressed: _isLoading ? null : _handleSaveCircle,
@@ -154,7 +156,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               )
             else
               AppButton(
-                text: 'Crear Círculo',
+                text: l10n.tr('circle.create.button.create'),
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isLoading,
@@ -169,9 +171,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildCircleNameField() {
+    final l10n = AppLocalizations.instance;
     return AppTextField(
-      label: 'Nombre del Círculo',
-      hintText: 'Ingresa un nombre para tu círculo',
+      label: l10n.tr('circle.create.label.name'),
+      hintText: l10n.tr('circle.create.hint.name'),
       controller: _circleNameController,
       keyboardType: TextInputType.text,
     );
@@ -181,8 +184,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Color del Círculo', style: AppTextStyles.titleSmall),
-        const SizedBox(height: 16),
+        Text(
+          l10n.tr('circle.create.label.color'),
+          style: AppTextStyles.titleSmall,
+        ),
+        const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -210,7 +216,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                       ),
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check, color: Colors.white, size: 24)
+                        ? Icon(Icons.check, color: Colors.white, size: 24)
                         : null,
                   ),
                 ),
@@ -223,9 +229,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildDescriptionField() {
+    final l10n = AppLocalizations.instance;
     return AppTextField(
-      label: 'Descripción (opcional)',
-      hintText: '¿Para qué es este círculo?...',
+      label: l10n.tr('circle.create.label.description'),
+      hintText: l10n.tr('circle.create.hint.description'),
       controller: _descriptionController,
       keyboardType: TextInputType.multiline,
       maxLines: 4,
@@ -233,18 +240,21 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildPrivacySection() {
+    final l10n = AppLocalizations.instance;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Privacidad', style: AppTextStyles.titleSmall),
+        Text(
+          l10n.tr('circle.create.label.privacy'),
+          style: AppTextStyles.titleSmall,
+        ),
         const SizedBox(height: 16),
 
         // Opción: Solo invitaciones
         _buildPrivacyOption(
           value: 'invite-only',
-          title: 'Solo Invitaciones',
-          description:
-              'Los miembros solo pueden unirse mediante invitación directa.',
+          title: l10n.tr('circle.create.privacy.invite_only'),
+          description: l10n.tr('circle.create.privacy.invite_only_desc'),
           isSelected: _selectedPrivacy == 'invite-only',
         ),
 
@@ -253,8 +263,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
         // Opción: Público
         _buildPrivacyOption(
           value: 'public',
-          title: 'Público',
-          description: 'Cualquier persona con el enlace puede unirse.',
+          title: l10n.tr('circle.create.privacy.public'),
+          description: l10n.tr('circle.create.privacy.public_desc'),
           isSelected: _selectedPrivacy == 'public',
         ),
       ],
@@ -275,10 +285,12 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected
+                ? AppColors.primary
+                : Theme.of(context).colorScheme.outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -292,7 +304,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected
+                      ? AppColors.primary
+                      : Theme.of(context).colorScheme.outline,
                   width: 2,
                 ),
               ),
@@ -323,7 +337,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                   Text(
                     description,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -401,7 +415,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '¡Círculo "${_circleNameController.text}" creado exitosamente!',
+            l10n
+                .tr('circle.create.success')
+                .replaceAll('{name}', _circleNameController.text),
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
@@ -489,8 +505,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       print('✅ [UPDATE CIRCLE] Circle updated successfully!');
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Círculo actualizado exitosamente!'),
+        SnackBar(
+          content: Text(l10n.tr('circle.create.update_success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -526,18 +542,20 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.background,
-        title: const Text('Eliminar Círculo'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        title: Text(l10n.tr('circle.create.dialog.delete_title')),
         content: Text(
-          '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
+          l10n.tr('circle.create.dialog.delete_message'),
           style: AppTextStyles.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(color: AppColors.textSecondary),
+            child: Text(
+              l10n.tr('circle.create.dialog.cancel'),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           TextButton(
@@ -545,8 +563,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               Navigator.pop(context);
               _proceedWithDelete();
             },
-            child: const Text(
-              'Eliminar',
+            child: Text(
+              l10n.tr('circle.create.dialog.delete'),
               style: TextStyle(color: AppColors.error),
             ),
           ),
@@ -586,8 +604,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       print('✅ [DELETE CIRCLE] Circle deleted successfully!');
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Círculo eliminado exitosamente!'),
+        SnackBar(
+          content: Text(l10n.tr('circle.detail.delete_success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),

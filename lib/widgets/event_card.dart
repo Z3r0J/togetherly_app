@@ -120,16 +120,16 @@ class EventCard extends StatelessWidget {
               // Fecha
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.calendar_today_outlined,
                     size: 16,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     date,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -139,16 +139,16 @@ class EventCard extends StatelessWidget {
               // Hora
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
                     size: 16,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     time,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -158,17 +158,17 @@ class EventCard extends StatelessWidget {
               // Ubicación
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.location_on_outlined,
                     size: 16,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       location,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -190,13 +190,13 @@ class EventCard extends StatelessWidget {
                       Icon(
                         Icons.people_outline,
                         size: 16,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '$attendeeCount',
                         style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -253,7 +253,7 @@ class EventCard extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(50, 30),
                         ),
-                        child: const Text('Resolve'),
+                        child: Text('Resolve'),
                       ),
                     ],
                   ),
@@ -292,7 +292,7 @@ class CompactEventCard extends StatelessWidget {
   final String? notes;
 
   /// Color identificador
-  final Color colorTag;
+  final Color? colorTag;
 
   /// Estado de RSVP
   final RsvpStatus? rsvpStatus;
@@ -312,7 +312,7 @@ class CompactEventCard extends StatelessWidget {
     required this.time,
     this.location,
     this.notes,
-    this.colorTag = AppColors.primary,
+    this.colorTag,
     this.rsvpStatus,
     this.hasConflict = false,
     this.conflictWith,
@@ -336,7 +336,7 @@ class CompactEventCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border(
               left: BorderSide(
-                color: hasConflict ? AppColors.warning : colorTag,
+                color: hasConflict ? AppColors.warning : (colorTag ?? Theme.of(context).colorScheme.primary),
                 width: 4,
               ),
             ),
@@ -353,7 +353,7 @@ class CompactEventCard extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: colorTag,
+                        color: colorTag ?? Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -389,7 +389,7 @@ class CompactEventCard extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.more_vert),
+                      icon: Icon(Icons.more_vert),
                       onPressed: () {},
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -401,10 +401,12 @@ class CompactEventCard extends StatelessWidget {
                 // Hora
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time,
                       size: 14,
-                      color: AppColors.textTertiary,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                     ),
                     const SizedBox(width: 6),
                     Text(time, style: AppTextStyles.bodySmall),
@@ -416,10 +418,12 @@ class CompactEventCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on_outlined,
                         size: 14,
-                        color: AppColors.textTertiary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -435,10 +439,12 @@ class CompactEventCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.notes_outlined,
                         size: 14,
-                        color: AppColors.textTertiary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -477,11 +483,13 @@ class CompactEventCard extends StatelessWidget {
                       TextButton(
                         onPressed: onResolve ?? () {},
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(50, 24),
                         ),
-                        child: const Text('Resolve'),
+                        child: Text('Resolve'),
                       ),
                     ],
                   ),
@@ -501,7 +509,9 @@ class CompactEventCard extends StatelessWidget {
                             ? AppColors.rsvpGoing
                             : rsvpStatus == RsvpStatus.notGoing
                             ? AppColors.rsvpNotGoing
-                            : AppColors.textTertiary,
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -511,18 +521,20 @@ class CompactEventCard extends StatelessWidget {
                               ? AppColors.rsvpGoing
                               : rsvpStatus == RsvpStatus.notGoing
                               ? AppColors.rsvpNotGoing
-                              : AppColors.textSecondary,
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const Spacer(),
                       TextButton(
                         onPressed: () {},
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(80, 24),
                         ),
-                        child: const Text('Change Response'),
+                        child: Text('Change Response'),
                       ),
                     ],
                   ),

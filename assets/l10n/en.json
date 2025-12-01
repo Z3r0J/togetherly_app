@@ -1,0 +1,781 @@
+{
+  "common": {
+    "button": {
+      "cancel": "Cancel",
+      "ok": "OK",
+      "save": "Save",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "send": "Send",
+      "accept": "Accept",
+      "reject": "Reject",
+      "close": "Close",
+      "continue": "Continue",
+      "back": "Back",
+      "next": "Next",
+      "done": "Done",
+      "retry": "Retry",
+      "refresh": "Refresh"
+    },
+    "label": {
+      "email": "Email",
+      "password": "Password",
+      "name": "Name",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success",
+      "event": "event",
+      "events": "events"
+    },
+    "field": {
+      "email": "Email"
+    },
+    "error": {
+      "title": "Error"
+    },
+    "message": {
+      "loading": "Loading...",
+      "no_data": "No data available",
+      "network_error": "Connection error. Check your internet."
+    },
+    "dialog": {
+      "confirm_action": "Are you sure?",
+      "cannot_undo": "This action cannot be undone"
+    },
+    "snackbar": {
+      "auth_success": "Authentication successful!",
+      "auth_error": "Authentication error",
+      "verification_success": "Email verified successfully!",
+      "verification_error": "Error verifying email",
+      "join_success": "You joined {circleName}!",
+      "join_error": "Error accepting invitation",
+      "login_required": "You must log in to join the circle",
+      "initializing": "Initializing Togetherly...",
+      "init_error": "Error initializing app",
+      "profile_updated": "Profile updated",
+      "profile_update_failed": "Failed to update profile",
+      "registration_success": "Registration successful!",
+      "registration_info": "We have sent a verification email to:",
+      "registration_instruction": "After verifying your email, you can join the circle.",
+      "understood": "Got it"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Togetherly",
+      "subtitle": "Plan life together",
+      "illustration_placeholder": "Plan together",
+      "label": {
+        "email": "Email",
+        "password": "Password"
+      },
+      "hint": {
+        "email": "Enter your email",
+        "password": "Enter your password"
+      },
+      "link": {
+        "forgot_password": "Forgot your password?",
+        "sign_up": "Sign up",
+        "no_account": "Don't have an account? "
+      },
+      "button": {
+        "continue": "Continue with email",
+        "magic_link": "Send me a magic link"
+      },
+      "validation": {
+        "email_required": "Enter your email",
+        "password_required": "Enter your password"
+      },
+      "error": {
+        "generic": "Invalid credentials, please try again"
+      }
+    },
+    "register": {
+      "title": "Togetherly",
+      "heading": "Let's get you registered",
+      "label": {
+        "name": "Display name",
+        "email": "Email",
+        "password": "Password"
+      },
+      "hint": {
+        "name": "Enter your name",
+        "email": "Enter your email",
+        "password": "Create a secure password"
+      },
+      "password_instruction": "Minimum 8 characters with uppercase, lowercase, numbers and symbols",
+      "button": {
+        "create": "Create account"
+      },
+      "link": {
+        "login": "Log in",
+        "have_account": "Already have an account? "
+      },
+      "validation": {
+        "name_required": "Please enter your name",
+        "email_required": "Please enter your email",
+        "email_invalid": "Please enter a valid email",
+        "password_required": "Please enter a password",
+        "password_weak": "Password must be at least 8 characters and include uppercase, lowercase, numbers and special characters"
+      },
+      "error": {
+        "generic": "Registration error"
+      }
+    },
+    "forgot_password": {
+      "dialog_title": "Reset password",
+      "dialog_message": "Enter your email and we'll send you a link to reset your password.",
+      "success": "Password reset link sent!"
+    },
+    "magic_link": {
+      "dialog_title": "Magic Link",
+      "dialog_subtitle": "Log in without password",
+      "dialog_description": "We'll send you a special link to your email. Just click it to log in automatically.",
+      "hint": {
+        "email": "your@email.com"
+      },
+      "button": {
+        "send": "Send Magic Link"
+      },
+      "validation": {
+        "email_required": "Please enter your email",
+        "email_invalid": "Please enter a valid email"
+      },
+      "success": {
+        "title": "Link Sent!",
+        "message": "We've sent a magic link to your email.",
+        "instruction": "Click the link in the email to log in automatically.",
+        "expiry": "💡 The link will expire in 15 minutes"
+      },
+      "error": {
+        "generic": "Error sending link"
+      }
+    },
+    "email_verification": {
+      "dialog_title": "Check your email!",
+      "dialog_message": "We've sent you a verification email to:",
+      "dialog_instruction": "Please click the link in the email to verify your account and access Togetherly.",
+      "info_expiry": "The link will expire in 24 hours"
+    },
+    "message": {
+      "login_success": "Authentication successful!",
+      "login_error": "Authentication error",
+      "verification_success": "Email verified successfully!",
+      "verification_error": "Error verifying email",
+      "logout_confirm_title": "Log Out",
+      "logout_confirm_message": "Are you sure you want to log out?"
+    },
+    "error": {
+      "AUTH_UNAUTHORIZED": "You are not authorized to perform this action",
+      "AUTH_INVALID_CREDENTIALS": "Invalid email or password",
+      "AUTH_INVALID_TOKEN": "Invalid authentication token",
+      "AUTH_TOKEN_EXPIRED": "Your session has expired",
+      "AUTH_SESSION_EXPIRED": "Your session has expired. Please log in again",
+      "AUTH_INSUFFICIENT_PERMISSIONS": "You don't have sufficient permissions",
+      "AUTH_INVALID_API_KEY": "Invalid API key",
+      "AUTH_EMAIL_ALREADY_EXISTS": "This email is already registered",
+      "AUTH_INVALID_EMAIL_FORMAT": "Invalid email format",
+      "AUTH_WEAK_PASSWORD": "Password does not meet security requirements",
+      "AUTH_PASSWORDS_DO_NOT_MATCH": "Passwords do not match",
+      "AUTH_REGISTRATION_FAILED": "Registration could not be completed",
+      "AUTH_EMAIL_NOT_VERIFIED": "Your email has not been verified",
+      "AUTH_EMAIL_ALREADY_VERIFIED": "Your email is already verified",
+      "AUTH_VERIFICATION_TOKEN_INVALID": "Invalid verification token",
+      "AUTH_VERIFICATION_TOKEN_EXPIRED": "Verification token has expired",
+      "AUTH_MAGIC_LINK_INVALID": "Invalid magic link",
+      "AUTH_MAGIC_LINK_EXPIRED": "Magic link has expired",
+      "AUTH_MAGIC_LINK_ALREADY_USED": "This magic link has already been used",
+      "AUTH_MAGIC_LINK_NOT_FOUND": "Magic link not found",
+      "NETWORK_ERROR": "Could not connect to server. Check your connection",
+      "TIMEOUT_ERROR": "Request took too long. Please try again",
+      "UNKNOWN_ERROR": "An unexpected error occurred"
+    }
+  },
+  "dashboard": {
+    "greeting": "Welcome back,",
+    "date": "Today, {date}",
+    "menu": {
+      "profile": "My Profile",
+      "settings": "Settings",
+      "logout": "Log Out"
+    },
+    "section": {
+      "circles": "My Circles",
+      "events": "Upcoming Events",
+      "upcoming_event": "UPCOMING EVENT"
+    },
+    "link": {
+      "view_all": "View all",
+      "view_circle": "View Circle →"
+    },
+    "filter": {
+      "all": "All",
+      "personal": "Personal",
+      "going": "Going",
+      "maybe": "Maybe",
+      "confirmed": "Confirmed"
+    },
+    "empty": {
+      "no_events": "No upcoming events",
+      "no_circles": "You don't have any circles yet. Create your first circle!",
+      "no_events_filter": "No events for this filter"
+    },
+    "label": {
+      "members": "members",
+      "conflict": "Conflict"
+    },
+    "action": {
+      "retry": "Retry"
+    },
+    "dialog": {
+      "logout_title": "Log Out",
+      "logout_message": "Are you sure you want to log out?"
+    },
+    "error": {
+      "loading_circles": "Error loading circles",
+      "loading_events": "Error loading events",
+      "unknown": "Unknown error"
+    },
+    "fab": {
+      "create_event": "Create Event",
+      "create_circle": "Create Circle"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "action": {
+      "mark_all_read": "Mark all as read",
+      "view_event": "View Event",
+      "dismiss": "Dismiss",
+      "resolve": "Resolve",
+      "view": "View",
+      "set_rsvp": "Set RSVP",
+      "accept": "Accept",
+      "reject": "Reject"
+    },
+    "filter": {
+      "all": "All",
+      "events": "Events",
+      "circles": "Circles",
+      "rsvp": "RSVP"
+    },
+    "empty": "No notifications",
+    "message": {
+      "all_read": "All notifications marked as read",
+      "dismissed": "Notification dismissed",
+      "navigating_event": "Navigating to event details...",
+      "opening_rsvp": "Opening RSVP selector...",
+      "opening_conflict": "Opening conflict resolution...",
+      "invitation_accepted": "Circle invitation accepted!",
+      "invitation_rejected": "Circle invitation rejected.",
+      "action_executed": "Action executed: "
+    }
+  },
+  "user": {
+    "error": {
+      "USER_NOT_FOUND": "User not found",
+      "USER_ALREADY_EXISTS": "User already exists",
+      "USER_DELETED": "Account has been deleted",
+      "USER_UPDATE_FAILED": "Could not update user information",
+      "USER_DELETE_FAILED": "Could not delete account"
+    }
+  },
+  "circle": {
+    "label": {
+      "members": "members",
+      "member": "member",
+      "upcoming_events": "upcoming events",
+      "upcoming_event": "upcoming event",
+      "active": "Active",
+      "next_event": "NEXT EVENT",
+      "view_circle": "View Circle"
+    },
+    "message": {
+      "load_failed": "Could not load circles. Please try again.",
+      "create_failed": "Could not create circle. Please try again.",
+      "session_expired": "Your session has expired. Please log in again.",
+      "auth_required": "Authentication required. Please log in.",
+      "no_token": "Access token not found",
+      "delete_success": "Circle deleted successfully!",
+      "delete_failed": "Could not delete circle"
+    },
+    "create": {
+      "title_edit": "Edit Circle",
+      "title_create": "Create Circle",
+      "label": {
+        "name": "Circle Name",
+        "color": "Circle Color",
+        "description": "Description",
+        "privacy": "Privacy"
+      },
+      "hint": {
+        "name": "Enter a name for your circle",
+        "description": "Optional - Describe the purpose of this circle"
+      },
+      "button": {
+        "save": "Save Changes",
+        "create": "Create Circle",
+        "create_short": "+ Create Circle"
+      },
+      "privacy": {
+        "public": "Public",
+        "private": "Private",
+        "invite_only": "Invite Only",
+        "invite_only_desc": "Members can only join via direct invitation.",
+        "public_desc": "Anyone with the link can join."
+      },
+      "success": "Circle \"{name}\" created successfully!",
+      "update_success": "Circle updated successfully!",
+      "no_circles_available": "You have no circles available",
+      "dialog": {
+        "title_edit": "Edit Circle",
+        "title_create": "Create Circle",
+        "delete_title": "Delete Circle",
+        "delete_message": "Are you sure you want to delete this circle? This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      }
+    },
+    "invite": {
+      "title": "Invite to {circleName}",
+      "invited": "You've been invited!",
+      "join_message": "Join \"{circleName}\"",
+      "invited_by": "Invited by {inviterName}",
+      "login_to_join": "Log in to join",
+      "register_with_email": "Register with the invitation email",
+      "divider": "or",
+      "share_link": "Share Link",
+      "share_link_subtitle": "Anyone with the link can join",
+      "or_write_email": "Or Write Email",
+      "invitations_sent": "Invitations Sent",
+      "invitation_pending": "Invitation Pending",
+      "sending": "Sending...",
+      "created_by": "Created by {ownerName}",
+      "joining": "Joining...",
+      "join_info": "By joining, you can see and participate in all circle events.",
+      "label": {
+        "emails": "Email Addresses",
+        "email_section": "Or Write Email"
+      },
+      "hint": {
+        "email": "Enter email addresses...",
+        "emails": "Enter email addresses..."
+      },
+      "status": {
+        "joined": "Joined ✓",
+        "pending": "Pending"
+      },
+      "button": {
+        "copy_link": "Copy Link",
+        "share": "Share",
+        "send": "Send Invitation",
+        "sending": "Sending...",
+        "send_invitation": "Send Invitation",
+        "join": "Join",
+        "join_circle": "Join circle",
+        "invite": "+ Invite"
+      },
+      "success": {
+        "link_copied": "Link copied to clipboard",
+        "sent": "Invitation sent to {emails}"
+      },
+      "error": {
+        "already_sent": "You already sent an invitation to this email",
+        "send_failed": "Error sending invitation",
+        "generate_link": "Error generating invitation link"
+      },
+      "message": {
+        "invitation_sent": "Invitation sent to {emails}",
+        "join_success": "You joined {circleName}!",
+        "join_error": "Error accepting invitation",
+        "link_generation_error": "Error generating invitation link",
+        "send_error": "Error sending invitation",
+        "already_invited": "You already sent an invitation to this email",
+        "opening_share": "Opening share options..."
+      }
+    },
+    "join": {
+      "title": "Join circle"
+    },
+    "detail": {
+      "my_circles": "My Circles",
+      "members": "Members",
+      "members_count": "Members ({count})",
+      "upcoming_events": "Upcoming Events",
+      "owner": "(Owner)",
+      "edit_circle": "Edit Circle",
+      "delete_circle": "Delete Circle",
+      "delete_confirmation": "Are you sure you want to delete this circle? This action cannot be undone.",
+      "delete_success": "Circle deleted successfully!"
+    },
+    "my_circles": {
+      "title": "My Circles"
+    },
+    "error": {
+      "CIRCLE_NOT_FOUND": "Circle not found",
+      "CIRCLE_ALREADY_EXISTS": "A circle with this name already exists",
+      "CIRCLE_CREATE_FAILED": "Could not create circle",
+      "CIRCLE_UPDATE_FAILED": "Could not update circle",
+      "CIRCLE_DELETE_FAILED": "Could not delete circle",
+      "CIRCLE_NAME_REQUIRED": "Circle name is required",
+      "CIRCLE_INVALID_PRIVACY": "Invalid privacy setting",
+      "CIRCLE_NOT_MEMBER": "You are not a member of this circle",
+      "CIRCLE_NOT_OWNER": "Only the circle creator can perform this action",
+      "CIRCLE_ALREADY_MEMBER": "You are already a member of this circle",
+      "CIRCLE_MEMBER_LIMIT_REACHED": "Member limit reached",
+      "CIRCLE_CANNOT_REMOVE_OWNER": "Cannot remove circle creator",
+      "CIRCLE_MEMBER_ADD_FAILED": "Could not add member",
+      "CIRCLE_MEMBER_REMOVE_FAILED": "Could not remove member"
+    }
+  },
+  "event": {
+    "create": {
+      "title": "Create Event",
+      "type": {
+        "personal": "Personal Event",
+        "circle": "Circle Event"
+      },
+      "location_picker_title": "Select Location",
+      "label": {
+        "title": "Event title",
+        "description": "Description",
+        "location": "Location",
+        "date": "Date",
+        "start_time": "Start time",
+        "end_time": "End time",
+        "all_day": "All day",
+        "time": "Time",
+        "duration": "Duration",
+        "circle": "Circle",
+        "notes": "Notes",
+        "reminder": "Reminder",
+        "color": "Color",
+        "time_poll": "Time Poll"
+      },
+      "hint": {
+        "title": "E.g.: Team meeting",
+        "description": "Add event details",
+        "location": "Where will it be?",
+        "select_circle": "Select a circle",
+        "notes": "Add more details..."
+      },
+      "button": {
+        "create": "Create Event",
+        "add_time": "Add Time",
+        "create_circle": "Create Circle Event",
+        "create_personal": "Create Personal Event",
+        "add_event": "Add Event"
+      },
+      "validation": {
+        "title_required": "Please enter an event title",
+        "end_after_start": "End time must be after start time"
+      },
+      "time_poll": {
+        "option": "Option",
+        "start": "Start",
+        "end": "End"
+      },
+      "reminder": {
+        "none": "None",
+        "5min": "5 minutes",
+        "10min": "10 minutes",
+        "30min": "30 minutes"
+      },
+      "success": "Event created successfully",
+      "error": "Error creating event"
+    },
+    "detail": {
+      "title": "Event Details",
+      "date_tbd": "Date to be defined",
+      "time_tbd": "Time to be defined",
+      "all_day": "All day",
+      "button": {
+        "retry": "Retry",
+        "edit": "Edit Event",
+        "lock": "Lock Time Poll",
+        "finalize": "Finalize Event",
+        "view_details": "View details"
+      },
+      "label": {
+        "description": "Description",
+        "your_rsvp": "Your RSVP"
+      },
+      "tab": {
+        "rsvp": "RSVP",
+        "time_poll": "Time Poll",
+        "map": "Map",
+        "details": "Details"
+      },
+      "rsvp": {
+        "your_rsvp": "Your RSVP",
+        "confirm_attendance": "Confirm your attendance",
+        "going": "I'll attend",
+        "maybe": "Maybe",
+        "not_going": "I won't attend",
+        "going_label": "Going",
+        "maybe_label": "Maybe",
+        "not_going_label": "Not going",
+        "whos_coming": "Who's Coming?",
+        "no_rsvps": "No RSVPs yet",
+        "no_one_yet": "No one here yet",
+        "going_count": "{count} Going",
+        "maybe_count": "{count} Maybe",
+        "not_going_count": "{count} Not Going"
+      },
+      "time_poll": {
+        "title": "Time Poll",
+        "no_times": "No time options",
+        "no_votes": "No votes yet",
+        "votes": "votes",
+        "vote": "vote",
+        "vote_singular": "vote",
+        "vote_plural": "votes",
+        "vote_button": "Vote or Change Vote",
+        "vote_button_short": "Vote",
+        "choose_time": "Choose a time",
+        "no_options": "No time options to lock",
+        "lock_title": "Lock time poll",
+        "lock_message": "Do you want to lock the poll with the most voted option?",
+        "lock_success": "Time poll locked successfully!",
+        "lock_error": "Error locking time poll",
+        "lock_button": "Lock"
+      },
+      "location": {
+        "no_location": "No location",
+        "share": "Share",
+        "directions": "Directions",
+        "cannot_open": "Could not open maps"
+      },
+      "conflict": {
+        "title": "Resolve Conflict",
+        "overlapping_events": "You have {count} overlapping events",
+        "no_conflicts": "No conflicts",
+        "button": {
+          "cancel_event": "Cancel This Event",
+          "change_maybe": "Change to Maybe",
+          "change_going": "Change to Going",
+          "keep_both": "Keep Both As-Is",
+          "view_calendar": "View Both in Calendar"
+        }
+      },
+      "actions": {
+        "edit": "Edit Event",
+        "lock_poll": "Lock Time Poll",
+        "finalize": "Finalize Event",
+        "delete": "Delete",
+        "edit_personal": "Edit Event",
+        "cancel_personal": "Cancel Event",
+        "delete_personal": "Delete"
+      },
+      "finalize": {
+        "title": "Finalize event",
+        "message": "Do you want to finalize the event and set the final time?\\n\\nThe locked time will become the final event time.",
+        "success": "Event finalized successfully!",
+        "error": "Error finalizing event",
+        "no_detail": "Error: Could not load event detail",
+        "button": "Finalize"
+      },
+      "delete": {
+        "title": "Delete event",
+        "message": "Are you sure you want to delete this event? This action cannot be undone.",
+        "message_personal": "Are you sure you want to delete this personal event?",
+        "success": "Event deleted successfully",
+        "error": "Error deleting event"
+      },
+      "status": {
+        "cancelled": "Cancelled",
+        "draft": "DRAFT",
+        "locked": "LOCKED",
+        "finalized": "FINALIZED"
+      },
+      "coming_soon": {
+        "edit": "Edit event coming soon",
+        "edit_personal": "Edit personal event coming soon",
+        "cancel_personal": "Cancel personal event coming soon",
+        "delete_personal": "Delete personal event coming soon"
+      }
+    },
+    "conflict": {
+      "title": "Resolve Schedule Conflict",
+      "no_conflicts": "No conflicting events found.",
+      "overlapping_events": "You have {count} overlapping event(s):",
+      "conflicts_with": "Conflicts with",
+      "generic_message": "Event conflicts with another in your calendar",
+      "button": {
+        "cancel_event": "Cancel This Event",
+        "change_maybe": "Change to Maybe",
+        "change_going": "Change to Going",
+        "keep_both": "Keep Both As-Is",
+        "view_calendar": "View Both in Calendar"
+      }
+    },
+    "rsvp": {
+      "dialog_title": "Your response",
+      "going": "I'll attend",
+      "maybe": "Maybe",
+      "not_going": "I won't attend"
+    },
+    "day_view": {
+      "title": "Day Events"
+    },
+    "error": {
+      "EVENT_NOT_FOUND": "Event not found",
+      "EVENT_CREATE_FAILED": "Could not create event",
+      "EVENT_UPDATE_FAILED": "Could not update event",
+      "EVENT_DELETE_FAILED": "Could not delete event",
+      "EVENT_TITLE_REQUIRED": "Event title is required",
+      "EVENT_INVALID_STATUS": "Invalid event status",
+      "EVENT_ALREADY_LOCKED": "Event is already locked",
+      "EVENT_NOT_LOCKED": "Event is not locked",
+      "EVENT_ALREADY_FINALIZED": "Event is already finalized",
+      "EVENT_NOT_FINALIZED": "Event is not finalized",
+      "EVENT_CANNOT_MODIFY_LOCKED": "Cannot modify locked event",
+      "EVENT_CANNOT_MODIFY_FINALIZED": "Cannot modify finalized event",
+      "EVENT_LOCK_FAILED": "Could not lock event",
+      "EVENT_FINALIZE_FAILED": "Could not finalize event",
+      "EVENT_TIME_NOT_FOUND": "Event time not found",
+      "EVENT_TIME_REQUIRED": "At least one time is required",
+      "EVENT_TIME_INVALID": "Invalid event time",
+      "EVENT_TIME_CONFLICT": "This time conflicts with another event",
+      "EVENT_NO_TIMES_AVAILABLE": "No times available",
+      "EVENT_RSVP_NOT_FOUND": "RSVP not found",
+      "EVENT_RSVP_UPDATE_FAILED": "Could not update RSVP",
+      "EVENT_RSVP_INVALID_STATUS": "Invalid RSVP status",
+      "EVENT_RSVP_ALREADY_EXISTS": "RSVP already exists for this event",
+      "EVENT_VOTE_NOT_FOUND": "Vote not found",
+      "EVENT_VOTE_FAILED": "Could not register vote",
+      "EVENT_CANNOT_VOTE_LOCKED": "Cannot vote on locked event",
+      "EVENT_ALREADY_VOTED": "You have already voted on this event"
+    }
+  },
+  "profile": {
+    "title": "Profile & Settings",
+    "edit": {
+      "title": "Edit Profile",
+      "label": {
+        "avatar_url": "Avatar URL"
+      },
+      "button": {
+        "save": "Save Changes"
+      }
+    },
+    "section": {
+      "account": "Account",
+      "notifications": "Notifications",
+      "calendar": "Calendar",
+      "privacy": "Privacy",
+      "about": "About",
+      "danger_zone": "Danger Zone"
+    },
+    "option": {
+      "change_password": "Change Password",
+      "email_preferences": "Email Preferences",
+      "language": "Language",
+      "theme": "Theme",
+      "time_zone": "Time Zone",
+      "log_out": "Log Out",
+      "delete_account": "Delete Account"
+    },
+    "theme": {
+      "title": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "title": "Language",
+      "system": "System",
+      "spanish": "Español",
+      "english": "English"
+    }
+  },
+  "calendar": {
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "weekday_names": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "view": {
+      "monthly": "Monthly view",
+      "annual": "Annual view"
+    }
+  },
+  "location": {
+    "search": {
+      "hint": "Search for a place..."
+    },
+    "button": {
+      "confirm": "Confirm Location"
+    },
+    "map_preview": {
+      "title": "Map Preview",
+      "description": "Google Maps will appear here"
+    }
+  },
+  "validation": {
+    "email_required": "Please enter an email",
+    "email_invalid": "Please enter a valid email",
+    "error": {
+      "VALIDATION_FAILED": "Validation failed",
+      "VALIDATION_INVALID_INPUT": "Invalid input",
+      "VALIDATION_REQUIRED_FIELD_MISSING": "Required field missing",
+      "VALIDATION_INVALID_FORMAT": "Invalid format",
+      "VALIDATION_INVALID_UUID": "Invalid UUID format",
+      "VALIDATION_INVALID_DATE": "Invalid date format",
+      "VALIDATION_INVALID_EMAIL": "Invalid email format",
+      "VALIDATION_INVALID_URL": "Invalid URL format",
+      "VALIDATION_VALUE_TOO_LONG": "Value exceeds maximum length",
+      "VALIDATION_VALUE_TOO_SHORT": "Value is too short",
+      "VALIDATION_VALUE_OUT_OF_RANGE": "Value is out of allowed range"
+    }
+  },
+  "system": {
+    "error": {
+      "DB_ERROR": "Database error",
+      "DB_CONNECTION_FAILED": "Could not connect to database",
+      "DB_DUPLICATE_ENTRY": "Duplicate entry in database",
+      "DB_FOREIGN_KEY_CONSTRAINT": "Foreign key constraint violation",
+      "DB_TRANSACTION_FAILED": "Database transaction failed",
+      "DB_QUERY_FAILED": "Database query failed",
+      "INTERNAL_SERVER_ERROR": "Internal server error",
+      "SERVICE_UNAVAILABLE": "Service temporarily unavailable",
+      "NOT_FOUND": "Resource not found",
+      "NOT_IMPLEMENTED": "Feature not yet implemented",
+      "RATE_LIMIT_EXCEEDED": "Too many requests. Try again later",
+      "REQUEST_TIMEOUT": "Request timeout",
+      "PAYLOAD_TOO_LARGE": "Request is too large",
+      "UNKNOWN_ERROR": "An unknown error occurred",
+      "EMAIL_SERVICE_ERROR": "Email service error",
+      "EMAIL_SEND_FAILED": "Could not send email",
+      "STORAGE_SERVICE_ERROR": "Storage service error",
+      "EXTERNAL_API_ERROR": "External API error"
+    }
+  }
+}

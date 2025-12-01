@@ -5,6 +5,7 @@ import '../services/circle_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/widgets.dart';
+import '../l10n/app_localizations.dart';
 
 class JoinCircleView extends StatefulWidget {
   final String shareToken;
@@ -84,7 +85,12 @@ class _JoinCircleViewState extends State<JoinCircleView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_error?.message ?? 'Error al unirse al círculo'),
+            content: Text(
+              _error?.message ??
+                  AppLocalizations.instance.tr(
+                    'circle.invite.message.join_error',
+                  ),
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -98,22 +104,25 @@ class _JoinCircleViewState extends State<JoinCircleView> {
     if (colorStr != null) {
       return AppColors.hexToColor(colorStr);
     }
-    return AppColors.primary;
+    return Theme.of(context).colorScheme.primary;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('Unirse a círculo', style: AppTextStyles.headlineMedium),
+        title: Text(
+          AppLocalizations.instance.tr('circle.join.title'),
+          style: AppTextStyles.headlineMedium,
+        ),
       ),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary,
+                ),
               ),
             )
           : _error != null
@@ -129,18 +138,18 @@ class _JoinCircleViewState extends State<JoinCircleView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               _error!.message,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             AppButton(
-              text: 'Reintentar',
+              text: AppLocalizations.instance.tr('common.button.retry'),
               type: AppButtonType.primary,
               onPressed: _loadCircleDetails,
             ),
@@ -179,7 +188,7 @@ class _JoinCircleViewState extends State<JoinCircleView> {
           Text(
             _circlePreview!.name,
             style: AppTextStyles.headlineLarge.copyWith(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
@@ -187,9 +196,11 @@ class _JoinCircleViewState extends State<JoinCircleView> {
 
           // Owner Name
           Text(
-            'Creado por ${_circlePreview!.ownerName}',
+            AppLocalizations.instance
+                .tr('circle.invite.created_by')
+                .replaceAll('{ownerName}', _circlePreview!.ownerName),
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -201,24 +212,29 @@ class _JoinCircleViewState extends State<JoinCircleView> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border, width: 1),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Descripción',
+                    AppLocalizations.instance.tr(
+                      'circle.create.label.description',
+                    ),
                     style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _circlePreview!.description!,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -244,9 +260,9 @@ class _JoinCircleViewState extends State<JoinCircleView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Al unirte, podrás ver y participar en todos los eventos del círculo.',
+                    AppLocalizations.instance.tr('circle.invite.join_info'),
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -257,7 +273,11 @@ class _JoinCircleViewState extends State<JoinCircleView> {
 
           // Join Button
           AppButton(
-            text: _isJoining ? 'Uniéndose...' : 'Unirse al círculo',
+            text: _isJoining
+                ? AppLocalizations.instance.tr('circle.invite.joining')
+                : AppLocalizations.instance.tr(
+                    'circle.invite.button.join_circle',
+                  ),
             type: AppButtonType.primary,
             fullWidth: true,
             onPressed: _isJoining ? null : _handleJoinCircle,
@@ -267,7 +287,7 @@ class _JoinCircleViewState extends State<JoinCircleView> {
 
           // Cancel Button
           AppButton(
-            text: 'Cancelar',
+            text: AppLocalizations.instance.tr('common.button.cancel'),
             type: AppButtonType.outline,
             fullWidth: true,
             onPressed: _isJoining

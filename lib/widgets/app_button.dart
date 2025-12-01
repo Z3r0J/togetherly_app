@@ -124,8 +124,7 @@ class AppButton extends StatelessWidget {
     switch (type) {
       case AppButtonType.primary:
         return ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textOnPrimary,
+          // Los colores ahora se toman del tema en ElevatedButton
           elevation: 0,
           padding: padding,
           shape: RoundedRectangleBorder(
@@ -136,8 +135,7 @@ class AppButton extends StatelessWidget {
 
       case AppButtonType.secondary:
         return ElevatedButton.styleFrom(
-          backgroundColor: AppColors.surfaceVariant,
-          foregroundColor: AppColors.primary,
+          // Los colores ahora se toman del tema en ElevatedButton
           elevation: 0,
           padding: padding,
           shape: RoundedRectangleBorder(
@@ -149,7 +147,7 @@ class AppButton extends StatelessWidget {
       case AppButtonType.destructive:
         return ElevatedButton.styleFrom(
           backgroundColor: AppColors.error,
-          foregroundColor: AppColors.textOnPrimary,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: padding,
           shape: RoundedRectangleBorder(
@@ -160,8 +158,7 @@ class AppButton extends StatelessWidget {
 
       case AppButtonType.outline:
         return OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 2),
+          // Los colores ahora se toman del tema en OutlinedButton
           padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
@@ -171,7 +168,7 @@ class AppButton extends StatelessWidget {
 
       case AppButtonType.text:
         return TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          // Los colores ahora se toman del tema en TextButton
           padding: padding,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: textStyle,
@@ -216,7 +213,7 @@ class AppButton extends StatelessWidget {
     switch (type) {
       case AppButtonType.primary:
       case AppButtonType.destructive:
-        return AppColors.textOnPrimary;
+        return Colors.white;
       case AppButtonType.secondary:
       case AppButtonType.outline:
       case AppButtonType.text:
@@ -265,6 +262,7 @@ class AppIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: size,
       height: size,
@@ -272,9 +270,10 @@ class AppIconButton extends StatelessWidget {
         onPressed: onPressed,
         icon: Icon(icon),
         iconSize: iconSize ?? size * 0.5,
-        color: iconColor ?? AppColors.textPrimary,
+        color: iconColor ?? theme.colorScheme.onSurface,
         style: IconButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.surfaceVariant,
+          backgroundColor:
+              backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
           shape: const CircleBorder(),
         ),
       ),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1087557670012",
+    "project_id": "togetherly-app-4b46c",
+    "storage_bucket": "togetherly-app-4b46c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1087557670012:android:8bc97a7e7d583807c165f9",
+        "android_client_info": {
+          "package_name": "com.example.togetherly_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN_U8UpTqOniGcfdlUrtrXrpNd6xaYotg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/notification_view_model.dart';
 import '../models/notification_models.dart';
+import '../l10n/app_localizations.dart';
 import '../models/unified_calendar_models.dart';
 import '../services/event_service.dart';
 import 'event_detail_tabs_view.dart';
@@ -17,8 +18,8 @@ class NotificationsView extends StatefulWidget {
 }
 
 class _NotificationsViewState extends State<NotificationsView> {
-  String _selectedFilter = 'Todos';
-  final List<String> _filters = ['Todos', 'Eventos', 'Círculos', 'RSVP'];
+  String _selectedFilter = 'all';
+  final List<String> _filterKeys = ['all', 'events', 'circles', 'rsvp'];
 
   @override
   void initState() {
@@ -37,27 +38,28 @@ class _NotificationsViewState extends State<NotificationsView> {
     // Map UI filter to backend category
     String? category;
     switch (filter) {
-      case 'Eventos':
+      case 'events':
         category = 'events';
         break;
-      case 'Círculos':
+      case 'circles':
         category = 'circles';
         break;
-      case 'RSVP':
+      case 'rsvp':
         category = 'rsvps';
         break;
       default:
-        category = null; // 'Todos' means no category filter
+        category = null; // 'all' means no category filter
     }
 
     context.read<NotificationViewModel>().loadNotifications(category: category);
   }
 
   void _handleMarkAllRead(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     context.read<NotificationViewModel>().markAllAsRead();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Todas las notificaciones marcadas como leídas'),
+      SnackBar(
+        content: Text(l10n.tr('notifications.message.all_read')),
         backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),
@@ -65,10 +67,11 @@ class _NotificationsViewState extends State<NotificationsView> {
   }
 
   void _dismissNotification(BuildContext context, String notificationId) {
+    final l10n = AppLocalizations.instance;
     context.read<NotificationViewModel>().dismissNotification(notificationId);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notificación descartada'),
+      SnackBar(
+        content: Text(l10n.tr('notifications.message.dismissed')),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -98,11 +101,11 @@ class _NotificationsViewState extends State<NotificationsView> {
     final difference = now.difference(createdAt);
 
     if (difference.inMinutes < 60) {
-      return 'hace ${difference.inMinutes}m';
+      return '${difference.inMinutes}m';
     } else if (difference.inHours < 24) {
-      return 'hace ${difference.inHours}h';
+      return '${difference.inHours}h';
     } else {
-      return 'hace ${difference.inDays}d';
+      return '${difference.inDays}d';
     }
   }
 
@@ -114,19 +117,22 @@ class _NotificationsViewState extends State<NotificationsView> {
         final isLoading = viewModel.isLoading;
         final error = viewModel.error;
 
+        final l10n = AppLocalizations.instance;
+
         return Scaffold(
-          backgroundColor: AppColors.surface,
           appBar: AppBar(
-            backgroundColor: AppColors.background,
             elevation: 0,
-            title: Text('Notificaciones', style: AppTextStyles.headlineMedium),
+            title: Text(
+              l10n.tr('notifications.title'),
+              style: AppTextStyles.headlineMedium,
+            ),
             actions: [
               TextButton(
                 onPressed: () => _handleMarkAllRead(context),
                 child: Text(
-                  'Marcar todo como leído',
+                  l10n.tr('notifications.action.mark_all_read'),
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -143,21 +149,23 @@ class _NotificationsViewState extends State<NotificationsView> {
                     horizontal: 24,
                     vertical: 12,
                   ),
-                  children: _filters.map((filter) {
-                    final isSelected = filter == _selectedFilter;
+                  children: _filterKeys.map((filterKey) {
+                    final isSelected = filterKey == _selectedFilter;
                     return Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: GestureDetector(
-                        onTap: () => _filterNotifications(filter),
+                        onTap: () => _filterNotifications(filterKey),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              filter,
+                              l10n.tr('notifications.filter.$filterKey'),
                               style: AppTextStyles.labelMedium.copyWith(
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.textSecondary,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.w500,
@@ -169,7 +177,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                                 height: 3,
                                 width: 30,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                   borderRadius: BorderRadius.circular(1.5),
                                 ),
                               ),
@@ -184,11 +192,11 @@ class _NotificationsViewState extends State<NotificationsView> {
 
               // Loading state
               if (isLoading && notifications.isEmpty)
-                const Expanded(
+                Expanded(
                   child: Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primary,
+                        Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -200,7 +208,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.error_outline,
                           size: 64,
                           color: AppColors.error,
@@ -209,13 +217,15 @@ class _NotificationsViewState extends State<NotificationsView> {
                         Text(
                           error.message,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         AppButton(
-                          text: 'Reintentar',
+                          text: l10n.tr('common.button.retry'),
                           type: AppButtonType.primary,
                           onPressed: () {
                             viewModel.loadNotifications();
@@ -235,13 +245,17 @@ class _NotificationsViewState extends State<NotificationsView> {
                         Icon(
                           Icons.notifications_off_outlined,
                           size: 64,
-                          color: AppColors.textTertiary,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Sin notificaciones',
+                          l10n.tr('notifications.empty'),
                           style: AppTextStyles.labelMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -288,7 +302,9 @@ class _NotificationsViewState extends State<NotificationsView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: notification.isRead ? AppColors.surface : AppColors.background,
+        color: notification.isRead
+            ? Theme.of(context).colorScheme.surface
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: config.color, width: 4)),
       ),
@@ -331,7 +347,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                         Text(
                           notification.body,
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -339,7 +357,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                       Text(
                         timeAgo,
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textTertiary,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -437,9 +457,12 @@ class _NotificationsViewState extends State<NotificationsView> {
         await _handleDeclineInvitation(context, notification);
         break;
       default:
+        final l10n = AppLocalizations.instance;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Acción no implementada: $action'),
+            content: Text(
+              '${l10n.tr('notifications.message.action_executed')}$action',
+            ),
             backgroundColor: AppColors.warning,
             behavior: SnackBarBehavior.floating,
           ),
@@ -456,9 +479,10 @@ class _NotificationsViewState extends State<NotificationsView> {
   ) async {
     final eventId = notification.metadata.eventId;
     if (eventId == null) {
+      final l10n = AppLocalizations.instance;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: No se encontró el ID del evento'),
+        SnackBar(
+          content: Text(l10n.trError('EVENT_NOT_FOUND')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -500,9 +524,10 @@ class _NotificationsViewState extends State<NotificationsView> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.instance;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al cargar el evento: $e'),
+            content: Text('${l10n.trError('EVENT_NOT_FOUND')}: $e'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -519,26 +544,27 @@ class _NotificationsViewState extends State<NotificationsView> {
     if (eventId == null) return;
 
     // Show RSVP options dialog
+    final l10n = AppLocalizations.instance;
     final rsvpStatus = await showDialog<RsvpStatus>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tu respuesta'),
+        title: Text(l10n.tr('event.rsvp.dialog_title')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.check_circle, color: AppColors.success),
-              title: const Text('Asistiré'),
+              leading: Icon(Icons.check_circle, color: AppColors.success),
+              title: Text(l10n.tr('event.rsvp.going')),
               onTap: () => Navigator.pop(context, RsvpStatus.going),
             ),
             ListTile(
-              leading: const Icon(Icons.help_outline, color: AppColors.warning),
-              title: const Text('Tal vez'),
+              leading: Icon(Icons.help_outline, color: AppColors.warning),
+              title: Text(l10n.tr('event.rsvp.maybe')),
               onTap: () => Navigator.pop(context, RsvpStatus.maybe),
             ),
             ListTile(
-              leading: const Icon(Icons.cancel, color: AppColors.error),
-              title: const Text('No asistiré'),
+              leading: Icon(Icons.cancel, color: AppColors.error),
+              title: Text(l10n.tr('event.rsvp.not_going')),
               onTap: () => Navigator.pop(context, RsvpStatus.notGoing),
             ),
           ],
@@ -552,9 +578,10 @@ class _NotificationsViewState extends State<NotificationsView> {
         await eventService.updateRsvp(eventId, rsvpStatus);
 
         if (mounted) {
+          final l10n = AppLocalizations.instance;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('¡RSVP actualizado exitosamente!'),
+            SnackBar(
+              content: Text(l10n.tr('notifications.message.action_executed')),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
             ),
@@ -562,9 +589,10 @@ class _NotificationsViewState extends State<NotificationsView> {
         }
       } catch (e) {
         if (mounted) {
+          final l10n = AppLocalizations.instance;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error al actualizar RSVP: $e'),
+              content: Text('${l10n.trError('EVENT_RSVP_UPDATE_FAILED')}: $e'),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
             ),
@@ -617,9 +645,10 @@ class _NotificationsViewState extends State<NotificationsView> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.instance;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al cargar conflicto: $e'),
+            content: Text('${l10n.trError('EVENT_NOT_FOUND')}: $e'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -635,9 +664,10 @@ class _NotificationsViewState extends State<NotificationsView> {
     final shareToken = notification.metadata.shareToken;
 
     if (shareToken == null) {
+      final l10n = AppLocalizations.instance;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error: No se encontró el enlace de invitación'),
+        SnackBar(
+          content: Text(l10n.trError('CIRCLE_NOT_FOUND')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -660,9 +690,10 @@ class _NotificationsViewState extends State<NotificationsView> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.instance;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${l10n.tr('common.label.error')}: $e'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -681,9 +712,10 @@ class _NotificationsViewState extends State<NotificationsView> {
     );
 
     if (mounted) {
+      final l10n = AppLocalizations.instance;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invitación rechazada'),
+        SnackBar(
+          content: Text(l10n.tr('notifications.message.invitation_rejected')),
           backgroundColor: AppColors.info,
           behavior: SnackBarBehavior.floating,
         ),

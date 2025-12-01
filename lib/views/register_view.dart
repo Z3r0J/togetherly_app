@@ -146,7 +146,7 @@ class _RegisterViewState extends State<RegisterView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '¡Registro exitoso!',
+                    l10n.tr('common.snackbar.registration_success'),
                     style: AppTextStyles.headlineSmall,
                   ),
                 ),
@@ -157,7 +157,7 @@ class _RegisterViewState extends State<RegisterView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hemos enviado un correo de verificación a:',
+                  l10n.tr('common.snackbar.registration_info'),
                   style: AppTextStyles.bodyMedium,
                 ),
                 const SizedBox(height: 8),
@@ -165,27 +165,27 @@ class _RegisterViewState extends State<RegisterView> {
                   email,
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Después de verificar tu correo, podrás unirte al círculo.',
+                          l10n.tr('common.snackbar.registration_instruction'),
                           style: AppTextStyles.bodySmall,
                         ),
                       ),
@@ -196,7 +196,7 @@ class _RegisterViewState extends State<RegisterView> {
             ),
             actions: [
               AppButton(
-                text: 'Entendido',
+                text: l10n.tr('common.snackbar.understood'),
                 type: AppButtonType.primary,
                 onPressed: () {
                   Navigator.pop(context); // Close dialog
@@ -244,25 +244,27 @@ class _RegisterViewState extends State<RegisterView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
       ),
       child: Column(
         children: [
-          Icon(Icons.group_add, size: 48, color: AppColors.primary),
+          Icon(Icons.group_add, size: 48, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 12),
           Text(
-            '¡Has sido invitado!',
+            l10n.tr('circle.invite.invited'),
             style: AppTextStyles.headlineSmall.copyWith(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           if (circleName != null)
             Text(
-              'Únete a "$circleName"',
+              l10n
+                  .tr('circle.invite.join_message')
+                  .replaceAll('{circleName}', circleName),
               style: AppTextStyles.bodyLarge.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -270,17 +272,19 @@ class _RegisterViewState extends State<RegisterView> {
             ),
           if (inviterName != null)
             Text(
-              'Invitado por $inviterName',
+              l10n
+                  .tr('circle.invite.invited_by')
+                  .replaceAll('{inviterName}', inviterName),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
           const SizedBox(height: 8),
           Text(
-            'Regístrate con el email de la invitación',
+            l10n.tr('circle.invite.register_with_email'),
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -307,7 +311,6 @@ class _RegisterViewState extends State<RegisterView> {
     final inviterName = widget.invitationContext?['inviterName'];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -326,12 +329,12 @@ class _RegisterViewState extends State<RegisterView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people, size: 40, color: AppColors.primary),
+                  Icon(Icons.people, size: 40, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 12),
                   Text(
                     AppLocalizations.instance.tr('auth.register.title'),
                     style: AppTextStyles.displayLarge.copyWith(
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 32,
                     ),
                   ),
@@ -342,7 +345,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 AppLocalizations.instance.tr('auth.register.heading'),
                 style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -351,7 +354,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 AppLocalizations.instance.tr('auth.register.label.name'),
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -368,7 +371,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 AppLocalizations.instance.tr('auth.register.label.email'),
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -385,7 +388,7 @@ class _RegisterViewState extends State<RegisterView> {
               Text(
                 AppLocalizations.instance.tr('auth.register.label.password'),
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -412,7 +415,7 @@ class _RegisterViewState extends State<RegisterView> {
                   'auth.register.password_instruction',
                 ),
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 32),
@@ -434,7 +437,7 @@ class _RegisterViewState extends State<RegisterView> {
                       'auth.register.link.have_account',
                     ),
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   GestureDetector(
@@ -442,7 +445,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: Text(
                       AppLocalizations.instance.tr('auth.register.link.login'),
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

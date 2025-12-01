@@ -44,7 +44,11 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 28, color: AppColors.textPrimary),
+            Icon(
+              icon,
+              size: 28,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             const SizedBox(width: 12),
           ],
           Expanded(
@@ -110,10 +114,12 @@ class FilterTabs extends StatelessWidget {
                 }
               },
               labelStyle: AppTextStyles.labelMedium.copyWith(
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface,
               ),
-              backgroundColor: AppColors.surfaceVariant,
-              selectedColor: AppColors.primary,
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              selectedColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(100),
               ),
@@ -173,7 +179,7 @@ class WelcomeHeader extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
             ),
             child: avatarUrl != null
                 ? ClipOval(
@@ -182,12 +188,18 @@ class WelcomeHeader extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Center(
-                          child: Icon(Icons.person, color: AppColors.primary),
+                          child: Icon(
+                            Icons.person,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         );
                       },
                     ),
                   )
-                : Icon(Icons.person, color: AppColors.primary),
+                : Icon(
+                    Icons.person,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
           ),
           const SizedBox(width: 12),
 
@@ -204,7 +216,7 @@ class WelcomeHeader extends StatelessWidget {
                 Text(
                   date,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ],
@@ -215,9 +227,9 @@ class WelcomeHeader extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined),
+                icon: Icon(Icons.notifications_outlined),
                 onPressed: onNotificationPressed,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 iconSize: 28,
               ),
               if (unreadCount != null && unreadCount! > 0)
@@ -288,17 +300,17 @@ class PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(bottom: BorderSide(color: AppColors.divider, width: 1)),
       ),
       child: Row(
         children: [
           // Botón de regreso
           IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
-            color: AppColors.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
 
           // Título
@@ -324,13 +336,15 @@ class PageHeader extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           subtitle!,
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -344,9 +358,9 @@ class PageHeader extends StatelessWidget {
           // Menú de acciones
           if (onMenuPressed != null)
             IconButton(
-              icon: const Icon(Icons.more_vert),
+              icon: Icon(Icons.more_vert),
               onPressed: onMenuPressed,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
         ],
       ),
@@ -376,7 +390,9 @@ class DividerWithText extends StatelessWidget {
           child: Text(
             text,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textTertiary,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withOpacity(0.6),
             ),
           ),
         ),
@@ -433,10 +449,16 @@ class EmptyState extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceVariant,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 64, color: AppColors.textTertiary),
+              child: Icon(
+                icon,
+                size: 64,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -448,7 +470,7 @@ class EmptyState extends StatelessWidget {
             Text(
               message,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),

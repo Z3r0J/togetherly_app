@@ -16,7 +16,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -26,7 +26,11 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Logo y título
-              Icon(Icons.groups, size: 80, color: AppColors.primary),
+              Icon(
+                Icons.groups,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Togetherly',
@@ -37,7 +41,7 @@ class LoginScreen extends StatelessWidget {
               Text(
                 'Plan life together',
                 style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -105,7 +109,7 @@ class LoginScreen extends StatelessWidget {
                     child: Text(
                       'Log in',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -137,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -239,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () {
           // Crear evento
         },
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -262,7 +266,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -279,7 +283,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   children: [
                     // Información del evento
                     Container(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +328,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              const Icon(Icons.notes_outlined, size: 20),
+                              Icon(Icons.notes_outlined, size: 20),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -340,7 +346,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                     // RSVP
                     Container(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,7 +379,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                     // Asistentes
                     Container(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,7 +444,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                     // Time Poll
                     Container(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,7 +461,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               Text(
                                 'Poll closes in 2 days',
                                 style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -485,12 +499,10 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          TextButton(onPressed: () {}, child: const Text('Mark All Read')),
-        ],
+        title: Text('Notifications'),
+        actions: [TextButton(onPressed: () {}, child: Text('Mark All Read'))],
       ),
       body: Column(
         children: [
@@ -592,13 +604,13 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text('Cancel'),
         ),
-        title: const Text('Create Circle'),
+        title: Text('Create Circle'),
         leadingWidth: 80,
       ),
       body: SingleChildScrollView(
@@ -641,10 +653,12 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _isInviteOnly ? AppColors.primary : AppColors.border,
+                    color: _isInviteOnly
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
                     width: _isInviteOnly ? 2 : 1,
                   ),
                 ),
@@ -655,8 +669,8 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
                           ? Icons.radio_button_checked
                           : Icons.radio_button_unchecked,
                       color: _isInviteOnly
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -668,7 +682,9 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
                           Text(
                             'Members can only join via direct invitation.',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -686,12 +702,12 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: !_isInviteOnly
-                        ? AppColors.primary
-                        : AppColors.border,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outline,
                     width: !_isInviteOnly ? 2 : 1,
                   ),
                 ),
@@ -702,8 +718,8 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
                           ? Icons.radio_button_checked
                           : Icons.radio_button_unchecked,
                       color: !_isInviteOnly
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -715,7 +731,9 @@ class _CreateCircleScreenState extends State<CreateCircleScreen> {
                           Text(
                             'Anyone with the link can join.',
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
