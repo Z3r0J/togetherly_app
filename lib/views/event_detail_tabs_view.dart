@@ -232,7 +232,10 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                         circleDetail,
                         unifiedEvent as CircleUnifiedEvent,
                       ),
-                      _buildTimePollTab(circleDetail),
+                      _buildTimePollTab(
+                        circleDetail,
+                        unifiedEvent as CircleUnifiedEvent,
+                      ),
                       _buildMapTab(location),
                     ]
                   : [
@@ -275,115 +278,114 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final attendees = detail?.rsvps ?? [];
     final conflict = fallback.hasConflict;
     final eventId = detail?.id ?? fallback.id;
+    final currentStatus = fallback.rsvpStatus;
     final vm = context.read<EventDetailViewModel>();
+    final going = attendees.where((a) => a.status == RsvpStatus.going).toList();
+    final maybe = attendees.where((a) => a.status == RsvpStatus.maybe).toList();
+    final notGoing =
+        attendees.where((a) => a.status == RsvpStatus.notGoing).toList();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Your RSVP', style: AppTextStyles.headlineSmall),
-          const SizedBox(height: 16),
-          if (conflict) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.warning.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        color: AppColors.warning,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Conflict Detected',
-                        style: AppTextStyles.labelMedium.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'You have another event at this time.',
-                    style: AppTextStyles.bodySmall,
-                  ),
+          _buildCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Your RSVP', style: AppTextStyles.headlineSmall),
+                const SizedBox(height: 12),
+                if (conflict) ...[
+                  _buildConflictCallout(fallback),
+                  const SizedBox(height: 16),
                 ],
-              ),
+                Text(
+                  'Confirm your attendance',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _buildRsvpButton(
+                      label: 'Going',
+                      icon: Icons.check_circle_rounded,
+                      color: const Color(0xFF2ECC71),
+                      selected: currentStatus == RsvpStatus.going,
+                      onTap: vm.isActionLoading
+                          ? null
+                          : () => vm.updateRsvp(eventId, RsvpStatus.going),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildRsvpButton(
+                      label: 'Maybe',
+                      icon: Icons.help_outline_rounded,
+                      color: const Color(0xFFF2C94C),
+                      selected: currentStatus == RsvpStatus.maybe,
+                      onTap: vm.isActionLoading
+                          ? null
+                          : () => vm.updateRsvp(eventId, RsvpStatus.maybe),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildRsvpButton(
+                      label: 'Not Going',
+                      icon: Icons.cancel_rounded,
+                      color: const Color(0xFFEB5757),
+                      selected: currentStatus == RsvpStatus.notGoing,
+                      onTap: vm.isActionLoading
+                          ? null
+                          : () => vm.updateRsvp(eventId, RsvpStatus.notGoing),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-          ],
-
-          // Who's Coming section
-          Text('Who\'s Coming', style: AppTextStyles.headlineSmall),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: vm.isActionLoading
-                      ? null
-                      : () => vm.updateRsvp(eventId, RsvpStatus.going),
-                  child: const Text('Going'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: vm.isActionLoading
-                      ? null
-                      : () => vm.updateRsvp(eventId, RsvpStatus.maybe),
-                  child: const Text('Maybe'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: vm.isActionLoading
-                      ? null
-                      : () => vm.updateRsvp(eventId, RsvpStatus.notGoing),
-                  child: const Text('Not going'),
-                ),
-              ),
-            ],
           ),
-          const SizedBox(height: 16),
-          if (attendees.isEmpty)
-            Text(
-              'No RSVPs yet',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            )
-          else
-            Column(
-              children: attendees
-                  .map(
-                    (a) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _buildAttendeeRow(
-                        a.username ?? a.email ?? 'Miembro',
-                        a.status,
-                      ),
+          const SizedBox(height: 20),
+          _buildCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Who\'s Coming?', style: AppTextStyles.headlineSmall),
+                const SizedBox(height: 12),
+                if (attendees.isEmpty)
+                  Text(
+                    'No RSVPs yet',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
                     ),
                   )
-                  .toList(),
+                else ...[
+                  _buildAttendanceGroup('Going', going, const Color(0xFF2ECC71)),
+                  const SizedBox(height: 12),
+                  _buildAttendanceGroup(
+                    'Maybe',
+                    maybe,
+                    const Color(0xFFF2C94C),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAttendanceGroup(
+                    'Not Going',
+                    notGoing,
+                    const Color(0xFFEB5757),
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTimePollTab(CircleEventDetail? detail) {
+  Widget _buildTimePollTab(
+    CircleEventDetail? detail,
+    CircleUnifiedEvent fallback,
+  ) {
     final options = detail?.eventTimes ?? [];
-    final eventId = detail?.id;
+    final eventId = detail?.id ?? fallback.id;
     final vm = context.read<EventDetailViewModel>();
 
     if (options.isEmpty) {
@@ -397,31 +399,85 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       );
     }
 
+    final maxVotes =
+        options.map((o) => o.voteCount).fold<int>(0, (prev, v) => v > prev ? v : prev);
+    final totalVotes = options.fold<int>(0, (sum, o) => sum + o.voteCount);
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Time Poll', style: AppTextStyles.headlineSmall),
-          const SizedBox(height: 12),
-          Column(
-            children: options
-                .map(
-                  (o) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildTimeOption(
-                      o.startTime,
-                      o.endTime,
-                      o.voteCount,
-                      onVote: eventId == null || vm.isActionLoading
-                          ? null
-                          : () => vm.voteTimeOption(eventId, o.id),
-                    ),
+      padding: const EdgeInsets.all(20),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Time Poll', style: AppTextStyles.headlineSmall),
+                Text(
+                  totalVotes > 0 ? '$totalVotes votos' : 'Aún sin votos',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                )
-                .toList(),
-          ),
-        ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Column(
+              children: options
+                  .map(
+                    (o) => Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _buildTimeOption(
+                        o.startTime,
+                        o.endTime,
+                        o.voteCount,
+                        maxVotes: maxVotes == 0 ? 1 : maxVotes,
+                        onVote: eventId.isEmpty || vm.isActionLoading
+                            ? null
+                            : () => vm.voteTimeOption(eventId, o.id),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: eventId.isEmpty || vm.isActionLoading
+                    ? null
+                    : () => _showVoteSheet(context, options, eventId),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  'Vote or Change Vote',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.textOnPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -506,61 +562,136 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     DateTime start,
     DateTime end,
     int votes, {
+    required int maxVotes,
     VoidCallback? onVote,
   }) {
     final timeFormat = DateFormat('h:mm a');
+    final progress = votes <= 0 || maxVotes <= 0 ? 0.05 : votes / maxVotes;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${timeFormat.format(start)} - ${timeFormat.format(end)}',
-            style: AppTextStyles.labelMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton(
-                onPressed: onVote,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                ),
-                child: Text(
-                  'Vote',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.textOnPrimary,
-                  ),
+              Text(
+                timeFormat.format(start),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.how_to_vote_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$votes votos',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+              Text(
+                '$votes ${votes == 1 ? "vote" : "votes"}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0.05, 1.0),
+              minHeight: 10,
+              backgroundColor: AppColors.border.withOpacity(0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: onVote,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: EdgeInsets.zero,
+              ),
+              child: Text(
+                'Vote',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  Future<void> _showVoteSheet(
+    BuildContext context,
+    List<CircleEventTimeOption> options,
+    String eventId,
+  ) async {
+    final vm = context.read<EventDetailViewModel>();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        final timeFormat = DateFormat('h:mm a');
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Choose a time',
+                  style: AppTextStyles.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                ...options.map(
+                  (o) => ListTile(
+                    title: Text(
+                      timeFormat.format(o.startTime),
+                      style: AppTextStyles.bodyLarge,
+                    ),
+                    subtitle: Text(
+                      '${o.voteCount} ${o.voteCount == 1 ? "vote" : "votes"}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    onTap: vm.isActionLoading
+                        ? null
+                        : () {
+                            Navigator.of(ctx).pop();
+                            vm.voteTimeOption(eventId, o.id);
+                          },
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -582,6 +713,192 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         Expanded(child: Text(name, style: AppTextStyles.bodyMedium)),
         RsvpBadge(status: status),
       ],
+    );
+  }
+
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: child,
+    );
+  }
+
+  Widget _buildConflictCallout(CircleUnifiedEvent fallback) {
+    final conflictTitle =
+        fallback.conflictsWith.isNotEmpty ? fallback.conflictsWith.first.title : null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.warning.withOpacity(0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Conflict Detected',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  conflictTitle != null
+                      ? 'You have a conflict with “$conflictTitle”.'
+                      : 'You have another event at this time.',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRsvpButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool selected,
+    required VoidCallback? onTap,
+  }) {
+    return Expanded(
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(
+          icon,
+          size: 18,
+          color: selected ? Colors.white : color,
+        ),
+        label: Text(
+          label,
+          style: AppTextStyles.labelMedium.copyWith(
+            color: selected ? Colors.white : AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: selected ? color : color.withOpacity(0.12),
+          foregroundColor: color,
+          elevation: selected ? 0 : 0,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          side: BorderSide(color: color.withOpacity(0.4)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttendanceGroup(
+    String label,
+    List<CircleEventRsvp> people,
+    Color color,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '$label (${people.length})',
+              style: AppTextStyles.labelMedium.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (people.isEmpty)
+          Text(
+            'No one here yet',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          )
+        else
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            children: people
+                .map(
+                  (p) => _buildAvatarChip(
+                    p.username ?? p.email ?? 'Member',
+                    color,
+                  ),
+                )
+                .toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAvatarChip(String name, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: color.withOpacity(0.25),
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            name.split(' ').first,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
