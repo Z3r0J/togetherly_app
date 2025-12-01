@@ -30,7 +30,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
     DateTime.now().toLocal().add(const Duration(hours: 2)),
   );
   bool _isAllDay = false;
-  String _selectedReminder = 'Ninguno';
+  String? _selectedReminder;
   late Color _selectedColorTag;
   LocationModel? _selectedLocation;
 
@@ -38,6 +38,9 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _selectedColorTag = Theme.of(context).colorScheme.primary;
+    _selectedReminder ??= AppLocalizations.instance.tr(
+      'event.create.reminder.none',
+    );
   }
 
   @override
@@ -95,7 +98,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         if (!_isAllDay) const SizedBox(height: 12),
         if (!_isAllDay)
           _buildDateTimeField(
-            title: 'Hora de fin',
+            title: l10n.tr('event.create.label.end_time'),
             value: _formatTime(_endTime),
             onTap: () async {
               final picked = await showTimePicker(
@@ -154,8 +157,8 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
           },
           child: AbsorbPointer(
             child: AppTextField(
-              label: 'Ubicación',
-              hintText: 'Ej: Sala de conferencias',
+              label: l10n.tr('event.create.label.location'),
+              hintText: l10n.tr('event.create.hint.location'),
               controller: _locationController,
               prefixIcon: Icons.location_on_outlined,
               suffixIcon: Icons.map,
@@ -174,12 +177,12 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         const SizedBox(height: 24),
         _buildDateTimeField(
           title: l10n.tr('event.create.label.reminder'),
-          value: _selectedReminder,
+          value: _selectedReminder ?? l10n.tr('event.create.reminder.none'),
           onTap: _showReminderPicker,
         ),
         const SizedBox(height: 32),
         AppButton(
-          text: 'Crear Evento Personal',
+          text: l10n.tr('event.create.button.create_personal'),
           type: AppButtonType.primary,
           fullWidth: true,
           isLoading: vm.isLoading,
@@ -190,10 +193,11 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   }
 
   Future<void> _submitPersonal() async {
+    final l10n = AppLocalizations.instance;
     if (_eventTitleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa un título para el evento'),
+        SnackBar(
+          content: Text(l10n.tr('event.create.validation.title_required')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -218,8 +222,8 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
 
     if (!_isAllDay && endDateTime.isBefore(startDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La hora de fin debe ser posterior a la de inicio'),
+        SnackBar(
+          content: Text(l10n.tr('event.create.validation.end_after_start')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -238,16 +242,14 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
-        reminderMinutes: _reminderStringToMinutes(_selectedReminder),
+        reminderMinutes: _reminderStringToMinutes(_selectedReminder ?? ''),
         color: _colorToHex(_selectedColorTag),
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Evento "${_eventTitleController.text}" creado exitosamente',
-          ),
+          content: Text(l10n.tr('event.create.success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -257,7 +259,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al crear evento: ${e.toString()}'),
+          content: Text('${l10n.tr('event.create.error')}: ${e.toString()}'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
@@ -313,6 +315,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   }
 
   Widget _buildColorTagSection() {
+    final l10n = AppLocalizations.instance;
     final colors = [
       AppColors.circleRed,
       AppColors.circleGreen,
@@ -326,7 +329,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Color',
+          l10n.tr('event.create.label.color'),
           style: AppTextStyles.labelMedium.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -364,7 +367,13 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   }
 
   void _showReminderPicker() {
-    final reminders = ['Ninguno', '5 minutos', '10 minutos', '30 minutos'];
+    final l10n = AppLocalizations.instance;
+    final reminders = [
+      l10n.tr('event.create.reminder.none'),
+      l10n.tr('event.create.reminder.5min'),
+      l10n.tr('event.create.reminder.10min'),
+      l10n.tr('event.create.reminder.30min'),
+    ];
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -419,8 +428,12 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   }
 
   int? _reminderStringToMinutes(String value) {
-    if (value == 'Ninguno') return null;
-    return int.tryParse(value.replaceAll(' minutos', ''));
+    final l10n = AppLocalizations.instance;
+    if (value == l10n.tr('event.create.reminder.none')) return null;
+    if (value == l10n.tr('event.create.reminder.5min')) return 5;
+    if (value == l10n.tr('event.create.reminder.10min')) return 10;
+    if (value == l10n.tr('event.create.reminder.30min')) return 30;
+    return null;
   }
 
   String _colorToHex(Color color) {

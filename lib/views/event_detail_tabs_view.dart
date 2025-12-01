@@ -45,6 +45,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     final vm = context.watch<EventDetailViewModel>();
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy', 'es_ES');
     final timeFormat = DateFormat('h:mm a');
@@ -62,7 +63,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text('Event Details'),
+          title: Text(l10n.tr('event.detail.title')),
         ),
         body: Center(
           child: Padding(
@@ -180,35 +181,35 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
 
                 return [
                   if (permissions.canEdit)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
                           Icon(Icons.edit_outlined, size: 20),
                           SizedBox(width: 12),
-                          Text('Edit Event'),
+                          Text(l10n.tr('event.detail.actions.edit')),
                         ],
                       ),
                     ),
                   if (permissions.canLock && eventStatus != 'locked')
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'lock',
                       child: Row(
                         children: [
                           Icon(Icons.lock_outline, size: 20),
                           SizedBox(width: 12),
-                          Text('Lock Time Poll'),
+                          Text(l10n.tr('event.detail.actions.lock_poll')),
                         ],
                       ),
                     ),
                   if (permissions.canLock && eventStatus == 'locked')
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'finalize',
                       child: Row(
                         children: [
                           Icon(Icons.check_circle_outline, size: 20),
                           SizedBox(width: 12),
-                          Text('Finalize Event'),
+                          Text(l10n.tr('event.detail.actions.finalize')),
                         ],
                       ),
                     ),
@@ -224,7 +225,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            'Delete',
+                            l10n.tr('event.detail.actions.delete'),
                             style: TextStyle(color: AppColors.error),
                           ),
                         ],
@@ -234,13 +235,13 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               } else {
                 // Personal event menu
                 return [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit_personal',
                     child: Row(
                       children: [
                         Icon(Icons.edit_outlined, size: 20),
                         SizedBox(width: 12),
-                        Text('Edit Event'),
+                        Text(l10n.tr('event.detail.actions.edit_personal')),
                       ],
                     ),
                   ),
@@ -255,7 +256,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Cancel Event',
+                          l10n.tr('event.detail.actions.cancel_personal'),
                           style: TextStyle(color: AppColors.warning),
                         ),
                       ],
@@ -272,7 +273,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Delete',
+                          l10n.tr('event.detail.actions.delete_personal'),
                           style: TextStyle(color: AppColors.error),
                         ),
                       ],
@@ -312,7 +313,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Cancelled',
+                      l10n.tr('event.detail.status.cancelled'),
                       style: AppTextStyles.labelMedium.copyWith(
                         color: AppColors.error,
                       ),
@@ -397,12 +398,15 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             child: TabBar(
               controller: _tabController,
               tabs: _isCircleEvent
-                  ? const [
-                      Tab(text: 'RSVP'),
-                      Tab(text: 'Time Poll'),
-                      Tab(text: 'Map'),
+                  ? [
+                      Tab(text: l10n.tr('event.detail.tab.rsvp')),
+                      Tab(text: l10n.tr('event.detail.tab.time_poll')),
+                      Tab(text: l10n.tr('event.detail.tab.map')),
                     ]
-                  : const [Tab(text: 'Details'), Tab(text: 'Map')],
+                  : [
+                      Tab(text: l10n.tr('event.detail.tab.details')),
+                      Tab(text: l10n.tr('event.detail.tab.map')),
+                    ],
             ),
           ),
           // Contenido de tabs
@@ -429,6 +433,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildDescription(
+                                l10n,
                                 personalDetail?.notes ??
                                     circleDetail?.description,
                               ),
@@ -447,12 +452,15 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     );
   }
 
-  Widget _buildDescription(String? text) {
+  Widget _buildDescription(AppLocalizations l10n, String? text) {
     if (text == null || text.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Description', style: AppTextStyles.headlineSmall),
+        Text(
+          l10n.tr('event.create.label.description'),
+          style: AppTextStyles.headlineSmall,
+        ),
         const SizedBox(height: 12),
         Text(text, style: AppTextStyles.bodyMedium),
       ],
@@ -460,6 +468,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
   }
 
   Widget _buildRsvpTab(CircleEventDetail? detail, CircleUnifiedEvent fallback) {
+    final l10n = AppLocalizations.instance;
     final attendees = detail?.rsvps ?? [];
     final conflict = fallback.hasConflict;
     final eventId = detail?.id ?? fallback.id;
@@ -480,14 +489,17 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Your RSVP', style: AppTextStyles.headlineSmall),
+                Text(
+                  l10n.tr('event.detail.rsvp.your_rsvp'),
+                  style: AppTextStyles.headlineSmall,
+                ),
                 const SizedBox(height: 12),
                 if (conflict) ...[
                   _buildConflictCallout(fallback),
                   const SizedBox(height: 16),
                 ],
                 Text(
-                  'Confirm your attendance',
+                  l10n.tr('event.detail.rsvp.confirm_attendance'),
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -496,7 +508,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 Row(
                   children: [
                     _buildRsvpButton(
-                      label: 'Going',
+                      label: l10n.tr('event.detail.rsvp.going'),
                       icon: Icons.check_circle_rounded,
                       color: const Color(0xFF2ECC71),
                       selected: currentStatus == RsvpStatus.going,
@@ -506,7 +518,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ),
                     const SizedBox(width: 8),
                     _buildRsvpButton(
-                      label: 'Maybe',
+                      label: l10n.tr('event.detail.rsvp.maybe'),
                       icon: Icons.help_outline_rounded,
                       color: const Color(0xFFF2C94C),
                       selected: currentStatus == RsvpStatus.maybe,
@@ -516,7 +528,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ),
                     const SizedBox(width: 8),
                     _buildRsvpButton(
-                      label: 'Not Going',
+                      label: l10n.tr('event.detail.rsvp.not_going'),
                       icon: Icons.cancel_rounded,
                       color: const Color(0xFFEB5757),
                       selected: currentStatus == RsvpStatus.notGoing,
@@ -534,30 +546,33 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Who\'s Coming?', style: AppTextStyles.headlineSmall),
+                Text(
+                  l10n.tr('event.detail.rsvp.whos_coming'),
+                  style: AppTextStyles.headlineSmall,
+                ),
                 const SizedBox(height: 12),
                 if (attendees.isEmpty)
                   Text(
-                    'No RSVPs yet',
+                    l10n.tr('event.detail.rsvp.no_rsvps'),
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   )
                 else ...[
                   _buildAttendanceGroup(
-                    'Going',
+                    l10n.tr('event.detail.rsvp.going'),
                     going,
                     const Color(0xFF2ECC71),
                   ),
                   const SizedBox(height: 12),
                   _buildAttendanceGroup(
-                    'Maybe',
+                    l10n.tr('event.detail.rsvp.maybe'),
                     maybe,
                     const Color(0xFFF2C94C),
                   ),
                   const SizedBox(height: 12),
                   _buildAttendanceGroup(
-                    'Not Going',
+                    l10n.tr('event.detail.rsvp.not_going'),
                     notGoing,
                     const Color(0xFFEB5757),
                   ),
@@ -574,6 +589,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     CircleEventDetail? detail,
     CircleUnifiedEvent fallback,
   ) {
+    final l10n = AppLocalizations.instance;
     final options = detail?.eventTimes ?? [];
     final eventId = detail?.id ?? fallback.id;
     final vm = context.read<EventDetailViewModel>();
@@ -581,7 +597,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     if (options.isEmpty) {
       return Center(
         child: Text(
-          'No time options',
+          l10n.tr('event.detail.time_poll.no_times'),
           style: AppTextStyles.bodyMedium.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -616,9 +632,14 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Time Poll', style: AppTextStyles.headlineSmall),
                 Text(
-                  totalVotes > 0 ? '$totalVotes votos' : 'Aún sin votos',
+                  l10n.tr('event.detail.time_poll.title'),
+                  style: AppTextStyles.headlineSmall,
+                ),
+                Text(
+                  totalVotes > 0
+                      ? '$totalVotes ${l10n.tr('event.detail.time_poll.votes')}'
+                      : l10n.tr('event.detail.time_poll.no_votes'),
                   style: AppTextStyles.bodySmall.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -659,7 +680,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   ),
                 ),
                 child: Text(
-                  'Vote or Change Vote',
+                  l10n.tr('event.detail.time_poll.vote_button'),
                   style: AppTextStyles.labelLarge.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w700,
@@ -674,10 +695,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
   }
 
   Widget _buildMapTab(LocationModel? location) {
+    final l10n = AppLocalizations.instance;
     if (location == null) {
       return Center(
         child: Text(
-          'Sin ubicación',
+          l10n.tr('event.detail.location.no_location'),
           style: AppTextStyles.bodyMedium.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -735,7 +757,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 child: OutlinedButton.icon(
                   onPressed: () => _shareLocation(location),
                   icon: Icon(Icons.share_outlined),
-                  label: Text('Compartir'),
+                  label: Text(l10n.tr('event.detail.location.share')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -743,7 +765,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 child: ElevatedButton.icon(
                   onPressed: () => _openExternalMap(location),
                   icon: Icon(Icons.directions_outlined),
-                  label: Text('Directions'),
+                  label: Text(l10n.tr('event.detail.location.directions')),
                 ),
               ),
             ],

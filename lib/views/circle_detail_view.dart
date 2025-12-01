@@ -173,14 +173,16 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Miembros (${circleDetail.memberCount})',
+                l10n
+                    .tr('circle.detail.members_count')
+                    .replaceAll('{count}', '${circleDetail.memberCount}'),
                 style: AppTextStyles.headlineSmall,
               ),
               // Todos los miembros pueden invitar, no sólo owner/admin
               SizedBox(
                 height: 36,
                 child: AppButton(
-                  text: '+ Invitar',
+                  text: l10n.tr('circle.invite.button.invite'),
                   type: AppButtonType.primary,
                   size: AppButtonSize.small,
                   onPressed: () {
@@ -249,9 +251,11 @@ class _CircleDetailViewState extends State<CircleDetailView> {
         if (role == 'owner')
           Flexible(
             child: Text(
-              '(Propietario)',
+              l10n.tr('circle.detail.owner'),
               style: AppTextStyles.labelSmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 fontSize: 10,
               ),
               maxLines: 1,
@@ -274,12 +278,15 @@ class _CircleDetailViewState extends State<CircleDetailView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Próximos Eventos', style: AppTextStyles.headlineSmall),
+              Text(
+                l10n.tr('circle.detail.upcoming_events'),
+                style: AppTextStyles.headlineSmall,
+              ),
               // Todos los miembros pueden crear eventos, no sólo owner/admin
               SizedBox(
                 height: 36,
                 child: AppButton(
-                  text: '+ Crear Evento',
+                  text: l10n.tr('circle.create.button.create_short'),
                   type: AppButtonType.primary,
                   size: AppButtonSize.small,
                   onPressed: () async {
@@ -347,14 +354,16 @@ class _CircleDetailViewState extends State<CircleDetailView> {
         : null;
     final start = event.startsAt ?? firstOption?.startTime;
     final end = event.endsAt ?? firstOption?.endTime;
-    final dateText = start != null ? _formatDate(start) : 'Fecha por definir';
+    final dateText = start != null
+        ? _formatDate(start)
+        : l10n.tr('event.detail.date_tbd');
     final timeText = event.allDay
-        ? 'Todo el día'
+        ? l10n.tr('event.detail.all_day')
         : (start != null && end != null)
         ? '${_formatTime(start)} - ${_formatTime(end)}'
-        : 'Horario por definir';
+        : l10n.tr('event.detail.time_tbd');
     final rsvpText =
-        '${event.goingCount} Going · ${event.maybeCount} Maybe · ${event.notGoingCount} Not going';
+        '${event.goingCount} ${l10n.tr('event.detail.rsvp.going')} · ${event.maybeCount} ${l10n.tr('event.detail.rsvp.maybe')} · ${event.notGoingCount} ${l10n.tr('event.detail.rsvp.not_going')}';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -443,7 +452,9 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 child: Text(
                   rsvpText,
@@ -494,7 +505,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                     ),
                   );
                 },
-                child: Text('Ver detalles'),
+                child: Text(l10n.tr('event.detail.button.view_details')),
               ),
             ],
           ),
@@ -506,14 +517,26 @@ class _CircleDetailViewState extends State<CircleDetailView> {
   Widget _buildStatusChip(String status) {
     Color bg = AppColors.background;
     Color fg = AppColors.textPrimary;
+    String translatedStatus;
+
     switch (status.toLowerCase()) {
       case 'finalized':
+        translatedStatus = l10n.tr('event.detail.status.finalized');
+        bg = AppColors.success.withOpacity(0.15);
+        fg = AppColors.success;
+        break;
       case 'locked':
+        translatedStatus = l10n.tr('event.detail.status.locked');
         bg = AppColors.success.withOpacity(0.15);
         fg = AppColors.success;
         break;
       case 'draft':
+        translatedStatus = l10n.tr('event.detail.status.draft');
+        bg = AppColors.warning.withOpacity(0.15);
+        fg = AppColors.warning;
+        break;
       default:
+        translatedStatus = status.toUpperCase();
         bg = AppColors.warning.withOpacity(0.15);
         fg = AppColors.warning;
     }
@@ -524,7 +547,7 @@ class _CircleDetailViewState extends State<CircleDetailView> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.toUpperCase(),
+        translatedStatus,
         style: AppTextStyles.labelSmall.copyWith(
           fontWeight: FontWeight.w700,
           color: fg,
@@ -634,7 +657,9 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                   ListTile(
                     leading: Icon(
                       Icons.edit,
-                      color: canEdit ? AppColors.textPrimary : Theme.of(context).colorScheme.outline,
+                      color: canEdit
+                          ? AppColors.textPrimary
+                          : Theme.of(context).colorScheme.outline,
                     ),
                     title: Text(
                       'Editar Círculo',
@@ -666,12 +691,16 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                   ListTile(
                     leading: Icon(
                       Icons.delete,
-                      color: canDelete ? AppColors.error : Theme.of(context).colorScheme.outline,
+                      color: canDelete
+                          ? AppColors.error
+                          : Theme.of(context).colorScheme.outline,
                     ),
                     title: Text(
                       'Eliminar Círculo',
                       style: TextStyle(
-                        color: canDelete ? AppColors.error : Theme.of(context).colorScheme.outline,
+                        color: canDelete
+                            ? AppColors.error
+                            : Theme.of(context).colorScheme.outline,
                       ),
                     ),
                     enabled: canDelete,

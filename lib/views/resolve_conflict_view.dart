@@ -82,7 +82,9 @@ class ResolveConflictView extends StatelessWidget {
                         : Icons.group,
                     date: _formatRange(event.startTime, event.endTime),
                     location: locationStr,
-                    actions: [_redButton('Cancel This Event')],
+                    actions: [
+                      _redButton(l10n.tr('event.conflict.button.cancel_event')),
+                    ],
                     sideColor: Theme.of(context).colorScheme.outline,
                   );
                 },
@@ -109,9 +111,11 @@ class ResolveConflictView extends StatelessWidget {
                   rsvpTag: null,
                   rsvpColor: null,
                   actions: [
-                    _outlineButton('Change to Maybe'),
+                    _outlineButton(
+                      l10n.tr('event.conflict.button.change_maybe'),
+                    ),
                     const SizedBox(width: 10),
-                    _blueButton('Change to Going'),
+                    _blueButton(l10n.tr('event.conflict.button.change_going')),
                   ],
                   sideColor: Theme.of(context).colorScheme.primary,
                 )
@@ -144,7 +148,7 @@ class ResolveConflictView extends StatelessWidget {
                     color: Theme.of(context).colorScheme.surface,
                   ),
                   child: Text(
-                    "Keep Both As-Is",
+                    l10n.tr('event.conflict.button.keep_both'),
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -158,7 +162,7 @@ class ResolveConflictView extends StatelessWidget {
               // View both in calendar
               Center(
                 child: Text(
-                  "View Both in Calendar",
+                  l10n.tr('event.conflict.button.view_calendar'),
                   style: TextStyle(
                     fontSize: 16,
                     color: Theme.of(context).colorScheme.primary,

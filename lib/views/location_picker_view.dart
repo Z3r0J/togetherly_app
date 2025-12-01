@@ -352,7 +352,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
             TextButton(
               onPressed: _confirm,
               child: Text(
-                'Done',
+                l10n.tr('common.button.done'),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontSize: 16,
@@ -375,7 +375,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                   onSubmitted: _isMapAvailable ? _searchLocation : null,
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
-                    hintText: 'Search for a place...',
+                    hintText: l10n.tr('location.search.hint'),
                     prefixIcon: Icon(
                       Icons.search,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -518,7 +518,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                       ),
                                     ),
                                     child: Text(
-                                      'Confirm Location',
+                                      l10n.tr('location.button.confirm'),
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
@@ -618,7 +618,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                         Icon(Icons.map, size: 48, color: Colors.grey[600]),
                         const SizedBox(height: 8),
                         Text(
-                          'Map Preview',
+                          l10n.tr('location.map_preview.title'),
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -627,7 +627,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Google Maps will appear here',
+                          l10n.tr('location.map_preview.description'),
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,

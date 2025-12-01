@@ -93,7 +93,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
           controller: _eventTitleController,
         ),
         const SizedBox(height: 20),
-        _buildCircleSelector(circleVm),
+        _buildCircleSelector(circleVm, l10n),
         const SizedBox(height: 20),
         _buildDateTimeField(
           title: l10n.tr('event.create.label.date'),
@@ -112,7 +112,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
         ),
         const SizedBox(height: 12),
         _buildDateTimeField(
-          title: 'Hora de inicio',
+          title: l10n.tr('event.create.label.start_time'),
           value: _formatTime(_startTime),
           onTap: () async {
             final picked = await showTimePicker(
@@ -126,7 +126,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
         ),
         const SizedBox(height: 12),
         _buildDateTimeField(
-          title: 'Hora de fin',
+          title: l10n.tr('event.create.label.end_time'),
           value: _formatTime(_endTime),
           onTap: () async {
             final picked = await showTimePicker(
@@ -160,8 +160,8 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
           },
           child: AbsorbPointer(
             child: AppTextField(
-              label: 'Ubicación',
-              hintText: 'Ej: Sala de conferencias',
+              label: l10n.tr('event.create.label.location'),
+              hintText: l10n.tr('event.create.hint.location'),
               controller: _locationController,
               prefixIcon: Icons.location_on_outlined,
               suffixIcon: Icons.map,
@@ -170,8 +170,8 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
         ),
         const SizedBox(height: 16),
         AppTextField(
-          label: 'Notas',
-          hintText: 'Agrega más detalles...',
+          label: l10n.tr('event.create.label.notes'),
+          hintText: l10n.tr('event.create.hint.notes'),
           controller: _notesController,
           maxLines: 4,
         ),
@@ -181,7 +181,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
         _buildColorTagSection(),
         const SizedBox(height: 32),
         AppButton(
-          text: 'Crear Evento de Círculo',
+          text: l10n.tr('event.create.button.create_circle'),
           type: AppButtonType.primary,
           fullWidth: true,
           isLoading: vm.isLoading,
@@ -191,7 +191,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
     );
   }
 
-  Widget _buildCircleSelector(CircleViewModel circleVm) {
+  Widget _buildCircleSelector(CircleViewModel circleVm, AppLocalizations l10n) {
     final circles = circleVm.circles;
 
     // Filter out invalid/empty ids and dedupe by id to avoid duplicate
@@ -217,7 +217,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Círculo',
+                l10n.tr('event.create.label.circle'),
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -231,14 +231,14 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
               else
                 TextButton(
                   onPressed: () => circleVm.fetchCircles(),
-                  child: Text('Actualizar'),
+                  child: Text(l10n.tr('common.button.refresh')),
                 ),
             ],
           ),
           const SizedBox(height: 8),
           if (circles.isEmpty)
             Text(
-              'No tienes círculos disponibles',
+              l10n.tr('circle.create.no_circles_available'),
               style: AppTextStyles.bodySmall.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -274,10 +274,11 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   }
 
   Future<void> _submitCircleEvent() async {
+    final l10n = AppLocalizations.instance;
     if (_eventTitleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor ingresa un título para el evento'),
+        SnackBar(
+          content: Text(l10n.tr('event.create.validation.title_required')),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -327,8 +328,8 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       await context.read<CircleEventViewModel>().create(payload);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Evento creado con éxito'),
+        SnackBar(
+          content: Text(l10n.tr('event.create.success')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
         ),
@@ -338,7 +339,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al crear evento: ${e.toString()}'),
+          content: Text('${l10n.tr('event.create.error')}: ${e.toString()}'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -347,6 +348,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   }
 
   Widget _buildTimePollSection() {
+    final l10n = AppLocalizations.instance;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -361,7 +363,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Encuesta de horarios',
+                l10n.tr('event.create.label.time_poll'),
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -404,7 +406,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Opción ${idx + 1}',
+                              '${l10n.tr('event.create.time_poll.option')} ${idx + 1}',
                               style: AppTextStyles.labelMedium.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -423,7 +425,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                         ),
                         const SizedBox(height: 8),
                         _buildDateTimeField(
-                          title: 'Inicio',
+                          title: l10n.tr('event.create.time_poll.start'),
                           value: _formatTime(option.start),
                           onTap: () async {
                             final picked = await showTimePicker(
@@ -441,7 +443,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                         ),
                         const SizedBox(height: 8),
                         _buildDateTimeField(
-                          title: 'Fin',
+                          title: l10n.tr('event.create.time_poll.end'),
                           value: _formatTime(option.end),
                           onTap: () async {
                             final picked = await showTimePicker(
@@ -471,7 +473,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                   });
                 },
                 icon: Icon(Icons.add),
-                label: Text('Agregar horario'),
+                label: Text(l10n.tr('event.create.button.add_time')),
               ),
             ],
           ),
@@ -480,6 +482,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   }
 
   Widget _buildColorTagSection() {
+    final l10n = AppLocalizations.instance;
     final colors = [
       AppColors.circleRed,
       AppColors.circleGreen,
@@ -493,7 +496,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Color',
+          l10n.tr('event.create.label.color'),
           style: AppTextStyles.labelMedium.copyWith(
             fontWeight: FontWeight.w600,
           ),

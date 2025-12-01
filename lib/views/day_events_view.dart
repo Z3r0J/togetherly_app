@@ -7,6 +7,7 @@ import '../theme/app_text_styles.dart';
 import '../viewmodels/unified_calendar_view_model.dart';
 import '../models/unified_calendar_models.dart';
 import '../viewmodels/event_detail_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'create_event_view.dart';
 import 'event_detail_tabs_view.dart';
 import '../widgets/resolve_conflict_dialog.dart';
@@ -502,13 +503,27 @@ class _DayEventsViewState extends State<DayEventsView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _WeekdayLabel('Lu'),
-              _WeekdayLabel('Ma'),
-              _WeekdayLabel('Mi'),
-              _WeekdayLabel('Ju'),
-              _WeekdayLabel('Vi'),
-              _WeekdayLabel('Sa'),
-              _WeekdayLabel('Do'),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.mon'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.tue'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.wed'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.thu'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.fri'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.sat'),
+              ),
+              _WeekdayLabel(
+                AppLocalizations.instance.tr('calendar.weekdays.sun'),
+              ),
             ],
           ),
           const SizedBox(height: 4),

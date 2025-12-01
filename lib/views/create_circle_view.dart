@@ -166,9 +166,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildCircleNameField() {
+    final l10n = AppLocalizations.instance;
     return AppTextField(
-      label: 'Nombre del Círculo',
-      hintText: 'Ingresa un nombre para tu círculo',
+      label: l10n.tr('circle.create.label.name'),
+      hintText: l10n.tr('circle.create.hint.name'),
       controller: _circleNameController,
       keyboardType: TextInputType.text,
     );
@@ -220,9 +221,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildDescriptionField() {
+    final l10n = AppLocalizations.instance;
     return AppTextField(
-      label: 'Descripción (opcional)',
-      hintText: '¿Para qué es este círculo?...',
+      label: l10n.tr('circle.create.label.description'),
+      hintText: l10n.tr('circle.create.hint.description'),
       controller: _descriptionController,
       keyboardType: TextInputType.multiline,
       maxLines: 4,
@@ -230,18 +232,21 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   }
 
   Widget _buildPrivacySection() {
+    final l10n = AppLocalizations.instance;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Privacidad', style: AppTextStyles.titleSmall),
+        Text(
+          l10n.tr('circle.create.label.privacy'),
+          style: AppTextStyles.titleSmall,
+        ),
         const SizedBox(height: 16),
 
         // Opción: Solo invitaciones
         _buildPrivacyOption(
           value: 'invite-only',
-          title: 'Solo Invitaciones',
-          description:
-              'Los miembros solo pueden unirse mediante invitación directa.',
+          title: l10n.tr('circle.create.privacy.invite_only'),
+          description: l10n.tr('circle.create.privacy.invite_only_desc'),
           isSelected: _selectedPrivacy == 'invite-only',
         ),
 
@@ -250,8 +255,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
         // Opción: Público
         _buildPrivacyOption(
           value: 'public',
-          title: 'Público',
-          description: 'Cualquier persona con el enlace puede unirse.',
+          title: l10n.tr('circle.create.privacy.public'),
+          description: l10n.tr('circle.create.privacy.public_desc'),
           isSelected: _selectedPrivacy == 'public',
         ),
       ],
@@ -275,7 +280,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline,
+            color: isSelected
+                ? AppColors.primary
+                : Theme.of(context).colorScheme.outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -289,7 +296,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline,
+                  color: isSelected
+                      ? AppColors.primary
+                      : Theme.of(context).colorScheme.outline,
                   width: 2,
                 ),
               ),
@@ -398,7 +407,9 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '¡Círculo "${_circleNameController.text}" creado exitosamente!',
+            l10n
+                .tr('circle.create.success')
+                .replaceAll('{name}', _circleNameController.text),
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,

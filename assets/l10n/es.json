@@ -14,7 +14,8 @@
       "back": "Volver",
       "next": "Siguiente",
       "done": "Listo",
-      "retry": "Reintentar"
+      "retry": "Reintentar",
+      "refresh": "Actualizar"
     },
     "label": {
       "email": "Correo electrónico",
@@ -22,7 +23,9 @@
       "name": "Nombre",
       "loading": "Cargando...",
       "error": "Error",
-      "success": "Éxito"
+      "success": "Éxito",
+      "event": "evento",
+      "events": "eventos"
     },
     "field": {
       "email": "Email"
@@ -206,17 +209,20 @@
       "view_circle": "Ver Círculo →"
     },
     "label": {
-      "members": "miembros"
+      "members": "miembros",
+      "conflict": "Conflicto"
     },
     "filter": {
       "all": "Todos",
       "personal": "Personal",
       "going": "Asistiendo",
-      "maybe": "Quizás"
+      "maybe": "Quizás",
+      "confirmed": "Confirmado"
     },
     "empty": {
       "no_events": "No hay eventos próximos",
-      "no_circles": "Aún no tienes círculos. ¡Crea tu primer círculo!"
+      "no_circles": "Aún no tienes círculos. ¡Crea tu primer círculo!",
+      "no_events_filter": "No hay eventos para este filtro"
     },
     "action": {
       "retry": "Reintentar"
@@ -226,7 +232,13 @@
       "logout_message": "¿Estás seguro de que quieres cerrar sesión?"
     },
     "error": {
-      "loading_circles": "Error al cargar círculos"
+      "loading_circles": "Error al cargar círculos",
+      "loading_events": "Error al cargar eventos",
+      "unknown": "Error desconocido"
+    },
+    "fab": {
+      "create_event": "Crear Evento",
+      "create_circle": "Crear Círculo"
     }
   },
   "notifications": {
@@ -307,8 +319,14 @@
       },
       "privacy": {
         "public": "Público",
-        "private": "Privado"
-      }
+        "private": "Privado",
+        "invite_only": "Solo Invitaciones",
+        "invite_only_desc": "Los miembros solo pueden unirse mediante invitación directa.",
+        "public_desc": "Cualquier persona con el enlace puede unirse."
+      },
+      "success": "¡Círculo \"{name}\" creado exitosamente!",
+      "update_success": "¡Círculo actualizado exitosamente!",
+      "no_circles_available": "No tienes círculos disponibles"
     },
     "invite": {
       "title": "Invitar a {circleName}",
@@ -327,8 +345,13 @@
       "created_by": "Creado por {ownerName}",
       "joining": "Uniéndose...",
       "join_info": "Al unirte, podrás ver y participar en todos los eventos del círculo.",
+      "label": {
+        "emails": "Correos Electrónicos",
+        "email_section": "O Escribir Email"
+      },
       "hint": {
-        "email": "Ingresa direcciones de email..."
+        "email": "Ingresa direcciones de email...",
+        "emails": "Ingresa direcciones de email..."
       },
       "status": {
         "joined": "Unido ✓",
@@ -337,13 +360,23 @@
       "button": {
         "copy_link": "Copiar Enlace",
         "share": "Compartir",
+        "send": "Enviar Invitación",
+        "sending": "Enviando...",
         "send_invitation": "Enviar Invitación",
         "join": "Unirse",
         "join_circle": "Unirse al círculo",
         "invite": "+ Invitar"
       },
-      "message": {
+      "success": {
         "link_copied": "Enlace copiado al portapapeles",
+        "sent": "Invitación enviada a {emails}"
+      },
+      "error": {
+        "already_sent": "Ya enviaste una invitación a este email",
+        "send_failed": "Error al enviar invitación",
+        "generate_link": "Error al generar enlace de invitación"
+      },
+      "message": {
         "invitation_sent": "Invitación enviada a {emails}",
         "join_success": "¡Te uniste a {circleName}!",
         "join_error": "Error al aceptar invitación",
@@ -359,11 +392,15 @@
     "detail": {
       "my_circles": "Mis Círculos",
       "members": "Miembros",
+      "members_count": "Miembros ({count})",
       "upcoming_events": "Próximos Eventos",
       "owner": "(Propietario)",
       "edit_circle": "Editar Círculo",
       "delete_circle": "Eliminar Círculo",
       "delete_confirmation": "¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer."
+    },
+    "my_circles": {
+      "title": "Mis Círculos"
     },
     "error": {
       "CIRCLE_NOT_FOUND": "Círculo no encontrado",
@@ -402,7 +439,9 @@
         "duration": "Duración",
         "circle": "Círculo",
         "notes": "Notas",
-        "reminder": "Recordatorio"
+        "reminder": "Recordatorio",
+        "color": "Color",
+        "time_poll": "Encuesta de horarios"
       },
       "hint": {
         "title": "Ej: Reunión de equipo",
@@ -413,8 +452,28 @@
       },
       "button": {
         "create": "Crear Evento",
-        "add_time": "Agregar Horario"
-      }
+        "add_time": "Agregar Horario",
+        "create_circle": "Crear Evento de Círculo",
+        "create_personal": "Crear Evento Personal",
+        "add_event": "Agregar Evento"
+      },
+      "validation": {
+        "title_required": "Por favor ingresa un título para el evento",
+        "end_after_start": "La hora de fin debe ser posterior a la de inicio"
+      },
+      "time_poll": {
+        "option": "Opción",
+        "start": "Inicio",
+        "end": "Fin"
+      },
+      "reminder": {
+        "none": "Ninguno",
+        "5min": "5 minutos",
+        "10min": "10 minutos",
+        "30min": "30 minutos"
+      },
+      "success": "Evento creado con éxito",
+      "error": "Error al crear evento"
     },
     "detail": {
       "title": "Detalles del Evento",
@@ -431,12 +490,112 @@
       "label": {
         "description": "Descripción",
         "your_rsvp": "Tu RSVP"
+      },
+      "tab": {
+        "rsvp": "RSVP",
+        "time_poll": "Encuesta de Horario",
+        "map": "Mapa",
+        "details": "Detalles"
+      },
+      "rsvp": {
+        "your_rsvp": "Tu RSVP",
+        "confirm_attendance": "Confirma tu asistencia",
+        "going": "Asistiré",
+        "maybe": "Tal vez",
+        "not_going": "No asistiré",
+        "whos_coming": "¿Quién viene?",
+        "no_rsvps": "Aún sin respuestas",
+        "no_one_yet": "Nadie por aquí todavía",
+        "going_count": "{count} Asistiré",
+        "maybe_count": "{count} Tal vez",
+        "not_going_count": "{count} No asistiré"
+      },
+      "time_poll": {
+        "title": "Encuesta de Horario",
+        "no_times": "Sin opciones de horario",
+        "no_votes": "Aún sin votos",
+        "votes": "votos",
+        "vote": "voto",
+        "vote_singular": "voto",
+        "vote_plural": "votos",
+        "vote_button": "Votar o Cambiar Voto",
+        "vote_button_short": "Votar",
+        "choose_time": "Elige un horario",
+        "no_options": "No hay opciones de tiempo para bloquear",
+        "lock_title": "Bloquear votación",
+        "lock_message": "¿Deseas bloquear la votación con la opción más votada?",
+        "lock_success": "¡Votación bloqueada exitosamente!",
+        "lock_error": "Error al bloquear votación",
+        "lock_button": "Bloquear"
+      },
+      "location": {
+        "no_location": "Sin ubicación",
+        "share": "Compartir",
+        "directions": "Cómo llegar",
+        "cannot_open": "No se pudo abrir mapas"
+      },
+      "conflict": {
+        "title": "Resolver Conflicto",
+        "overlapping_events": "Tienes {count} eventos superpuestos",
+        "no_conflicts": "No hay conflictos",
+        "button": {
+          "cancel_event": "Cancelar Este Evento",
+          "change_maybe": "Cambiar a Tal vez",
+          "change_going": "Cambiar a Asistiré",
+          "keep_both": "Mantener Ambos",
+          "view_calendar": "Ver Ambos en el Calendario"
+        }
+      },
+      "actions": {
+        "edit": "Editar Evento",
+        "lock_poll": "Bloquear Encuesta",
+        "finalize": "Finalizar Evento",
+        "delete": "Eliminar",
+        "edit_personal": "Editar Evento",
+        "cancel_personal": "Cancelar Evento",
+        "delete_personal": "Eliminar"
+      },
+      "finalize": {
+        "title": "Finalizar evento",
+        "message": "¿Deseas finalizar el evento y establecer el horario definitivo?\n\nEl horario bloqueado se convertirá en el horario final del evento.",
+        "success": "¡Evento finalizado exitosamente!",
+        "error": "Error al finalizar evento",
+        "no_detail": "Error: No se pudo cargar el detalle del evento",
+        "button": "Finalizar"
+      },
+      "delete": {
+        "title": "Eliminar evento",
+        "message": "¿Estás seguro de que deseas eliminar este evento? Esta acción no se puede deshacer.",
+        "message_personal": "¿Estás seguro de que deseas eliminar este evento personal?",
+        "success": "Evento eliminado exitosamente",
+        "error": "Error al eliminar evento"
+      },
+      "status": {
+        "cancelled": "Cancelado",
+        "draft": "BORRADOR",
+        "locked": "BLOQUEADO",
+        "finalized": "FINALIZADO"
+      },
+      "coming_soon": {
+        "edit": "Editar evento próximamente",
+        "edit_personal": "Editar evento personal próximamente",
+        "cancel_personal": "Cancelar evento personal próximamente",
+        "delete_personal": "Eliminar evento personal próximamente"
       }
     },
     "conflict": {
       "title": "Resolver Conflicto de Horario",
       "no_conflicts": "No se encontraron eventos en conflicto.",
-      "overlapping_events": "Tienes {count} evento(s) superpuesto(s):"
+      "overlapping_events": "Tienes {count} evento(s) superpuesto(s):",
+      "conflicts_with": "Conflicto con",
+      "generic_message": "El evento tiene conflicto con otro en tu calendario",
+      "button": {
+        "cancel_event": "Cancelar Este Evento",
+        "change_maybe": "Cambiar a Tal Vez",
+        "change_going": "Cambiar a Confirmado",
+        "keep_both": "Mantener Ambos",
+        "view_calendar": "Ver Ambos en Calendario"
+      }
     },
     "rsvp": {
       "dialog_title": "Tu respuesta",
@@ -478,7 +637,7 @@
     }
   },
   "profile": {
-    "title": "Profile & Settings",
+    "title": "Perfil y Configuración",
     "edit": {
       "title": "Editar Perfil",
       "label": {
@@ -489,21 +648,21 @@
       }
     },
     "section": {
-      "account": "Account",
-      "notifications": "Notifications",
-      "calendar": "Calendar",
-      "privacy": "Privacy",
-      "about": "About",
-      "danger_zone": "Danger Zone"
+      "account": "Cuenta",
+      "notifications": "Notificaciones",
+      "calendar": "Calendario",
+      "privacy": "Privacidad",
+      "about": "Acerca de",
+      "danger_zone": "Zona de Peligro"
     },
     "option": {
-      "change_password": "Change Password",
-      "email_preferences": "Email Preferences",
-      "language": "Language",
-      "theme": "Theme",
-      "time_zone": "Time Zone",
-      "log_out": "Log Out",
-      "delete_account": "Delete Account"
+      "change_password": "Cambiar Contraseña",
+      "email_preferences": "Preferencias de Correo",
+      "language": "Idioma",
+      "theme": "Tema",
+      "time_zone": "Zona Horaria",
+      "log_out": "Cerrar Sesión",
+      "delete_account": "Eliminar Cuenta"
     },
     "theme": {
       "title": "Tema",
@@ -518,7 +677,36 @@
       "english": "English"
     }
   },
+  "calendar": {
+    "weekdays": {
+      "mon": "Lu",
+      "tue": "Ma",
+      "wed": "Mi",
+      "thu": "Ju",
+      "fri": "Vi",
+      "sat": "Sa",
+      "sun": "Do"
+    },
+    "view": {
+      "monthly": "Vista mensual",
+      "annual": "Vista anual"
+    }
+  },
+  "location": {
+    "search": {
+      "hint": "Buscar un lugar..."
+    },
+    "button": {
+      "confirm": "Confirmar Ubicación"
+    },
+    "map_preview": {
+      "title": "Vista Previa del Mapa",
+      "description": "Google Maps aparecerá aquí"
+    }
+  },
   "validation": {
+    "email_required": "Por favor ingresa un email",
+    "email_invalid": "Por favor ingresa un email válido",
     "error": {
       "VALIDATION_FAILED": "Validación fallida",
       "VALIDATION_INVALID_INPUT": "Entrada inválida",

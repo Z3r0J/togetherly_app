@@ -38,12 +38,15 @@ class _MyCirclesViewState extends State<MyCirclesView> {
           color: Theme.of(context).colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Mis Círculos', style: AppTextStyles.headlineMedium),
+        title: Text(
+          l10n.tr('circle.my_circles.title'),
+          style: AppTextStyles.headlineMedium,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8),
             child: AppButton(
-              text: '+ Crear Círculo',
+              text: l10n.tr('circle.create.button.create_short'),
               type: AppButtonType.primary,
               onPressed: () async {
                 final result = await Navigator.push(
@@ -101,7 +104,9 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                   Icon(
                     Icons.groups_outlined,
                     size: 64,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -113,7 +118,7 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                   ),
                   const SizedBox(height: 16),
                   AppButton(
-                    text: '+ Crear Círculo',
+                    text: l10n.tr('circle.create.button.create_short'),
                     type: AppButtonType.primary,
                     onPressed: () async {
                       final result = await Navigator.push(
@@ -235,7 +240,12 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                 ),
 
                 // Flecha de navegación
-                Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                ),
               ],
             ),
           ),

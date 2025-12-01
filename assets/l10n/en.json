@@ -14,7 +14,8 @@
       "back": "Back",
       "next": "Next",
       "done": "Done",
-      "retry": "Retry"
+      "retry": "Retry",
+      "refresh": "Refresh"
     },
     "label": {
       "email": "Email",
@@ -22,7 +23,9 @@
       "name": "Name",
       "loading": "Loading...",
       "error": "Error",
-      "success": "Success"
+      "success": "Success",
+      "event": "event",
+      "events": "events"
     },
     "field": {
       "email": "Email"
@@ -205,18 +208,21 @@
       "view_all": "View all",
       "view_circle": "View Circle →"
     },
-    "label": {
-      "members": "members"
-    },
     "filter": {
       "all": "All",
       "personal": "Personal",
       "going": "Going",
-      "maybe": "Maybe"
+      "maybe": "Maybe",
+      "confirmed": "Confirmed"
     },
     "empty": {
       "no_events": "No upcoming events",
-      "no_circles": "You don't have any circles yet. Create your first circle!"
+      "no_circles": "You don't have any circles yet. Create your first circle!",
+      "no_events_filter": "No events for this filter"
+    },
+    "label": {
+      "members": "members",
+      "conflict": "Conflict"
     },
     "action": {
       "retry": "Retry"
@@ -226,7 +232,13 @@
       "logout_message": "Are you sure you want to log out?"
     },
     "error": {
-      "loading_circles": "Error loading circles"
+      "loading_circles": "Error loading circles",
+      "loading_events": "Error loading events",
+      "unknown": "Unknown error"
+    },
+    "fab": {
+      "create_event": "Create Event",
+      "create_circle": "Create Circle"
     }
   },
   "notifications": {
@@ -307,8 +319,14 @@
       },
       "privacy": {
         "public": "Public",
-        "private": "Private"
-      }
+        "private": "Private",
+        "invite_only": "Invite Only",
+        "invite_only_desc": "Members can only join via direct invitation.",
+        "public_desc": "Anyone with the link can join."
+      },
+      "success": "Circle \"{name}\" created successfully!",
+      "update_success": "Circle updated successfully!",
+      "no_circles_available": "You have no circles available"
     },
     "invite": {
       "title": "Invite to {circleName}",
@@ -327,8 +345,13 @@
       "created_by": "Created by {ownerName}",
       "joining": "Joining...",
       "join_info": "By joining, you can see and participate in all circle events.",
+      "label": {
+        "emails": "Email Addresses",
+        "email_section": "Or Write Email"
+      },
       "hint": {
-        "email": "Enter email addresses..."
+        "email": "Enter email addresses...",
+        "emails": "Enter email addresses..."
       },
       "status": {
         "joined": "Joined ✓",
@@ -337,13 +360,23 @@
       "button": {
         "copy_link": "Copy Link",
         "share": "Share",
+        "send": "Send Invitation",
+        "sending": "Sending...",
         "send_invitation": "Send Invitation",
         "join": "Join",
         "join_circle": "Join circle",
         "invite": "+ Invite"
       },
-      "message": {
+      "success": {
         "link_copied": "Link copied to clipboard",
+        "sent": "Invitation sent to {emails}"
+      },
+      "error": {
+        "already_sent": "You already sent an invitation to this email",
+        "send_failed": "Error sending invitation",
+        "generate_link": "Error generating invitation link"
+      },
+      "message": {
         "invitation_sent": "Invitation sent to {emails}",
         "join_success": "You joined {circleName}!",
         "join_error": "Error accepting invitation",
@@ -359,11 +392,15 @@
     "detail": {
       "my_circles": "My Circles",
       "members": "Members",
+      "members_count": "Members ({count})",
       "upcoming_events": "Upcoming Events",
       "owner": "(Owner)",
       "edit_circle": "Edit Circle",
       "delete_circle": "Delete Circle",
       "delete_confirmation": "Are you sure you want to delete this circle? This action cannot be undone."
+    },
+    "my_circles": {
+      "title": "My Circles"
     },
     "error": {
       "CIRCLE_NOT_FOUND": "Circle not found",
@@ -402,7 +439,9 @@
         "duration": "Duration",
         "circle": "Circle",
         "notes": "Notes",
-        "reminder": "Reminder"
+        "reminder": "Reminder",
+        "color": "Color",
+        "time_poll": "Time Poll"
       },
       "hint": {
         "title": "E.g.: Team meeting",
@@ -413,8 +452,28 @@
       },
       "button": {
         "create": "Create Event",
-        "add_time": "Add Time"
-      }
+        "add_time": "Add Time",
+        "create_circle": "Create Circle Event",
+        "create_personal": "Create Personal Event",
+        "add_event": "Add Event"
+      },
+      "validation": {
+        "title_required": "Please enter an event title",
+        "end_after_start": "End time must be after start time"
+      },
+      "time_poll": {
+        "option": "Option",
+        "start": "Start",
+        "end": "End"
+      },
+      "reminder": {
+        "none": "None",
+        "5min": "5 minutes",
+        "10min": "10 minutes",
+        "30min": "30 minutes"
+      },
+      "success": "Event created successfully",
+      "error": "Error creating event"
     },
     "detail": {
       "title": "Event Details",
@@ -431,12 +490,112 @@
       "label": {
         "description": "Description",
         "your_rsvp": "Your RSVP"
+      },
+      "tab": {
+        "rsvp": "RSVP",
+        "time_poll": "Time Poll",
+        "map": "Map",
+        "details": "Details"
+      },
+      "rsvp": {
+        "your_rsvp": "Your RSVP",
+        "confirm_attendance": "Confirm your attendance",
+        "going": "I'll attend",
+        "maybe": "Maybe",
+        "not_going": "I won't attend",
+        "whos_coming": "Who's Coming?",
+        "no_rsvps": "No RSVPs yet",
+        "no_one_yet": "No one here yet",
+        "going_count": "{count} Going",
+        "maybe_count": "{count} Maybe",
+        "not_going_count": "{count} Not Going"
+      },
+      "time_poll": {
+        "title": "Time Poll",
+        "no_times": "No time options",
+        "no_votes": "No votes yet",
+        "votes": "votes",
+        "vote": "vote",
+        "vote_singular": "vote",
+        "vote_plural": "votes",
+        "vote_button": "Vote or Change Vote",
+        "vote_button_short": "Vote",
+        "choose_time": "Choose a time",
+        "no_options": "No time options to lock",
+        "lock_title": "Lock time poll",
+        "lock_message": "Do you want to lock the poll with the most voted option?",
+        "lock_success": "Time poll locked successfully!",
+        "lock_error": "Error locking time poll",
+        "lock_button": "Lock"
+      },
+      "location": {
+        "no_location": "No location",
+        "share": "Share",
+        "directions": "Directions",
+        "cannot_open": "Could not open maps"
+      },
+      "conflict": {
+        "title": "Resolve Conflict",
+        "overlapping_events": "You have {count} overlapping events",
+        "no_conflicts": "No conflicts",
+        "button": {
+          "cancel_event": "Cancel This Event",
+          "change_maybe": "Change to Maybe",
+          "change_going": "Change to Going",
+          "keep_both": "Keep Both As-Is",
+          "view_calendar": "View Both in Calendar"
+        }
+      },
+      "actions": {
+        "edit": "Edit Event",
+        "lock_poll": "Lock Time Poll",
+        "finalize": "Finalize Event",
+        "delete": "Delete",
+        "edit_personal": "Edit Event",
+        "cancel_personal": "Cancel Event",
+        "delete_personal": "Delete"
+      },
+      "finalize": {
+        "title": "Finalize event",
+        "message": "Do you want to finalize the event and set the final time?\\n\\nThe locked time will become the final event time.",
+        "success": "Event finalized successfully!",
+        "error": "Error finalizing event",
+        "no_detail": "Error: Could not load event detail",
+        "button": "Finalize"
+      },
+      "delete": {
+        "title": "Delete event",
+        "message": "Are you sure you want to delete this event? This action cannot be undone.",
+        "message_personal": "Are you sure you want to delete this personal event?",
+        "success": "Event deleted successfully",
+        "error": "Error deleting event"
+      },
+      "status": {
+        "cancelled": "Cancelled",
+        "draft": "DRAFT",
+        "locked": "LOCKED",
+        "finalized": "FINALIZED"
+      },
+      "coming_soon": {
+        "edit": "Edit event coming soon",
+        "edit_personal": "Edit personal event coming soon",
+        "cancel_personal": "Cancel personal event coming soon",
+        "delete_personal": "Delete personal event coming soon"
       }
     },
     "conflict": {
       "title": "Resolve Schedule Conflict",
       "no_conflicts": "No conflicting events found.",
-      "overlapping_events": "You have {count} overlapping event(s):"
+      "overlapping_events": "You have {count} overlapping event(s):",
+      "conflicts_with": "Conflicts with",
+      "generic_message": "Event conflicts with another in your calendar",
+      "button": {
+        "cancel_event": "Cancel This Event",
+        "change_maybe": "Change to Maybe",
+        "change_going": "Change to Going",
+        "keep_both": "Keep Both As-Is",
+        "view_calendar": "View Both in Calendar"
+      }
     },
     "rsvp": {
       "dialog_title": "Your response",
@@ -518,7 +677,36 @@
       "english": "English"
     }
   },
+  "calendar": {
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "view": {
+      "monthly": "Monthly view",
+      "annual": "Annual view"
+    }
+  },
+  "location": {
+    "search": {
+      "hint": "Search for a place..."
+    },
+    "button": {
+      "confirm": "Confirm Location"
+    },
+    "map_preview": {
+      "title": "Map Preview",
+      "description": "Google Maps will appear here"
+    }
+  },
   "validation": {
+    "email_required": "Please enter an email",
+    "email_invalid": "Please enter a valid email",
     "error": {
       "VALIDATION_FAILED": "Validation failed",
       "VALIDATION_INVALID_INPUT": "Invalid input",

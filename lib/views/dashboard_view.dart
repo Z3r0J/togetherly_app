@@ -497,13 +497,19 @@ class _DashboardViewState extends State<DashboardView> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
-                  _buildFilterChip('Todos', 'all'),
+                  _buildFilterChip(l10n.tr('dashboard.filter.all'), 'all'),
                   const SizedBox(width: 8),
-                  _buildFilterChip('Personal', 'personal'),
+                  _buildFilterChip(
+                    l10n.tr('dashboard.filter.personal'),
+                    'personal',
+                  ),
                   const SizedBox(width: 8),
-                  _buildFilterChip('Confirmado', 'going'),
+                  _buildFilterChip(
+                    l10n.tr('dashboard.filter.confirmed'),
+                    'going',
+                  ),
                   const SizedBox(width: 8),
-                  _buildFilterChip('Tal vez', 'maybe'),
+                  _buildFilterChip(l10n.tr('dashboard.filter.maybe'), 'maybe'),
                 ],
               ),
             ),
@@ -835,7 +841,7 @@ class _DashboardViewState extends State<DashboardView> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Conflicto',
+                            l10n.tr('dashboard.label.conflict'),
                             style: AppTextStyles.labelSmall.copyWith(
                               color: AppColors.warning,
                             ),
