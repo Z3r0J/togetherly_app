@@ -53,6 +53,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
 
 dependency_overrides:
   # shared_preferences_android 2.2.3 elimina v1 embedding y usa compileSdk 34 (2.2.2)
@@ -83,6 +84,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/images/onboarding/
     - assets/l10n/
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -110,3 +112,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter Launcher Icons configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  # Si quieres un ícono adaptivo para Android (recomendado):
+  # adaptive_icon_background: "#FFFFFF"
+  # adaptive_icon_foreground: "assets/images/app_icon_foreground.png"

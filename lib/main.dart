@@ -18,6 +18,7 @@ import 'views/register_view.dart';
 import 'views/dashboard_view.dart';
 import 'views/join_circle_view.dart';
 import 'widgets/auth_wrapper.dart';
+import 'widgets/onboarding_wrapper.dart';
 import 'theme/app_theme.dart';
 import 'services/deep_link_service.dart';
 import 'services/invitation_service.dart';
@@ -577,9 +578,11 @@ class _MyAppState extends State<MyApp> {
             title: 'Togetherly App',
             theme: AppTheme.lightTheme,
             debugShowCheckedModeBanner: false,
-            home: AuthWrapper(
-              authenticatedChild: const DashboardView(),
-              unauthenticatedChild: const LoginView(),
+            home: OnboardingWrapper(
+              child: AuthWrapper(
+                authenticatedChild: const DashboardView(),
+                unauthenticatedChild: const LoginView(),
+              ),
             ),
           );
         },

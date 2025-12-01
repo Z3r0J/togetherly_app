@@ -38,13 +38,14 @@ class _MyCirclesViewState extends State<MyCirclesView> {
           color: AppColors.textPrimary,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Mis Círculos', style: AppTextStyles.headlineMedium),
+        title: Text(
+          'Mis Círculos',
+          style: AppTextStyles.headlineMedium.copyWith(fontSize: 20),
+        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.all(8),
-            child: AppButton(
-              text: '+ Crear Círculo',
-              type: AppButtonType.primary,
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -57,6 +58,9 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                   context.read<CircleViewModel>().fetchCircles();
                 }
               },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('Crear'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
           ),
         ],
@@ -217,7 +221,10 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                         name,
                         style: AppTextStyles.labelMedium.copyWith(
                           fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -227,8 +234,8 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                        overflow: TextOverflow.visible,
                       ),
                     ],
                   ),
