@@ -1,4 +1,3 @@
-git commit -m "Update personal_event_service"
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
