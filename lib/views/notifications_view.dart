@@ -3,6 +3,11 @@ import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/notification_view_model.dart';
 import '../models/notification_models.dart';
+import '../models/unified_calendar_models.dart';
+import '../services/event_service.dart';
+import 'event_detail_tabs_view.dart';
+import 'resolve_conflict_view.dart';
+import 'join_circle_view.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -343,8 +348,9 @@ class _NotificationsViewState extends State<NotificationsView> {
               ],
             ),
 
-            // Acciones
-            if (primaryAction != null || secondaryAction != null) ...[
+            // Acciones (solo si no está leída)
+            if (!notification.isRead &&
+                (primaryAction != null || secondaryAction != null)) ...[
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -407,50 +413,281 @@ class _NotificationsViewState extends State<NotificationsView> {
     }
   }
 
-  void _handleNotificationAction(
+  Future<void> _handleNotificationAction(
     BuildContext context,
     AppNotification notification,
     String action,
-  ) {
-    // Handle the action with the backend
-    context.read<NotificationViewModel>().handleAction(notification.id, action);
-
-    // Show feedback
-    String message = '';
-    Color color = AppColors.info;
+  ) async {
+    final viewModel = context.read<NotificationViewModel>();
 
     switch (action) {
       case 'view_event':
-        message = 'Navegando a detalles del evento...';
-        color = AppColors.info;
-        // TODO: Navigate to event detail using notification.metadata.eventId
+        await _handleViewEvent(context, notification);
         break;
       case 'set_rsvp':
-        message = 'Abriendo selector de RSVP...';
-        color = AppColors.info;
+        await _handleSetRsvp(context, notification);
         break;
       case 'resolve_conflict':
-        message = 'Abriendo resolución de conflicto...';
-        color = AppColors.warning;
+        await _handleResolveConflict(context, notification);
         break;
       case 'accept_invitation':
-        message = '¡Invitación de círculo aceptada!';
-        color = AppColors.success;
+        await _handleAcceptInvitation(context, notification);
         break;
       case 'decline_invitation':
-        message = 'Invitación de círculo rechazada.';
-        color = AppColors.error;
+        await _handleDeclineInvitation(context, notification);
         break;
       default:
-        message = 'Acción ejecutada: $action';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Acción no implementada: $action'),
+            backgroundColor: AppColors.warning,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
+    // Mark as handled
+    await viewModel.handleAction(notification.id, action);
+  }
+
+  Future<void> _handleViewEvent(
+    BuildContext context,
+    AppNotification notification,
+  ) async {
+    final eventId = notification.metadata.eventId;
+    if (eventId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: No se encontró el ID del evento'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Load event details
+      final eventService = EventService();
+      final event = await eventService.getCircleEventDetail(eventId);
+
+      if (mounted) {
+        // Navigate to event details
+        final unifiedEvent = CircleUnifiedEvent(
+          id: event.id,
+          title: event.title,
+          startTime: event.startsAt ?? DateTime.now(),
+          endTime: event.endsAt ?? DateTime.now(),
+          allDay: event.allDay,
+          conflictsWith: [],
+          circleId: event.circleId,
+          circleName: '',
+          circleColor: event.color,
+          location: event.location,
+          status: event.status,
+          rsvpStatus: null,
+          attendeeCount: event.rsvps.length,
+          canChangeRsvp: true,
+          isCreator: false,
+        );
+
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailTabsView(event: unifiedEvent),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar el evento: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleSetRsvp(
+    BuildContext context,
+    AppNotification notification,
+  ) async {
+    final eventId = notification.metadata.eventId;
+    if (eventId == null) return;
+
+    // Show RSVP options dialog
+    final rsvpStatus = await showDialog<RsvpStatus>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tu respuesta'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: AppColors.success),
+              title: const Text('Asistiré'),
+              onTap: () => Navigator.pop(context, RsvpStatus.going),
+            ),
+            ListTile(
+              leading: const Icon(Icons.help_outline, color: AppColors.warning),
+              title: const Text('Tal vez'),
+              onTap: () => Navigator.pop(context, RsvpStatus.maybe),
+            ),
+            ListTile(
+              leading: const Icon(Icons.cancel, color: AppColors.error),
+              title: const Text('No asistiré'),
+              onTap: () => Navigator.pop(context, RsvpStatus.notGoing),
+            ),
+          ],
+        ),
       ),
     );
+
+    if (rsvpStatus != null && mounted) {
+      try {
+        final eventService = EventService();
+        await eventService.updateRsvp(eventId, rsvpStatus);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('¡RSVP actualizado exitosamente!'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al actualizar RSVP: $e'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handleResolveConflict(
+    BuildContext context,
+    AppNotification notification,
+  ) async {
+    final eventId = notification.metadata.eventId;
+    if (eventId == null) return;
+
+    try {
+      // Load the conflicting events
+      final eventService = EventService();
+      final event = await eventService.getCircleEventDetail(eventId);
+
+      if (mounted) {
+        final unifiedEvent = CircleUnifiedEvent(
+          id: event.id,
+          title: event.title,
+          startTime: event.startsAt ?? DateTime.now(),
+          endTime: event.endsAt ?? DateTime.now(),
+          allDay: event.allDay,
+          conflictsWith: [],
+          circleId: event.circleId,
+          circleName: '',
+          circleColor: event.color,
+          location: event.location,
+          status: event.status,
+          rsvpStatus: null,
+          attendeeCount: event.rsvps.length,
+          canChangeRsvp: true,
+          isCreator: false,
+        );
+
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResolveConflictView(
+              event: unifiedEvent,
+              conflicts: unifiedEvent.conflictsWith,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar conflicto: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAcceptInvitation(
+    BuildContext context,
+    AppNotification notification,
+  ) async {
+    final shareToken = notification.metadata.shareToken;
+
+    if (shareToken == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: No se encontró el enlace de invitación'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Navigate to JoinCircleView with the shareToken
+      final result = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => JoinCircleView(shareToken: shareToken),
+        ),
+      );
+
+      // If successfully joined, refresh notifications
+      if (result == true && mounted) {
+        context.read<NotificationViewModel>().refresh();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleDeclineInvitation(
+    BuildContext context,
+    AppNotification notification,
+  ) async {
+    // For now, just dismiss the notification
+    await context.read<NotificationViewModel>().dismissNotification(
+      notification.id,
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invitación rechazada'),
+          backgroundColor: AppColors.info,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

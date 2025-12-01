@@ -11,6 +11,7 @@ class DeepLinkService {
   Function(DeepLinkAuthData)? onAuthLinkReceived;
   Function(EmailVerificationData)? onEmailVerificationReceived;
   Function(String token)? onInvitationLinkReceived;
+  Function(String shareToken)? onShareLinkReceived;
   Function(String error)? onError;
 
   // Initialize and listen for deep links
@@ -97,6 +98,42 @@ class DeepLinkService {
         } else {
           print('❌ [DeepLinkService] Invalid invitation token');
           onError?.call('Invalid invitation token in deep link');
+        }
+      }
+      // Check if this is a circle share link
+      // Expected format: togetherly://circles/share/{shareToken}
+      // OR: https://togetherly-backend.fly.dev/api/circles/share/{shareToken}/join
+      else if ((uri.scheme == 'togetherly' &&
+              uri.host == 'circles' &&
+              uri.pathSegments.length >= 2 &&
+              uri.pathSegments[0] == 'share') ||
+          (uri.scheme == 'https' &&
+              uri.host == 'togetherly-backend.fly.dev' &&
+              uri.pathSegments.length >= 4 &&
+              uri.pathSegments[0] == 'api' &&
+              uri.pathSegments[1] == 'circles' &&
+              uri.pathSegments[2] == 'share')) {
+        print('🔍 [DeepLinkService] Share link detected');
+        print('   Scheme: ${uri.scheme}');
+        print('   Host: ${uri.host}');
+        print('   Path segments: ${uri.pathSegments}');
+
+        // Extract shareToken from path
+        // For togetherly://circles/share/{shareToken} -> pathSegments[1]
+        // For https://togetherly-backend.fly.dev/api/circles/share/{shareToken}/join -> pathSegments[3]
+        final shareToken = uri.scheme == 'togetherly'
+            ? uri.pathSegments[1]
+            : uri.pathSegments[3];
+        print(
+          '   Extracted shareToken: ${shareToken.length > 10 ? shareToken.substring(0, 10) + "..." : shareToken}',
+        );
+
+        if (shareToken.isNotEmpty) {
+          print('📧 [DeepLinkService] Valid share token - calling callback');
+          onShareLinkReceived?.call(shareToken);
+        } else {
+          print('❌ [DeepLinkService] Invalid share token');
+          onError?.call('Invalid share token in deep link');
         }
       } else {
         // Unknown deep link format

@@ -8,12 +8,14 @@ class InviteMembersView extends StatefulWidget {
   final String circleId;
   final String circleName;
   final Color circleColor;
+  final String? shareToken;
 
   const InviteMembersView({
     super.key,
     required this.circleId,
     required this.circleName,
     required this.circleColor,
+    this.shareToken,
   });
 
   @override
@@ -124,7 +126,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'https://togetherly.app/join/${widget.circleId}',
+                      _getShareLink(),
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textPrimary,
                       ),
@@ -321,8 +323,15 @@ class _InviteMembersViewState extends State<InviteMembersView> {
     }
   }
 
+  String _getShareLink() {
+    if (widget.shareToken != null && widget.shareToken!.isNotEmpty) {
+      return 'https://togetherly-backend.fly.dev/api/circles/share/${widget.shareToken}/join';
+    }
+    return 'https://togetherly-backend.fly.dev/join/${widget.circleId}';
+  }
+
   void _handleCopyLink() {
-    final link = 'https://togetherly.app/join/${widget.circleId}';
+    final link = _getShareLink();
     Clipboard.setData(ClipboardData(text: link));
     _showSnackBar('Enlace copiado al portapapeles', AppColors.success);
   }

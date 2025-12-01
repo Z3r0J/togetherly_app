@@ -226,7 +226,7 @@ class NotificationService {
 
   // Get notifications from backend
   Future<NotificationsResponse?> getNotifications({
-    String category = 'all',
+    String? category,
     int page = 1,
     int limit = 20,
   }) async {
@@ -237,10 +237,18 @@ class NotificationService {
 
       developer.log('🔵 Fetching notifications...');
 
+      // Build query parameters
+      final queryParams = {'page': page.toString(), 'limit': limit.toString()};
+      if (category != null) {
+        queryParams['category'] = category;
+      }
+
+      final uri = Uri.parse(
+        ApiConfig.notificationsUrl,
+      ).replace(queryParameters: queryParams);
+
       final response = await http.get(
-        Uri.parse(
-          '${ApiConfig.notificationsUrl}?category=$category&page=$page&limit=$limit',
-        ),
+        uri,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -270,16 +278,24 @@ class NotificationService {
   }
 
   // Get unread count
-  Future<UnreadCountResponse?> getUnreadCount({String category = 'all'}) async {
+  Future<UnreadCountResponse?> getUnreadCount({String? category}) async {
     try {
       final accessToken = await _authService.getAccessToken();
       if (accessToken == null)
         throw ApiError(errorCode: 'AUTH_NO_TOKEN', message: 'No access token');
 
+      // Build query parameters
+      final queryParams = <String, String>{};
+      if (category != null) {
+        queryParams['category'] = category;
+      }
+
+      final uri = Uri.parse(
+        '${ApiConfig.notificationsUrl}/unread-count',
+      ).replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+
       final response = await http.get(
-        Uri.parse(
-          '${ApiConfig.notificationsUrl}/unread-count?category=$category',
-        ),
+        uri,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

@@ -8,6 +8,7 @@ class Circle {
   final String privacy;
   final String memberCount;
   final String role;
+  final String? shareToken;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +20,7 @@ class Circle {
     required this.privacy,
     required this.memberCount,
     required this.role,
+    this.shareToken,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,6 +34,7 @@ class Circle {
       privacy: json['privacy'] ?? 'invite-only',
       memberCount: json['memberCount'] ?? '0',
       role: json['role'] ?? 'member',
+      shareToken: json['shareToken'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
@@ -182,6 +185,7 @@ class CircleDetail {
   final String color;
   final String privacy;
   final String ownerId;
+  final String? shareToken;
   final List<CircleMember> members;
   final List<CircleDetailEvent> events;
   final String userRole;
@@ -197,6 +201,7 @@ class CircleDetail {
     required this.color,
     required this.privacy,
     required this.ownerId,
+    this.shareToken,
     required this.members,
     required this.events,
     required this.userRole,
@@ -214,6 +219,7 @@ class CircleDetail {
       color: json['color'] ?? 'purple',
       privacy: json['privacy'] ?? 'invite-only',
       ownerId: json['ownerId'] ?? '',
+      shareToken: json['shareToken'] as String?,
       members:
           (json['members'] as List<dynamic>?)
               ?.map(
@@ -223,9 +229,7 @@ class CircleDetail {
               .toList() ??
           [],
       events: (json['events'] as List<dynamic>? ?? [])
-          .map(
-            (e) => CircleDetailEvent.fromJson(e as Map<String, dynamic>),
-          )
+          .map((e) => CircleDetailEvent.fromJson(e as Map<String, dynamic>))
           .toList(),
       userRole: json['userRole'] ?? 'member',
       canEdit: json['canEdit'] ?? false,
@@ -324,9 +328,7 @@ class CircleDetailEvent {
       rsvpStatus: json['rsvpStatus'] as String?,
       eventTimes: (json['eventTimes'] as List<dynamic>? ?? [])
           .map(
-            (et) => CircleDetailEventTime.fromJson(
-              et as Map<String, dynamic>,
-            ),
+            (et) => CircleDetailEventTime.fromJson(et as Map<String, dynamic>),
           )
           .toList(),
     );
@@ -624,6 +626,54 @@ class AcceptInvitationResponse {
       success: json['success'] ?? false,
       data: AcceptInvitationData.fromJson(json['data'] as Map<String, dynamic>),
       timestamp: json['timestamp'] ?? '',
+    );
+  }
+}
+
+// Circle Share Preview (public endpoint response)
+class CircleSharePreview {
+  final String circleId;
+  final String name;
+  final String? description;
+  final String? color;
+  final String ownerName;
+
+  CircleSharePreview({
+    required this.circleId,
+    required this.name,
+    this.description,
+    this.color,
+    required this.ownerName,
+  });
+
+  factory CircleSharePreview.fromJson(Map<String, dynamic> json) {
+    return CircleSharePreview(
+      circleId: json['circleId'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] as String?,
+      color: json['color'] as String?,
+      ownerName: json['ownerName'] ?? '',
+    );
+  }
+}
+
+// Join Circle Result
+class JoinCircleResult {
+  final String circleId;
+  final String circleName;
+  final String message;
+
+  JoinCircleResult({
+    required this.circleId,
+    required this.circleName,
+    required this.message,
+  });
+
+  factory JoinCircleResult.fromJson(Map<String, dynamic> json) {
+    return JoinCircleResult(
+      circleId: json['circleId'] ?? '',
+      circleName: json['circleName'] ?? '',
+      message: json['message'] ?? '',
     );
   }
 }

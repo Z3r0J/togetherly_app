@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:provider/provider.dart';
 
 import '../widgets/widgets.dart';
 import '../widgets/rsvp_widgets.dart';
@@ -177,10 +176,13 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                 'Miembros (${circleDetail.memberCount})',
                 style: AppTextStyles.headlineSmall,
               ),
-              if (circleDetail.canEdit)
-                AppButton(
+              // Todos los miembros pueden invitar, no sólo owner/admin
+              SizedBox(
+                height: 36,
+                child: AppButton(
                   text: '+ Invitar',
                   type: AppButtonType.primary,
+                  size: AppButtonSize.small,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -189,11 +191,13 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                           circleId: widget.circleId,
                           circleName: widget.circleName,
                           circleColor: widget.circleColor,
+                          shareToken: circleDetail.shareToken,
                         ),
                       ),
                     );
                   },
                 ),
+              ),
             ],
           ),
         ),
@@ -271,34 +275,35 @@ class _CircleDetailViewState extends State<CircleDetailView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Próximos Eventos', style: AppTextStyles.headlineSmall),
-              if (circleDetail.canEdit)
-                SizedBox(
-                  height: 36,
-                  child: AppButton(
-                    text: '+ Crear Evento',
-                    type: AppButtonType.primary,
-                    onPressed: () async {
-                      final result = await Navigator.push<bool>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateEventView(
-                            circleId: widget.circleId,
-                            circleName: widget.circleName,
-                            circleColor: widget.circleColor,
-                          ),
+              // Todos los miembros pueden crear eventos, no sólo owner/admin
+              SizedBox(
+                height: 36,
+                child: AppButton(
+                  text: '+ Crear Evento',
+                  type: AppButtonType.primary,
+                  size: AppButtonSize.small,
+                  onPressed: () async {
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateEventView(
+                          circleId: widget.circleId,
+                          circleName: widget.circleName,
+                          circleColor: widget.circleColor,
                         ),
+                      ),
+                    );
+                    if (result == true && mounted) {
+                      await context.read<CircleViewModel>().fetchCircleDetail(
+                        widget.circleId,
                       );
-                      if (result == true && mounted) {
-                        await context.read<CircleViewModel>().fetchCircleDetail(
-                          widget.circleId,
-                        );
-                        await context
-                            .read<UnifiedCalendarViewModel>()
-                            .loadCurrentMonth();
-                      }
-                    },
-                  ),
+                      await context
+                          .read<UnifiedCalendarViewModel>()
+                          .loadCurrentMonth();
+                    }
+                  },
                 ),
+              ),
             ],
           ),
         ),
@@ -466,9 +471,8 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                             title: event.title,
                             circleId: event.circleId,
                             circleName: widget.circleName,
-                            circleColor: widget.circleColor.value.toRadixString(
-                              16,
-                            ),
+                            circleColor:
+                                '#${widget.circleColor.value.toRadixString(16).substring(2)}',
                             startTime: startSafe,
                             endTime: endSafe,
                             allDay: event.allDay,
@@ -617,6 +621,8 @@ class _CircleDetailViewState extends State<CircleDetailView> {
       builder: (context) => Consumer<CircleViewModel>(
         builder: (context, circleViewModel, child) {
           final circleDetail = circleViewModel.currentCircleDetail;
+          final canEdit = circleDetail?.canEdit ?? false;
+          final canDelete = circleDetail?.canDelete ?? false;
 
           return Container(
             color: AppColors.background,
@@ -626,34 +632,55 @@ class _CircleDetailViewState extends State<CircleDetailView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.edit),
-                    title: const Text('Editar Círculo'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateCircleView.edit(
-                            circleId: widget.circleId,
-                            circleName: widget.circleName,
-                            circleColor: widget.circleColor,
-                            description: circleDetail?.description,
-                            privacy: circleDetail?.privacy,
-                          ),
-                        ),
-                      );
-                    },
+                    leading: Icon(
+                      Icons.edit,
+                      color: canEdit ? AppColors.textPrimary : AppColors.border,
+                    ),
+                    title: Text(
+                      'Editar Círculo',
+                      style: TextStyle(
+                        color: canEdit
+                            ? AppColors.textPrimary
+                            : AppColors.border,
+                      ),
+                    ),
+                    enabled: canEdit,
+                    onTap: canEdit
+                        ? () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateCircleView.edit(
+                                  circleId: widget.circleId,
+                                  circleName: widget.circleName,
+                                  circleColor: widget.circleColor,
+                                  description: circleDetail?.description,
+                                  privacy: circleDetail?.privacy,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                   ),
                   ListTile(
-                    leading: const Icon(Icons.delete, color: AppColors.error),
-                    title: const Text(
-                      'Eliminar Círculo',
-                      style: TextStyle(color: AppColors.error),
+                    leading: Icon(
+                      Icons.delete,
+                      color: canDelete ? AppColors.error : AppColors.border,
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showDeleteConfirmation();
-                    },
+                    title: Text(
+                      'Eliminar Círculo',
+                      style: TextStyle(
+                        color: canDelete ? AppColors.error : AppColors.border,
+                      ),
+                    ),
+                    enabled: canDelete,
+                    onTap: canDelete
+                        ? () {
+                            Navigator.pop(context);
+                            _showDeleteConfirmation();
+                          }
+                        : null,
                   ),
                 ],
               ),

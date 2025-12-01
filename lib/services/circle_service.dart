@@ -563,4 +563,99 @@ class CircleService {
       throw ApiError.unknownError(e.toString());
     }
   }
+
+  // Get circle details by share token (public, no auth required)
+  Future<CircleSharePreview> getCircleByShareToken(String shareToken) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.circlesUrl}/share/$shareToken'),
+            headers: {'Content-Type': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return CircleSharePreview.fromJson(body['data']);
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'CIRCLE_LOAD_FAILED',
+          message: 'Failed to load circle details',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  // Join a circle via share token (requires auth)
+  Future<JoinCircleResult> joinCircleViaShareLink(String shareToken) async {
+    try {
+      final accessToken = await _authService.getAccessToken();
+
+      if (accessToken == null) {
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'No access token found',
+        );
+      }
+
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.circlesUrl}/share/$shareToken/join'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return JoinCircleResult.fromJson(body['data']);
+      } else if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      } else if (response.statusCode == 409) {
+        throw ApiError(
+          errorCode: 'ALREADY_CIRCLE_MEMBER',
+          message: 'You are already a member of this circle',
+          statusCode: 409,
+        );
+      } else {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        if (ApiError.isErrorResponse(body)) {
+          throw ApiError.fromJson(body, statusCode: response.statusCode);
+        }
+        throw ApiError(
+          errorCode: 'CIRCLE_JOIN_FAILED',
+          message: 'Failed to join circle',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
 }

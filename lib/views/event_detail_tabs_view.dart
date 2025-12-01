@@ -47,6 +47,8 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final vm = context.watch<EventDetailViewModel>();
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy', 'es_ES');
     final timeFormat = DateFormat('h:mm a');
+    final circleDetail = vm.circleEvent;
+    final permissions = circleDetail?.permissions;
 
     if (vm.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -87,7 +89,6 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     }
 
     final unifiedEvent = widget.event;
-    final circleDetail = vm.circleEvent;
     final personalDetail = vm.personalEvent;
     final baseLocation = unifiedEvent is CircleUnifiedEvent
         ? unifiedEvent.location
@@ -104,8 +105,182 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Event Details', style: AppTextStyles.headlineSmall),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                circleDetail?.title ??
+                    personalDetail?.title ??
+                    unifiedEvent.title,
+                style: AppTextStyles.headlineSmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (_isCircleEvent && unifiedEvent is CircleUnifiedEvent) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  unifiedEvent.circleName,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         centerTitle: false,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            offset: const Offset(0, 45),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onSelected: (value) async {
+              switch (value) {
+                case 'edit':
+                  _handleEditEvent();
+                  break;
+                case 'lock':
+                  await _handleLockTimePoll();
+                  break;
+                case 'finalize':
+                  await _handleFinalizeEvent();
+                  break;
+                case 'delete':
+                  await _handleDeleteEvent();
+                  break;
+                case 'edit_personal':
+                  _handleEditPersonalEvent();
+                  break;
+                case 'cancel_personal':
+                  _handleCancelPersonalEvent();
+                  break;
+                case 'delete_personal':
+                  await _handleDeletePersonalEvent();
+                  break;
+              }
+            },
+            itemBuilder: (context) {
+              if (_isCircleEvent && permissions != null) {
+                // Circle event menu
+                final eventStatus = (unifiedEvent as CircleUnifiedEvent).status;
+
+                return [
+                  if (permissions.canEdit)
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 20),
+                          SizedBox(width: 12),
+                          Text('Edit Event'),
+                        ],
+                      ),
+                    ),
+                  if (permissions.canLock && eventStatus != 'locked')
+                    const PopupMenuItem(
+                      value: 'lock',
+                      child: Row(
+                        children: [
+                          Icon(Icons.lock_outline, size: 20),
+                          SizedBox(width: 12),
+                          Text('Lock Time Poll'),
+                        ],
+                      ),
+                    ),
+                  if (permissions.canLock && eventStatus == 'locked')
+                    const PopupMenuItem(
+                      value: 'finalize',
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_outline, size: 20),
+                          SizedBox(width: 12),
+                          Text('Finalize Event'),
+                        ],
+                      ),
+                    ),
+                  if (permissions.canDelete)
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 20,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Delete',
+                            style: TextStyle(color: AppColors.error),
+                          ),
+                        ],
+                      ),
+                    ),
+                ];
+              } else {
+                // Personal event menu
+                return [
+                  const PopupMenuItem(
+                    value: 'edit_personal',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 20),
+                        SizedBox(width: 12),
+                        Text('Edit Event'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'cancel_personal',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.cancel_outlined,
+                          size: 20,
+                          color: AppColors.warning,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Cancel Event',
+                          style: TextStyle(color: AppColors.warning),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete_personal',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: AppColors.error,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Delete',
+                          style: TextStyle(color: AppColors.error),
+                        ),
+                      ],
+                    ),
+                  ),
+                ];
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -259,6 +434,8 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           ),
         ],
       ),
+      floatingActionButton: null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -282,8 +459,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final vm = context.read<EventDetailViewModel>();
     final going = attendees.where((a) => a.status == RsvpStatus.going).toList();
     final maybe = attendees.where((a) => a.status == RsvpStatus.maybe).toList();
-    final notGoing =
-        attendees.where((a) => a.status == RsvpStatus.notGoing).toList();
+    final notGoing = attendees
+        .where((a) => a.status == RsvpStatus.notGoing)
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -358,7 +536,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ),
                   )
                 else ...[
-                  _buildAttendanceGroup('Going', going, const Color(0xFF2ECC71)),
+                  _buildAttendanceGroup(
+                    'Going',
+                    going,
+                    const Color(0xFF2ECC71),
+                  ),
                   const SizedBox(height: 12),
                   _buildAttendanceGroup(
                     'Maybe',
@@ -399,8 +581,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       );
     }
 
-    final maxVotes =
-        options.map((o) => o.voteCount).fold<int>(0, (prev, v) => v > prev ? v : prev);
+    final maxVotes = options
+        .map((o) => o.voteCount)
+        .fold<int>(0, (prev, v) => v > prev ? v : prev);
     final totalVotes = options.fold<int>(0, (sum, o) => sum + o.voteCount);
 
     return SingleChildScrollView(
@@ -656,10 +839,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  'Choose a time',
-                  style: AppTextStyles.titleMedium,
-                ),
+                Text('Choose a time', style: AppTextStyles.titleMedium),
                 const SizedBox(height: 8),
                 ...options.map(
                   (o) => ListTile(
@@ -695,27 +875,6 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     );
   }
 
-  Widget _buildAttendeeRow(String name, RsvpStatus status) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: AppColors.primary.withOpacity(0.15),
-          child: Text(
-            name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: AppTextStyles.labelMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(child: Text(name, style: AppTextStyles.bodyMedium)),
-        RsvpBadge(status: status),
-      ],
-    );
-  }
-
   Widget _buildCard({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -736,8 +895,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
   }
 
   Widget _buildConflictCallout(CircleUnifiedEvent fallback) {
-    final conflictTitle =
-        fallback.conflictsWith.isNotEmpty ? fallback.conflictsWith.first.title : null;
+    final conflictTitle = fallback.conflictsWith.isNotEmpty
+        ? fallback.conflictsWith.first.title
+        : null;
 
     return Container(
       width: double.infinity,
@@ -789,11 +949,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     return Expanded(
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: Icon(
-          icon,
-          size: 18,
-          color: selected ? Colors.white : color,
-        ),
+        icon: Icon(icon, size: 18, color: selected ? Colors.white : color),
         label: Text(
           label,
           style: AppTextStyles.labelMedium.copyWith(
@@ -828,10 +984,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             Container(
               width: 10,
               height: 10,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 8),
             Text(
@@ -926,5 +1079,233 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         ? 'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}'
         : location.name;
     await Share.share(link, subject: location.name);
+  }
+
+  void _handleEditEvent() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Editar evento próximamente'),
+        backgroundColor: AppColors.info,
+      ),
+    );
+    // TODO: Navigate to edit event screen
+  }
+
+  Future<void> _handleLockTimePoll() async {
+    final vm = context.read<EventDetailViewModel>();
+    final circleDetail = vm.circleEvent;
+
+    if (circleDetail == null || circleDetail.eventTimes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay opciones de tiempo para bloquear'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Find the option with most votes
+    final sortedOptions = List<CircleEventTimeOption>.from(
+      circleDetail.eventTimes,
+    )..sort((a, b) => b.voteCount.compareTo(a.voteCount));
+    final winningOption = sortedOptions.first;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Bloquear votación'),
+        content: Text(
+          '¿Deseas bloquear la votación con la opción más votada?\n\n'
+          '${DateFormat('EEEE, MMMM d', 'es_ES').format(winningOption.startTime)}\n'
+          '${DateFormat('h:mm a').format(winningOption.startTime)} - '
+          '${DateFormat('h:mm a').format(winningOption.endTime)}\n\n'
+          'Votos: ${winningOption.voteCount}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Bloquear'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final success = await vm.lockTimePoll(widget.event.id, winningOption.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? '¡Votación bloqueada exitosamente!'
+                  : 'Error al bloquear votación',
+            ),
+            backgroundColor: success ? AppColors.success : AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleFinalizeEvent() async {
+    final vm = context.read<EventDetailViewModel>();
+    final circleDetail = vm.circleEvent;
+
+    if (circleDetail == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: No se pudo cargar el detalle del evento'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Finalizar evento'),
+        content: const Text(
+          '¿Deseas finalizar el evento y establecer el horario definitivo?\n\n'
+          'El horario bloqueado se convertirá en el horario final del evento.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Finalizar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final success = await vm.finalizeEvent(widget.event.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? '¡Evento finalizado exitosamente!'
+                  : 'Error al finalizar evento',
+            ),
+            backgroundColor: success ? AppColors.success : AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleDeleteEvent() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar evento'),
+        content: const Text(
+          '¿Estás seguro de que deseas eliminar este evento? '
+          'Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final vm = context.read<EventDetailViewModel>();
+      final success = await vm.deleteEvent(widget.event.id);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Evento eliminado exitosamente'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context, true); // Return true to refresh calendar
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(vm.error?.message ?? 'Error al eliminar evento'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void _handleEditPersonalEvent() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Editar evento personal próximamente'),
+        backgroundColor: AppColors.info,
+      ),
+    );
+    // TODO: Navigate to edit personal event screen
+  }
+
+  void _handleCancelPersonalEvent() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Cancelar evento personal próximamente'),
+        backgroundColor: AppColors.info,
+      ),
+    );
+    // TODO: Implement cancel personal event
+  }
+
+  Future<void> _handleDeletePersonalEvent() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar evento'),
+        content: const Text(
+          '¿Estás seguro de que deseas eliminar este evento personal?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Eliminar evento personal próximamente'),
+          backgroundColor: AppColors.info,
+        ),
+      );
+      // TODO: Implement delete personal event
+    }
   }
 }

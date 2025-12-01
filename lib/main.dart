@@ -16,6 +16,7 @@ import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
 import 'views/register_view.dart';
 import 'views/dashboard_view.dart';
+import 'views/join_circle_view.dart';
 import 'widgets/auth_wrapper.dart';
 import 'theme/app_theme.dart';
 import 'services/deep_link_service.dart';
@@ -154,6 +155,7 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final DeepLinkService _deepLinkService = DeepLinkService();
   final InvitationService _invitationService = InvitationService();
+  bool _restoredPendingInvitation = false;
 
   @override
   void initState() {
@@ -214,6 +216,12 @@ class _MyAppState extends State<MyApp> {
       await _handleInvitation(token);
     };
 
+    // Handle circle share link deep links
+    _deepLinkService.onShareLinkReceived = (String shareToken) async {
+      print('🔗 [Main] Share link received: $shareToken');
+      await _handleShareLink(shareToken);
+    };
+
     // Handle email verification deep links
     _deepLinkService.onEmailVerificationReceived =
         (EmailVerificationData verificationData) async {
@@ -257,6 +265,8 @@ class _MyAppState extends State<MyApp> {
         };
 
     await _deepLinkService.initialize();
+    // After deep-link wiring, attempt to restore any pending invitation token
+    await _restorePendingInvitation();
   }
 
   Future<void> _handleInvitation(String token) async {
@@ -337,7 +347,6 @@ class _MyAppState extends State<MyApp> {
         }
       } else {
         print('ℹ️ [Main] User is NOT logged in - saving invitation for later');
-
         // User is NOT logged in - save token and show login/register with preview
         print('   Saving pending invitation...');
         await _invitationService.savePendingInvitation(token);
@@ -391,6 +400,121 @@ class _MyAppState extends State<MyApp> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _handleShareLink(String shareToken) async {
+    print('🔗 [Main] Processing share token: $shareToken');
+
+    // Wait for auth state to be properly checked
+    if (navigatorKey.currentContext != null) {
+      final authViewModel = navigatorKey.currentContext!.read<AuthViewModel>();
+
+      // Check auth status
+      print('⏳ [Main] Validating authentication status...');
+      await authViewModel.checkAuthStatus();
+      print('   Auth check completed. State: ${authViewModel.state}');
+
+      final isLoggedIn = authViewModel.isAuthenticated;
+      print('   User authenticated: $isLoggedIn');
+
+      if (isLoggedIn) {
+        print('✅ [Main] User is logged in - navigating to JoinCircleView');
+
+        // User is logged in - navigate to JoinCircleView
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => JoinCircleView(shareToken: shareToken),
+          ),
+        );
+      } else {
+        print('ℹ️ [Main] User is NOT logged in - navigating to login');
+
+        // User is NOT logged in - navigate to login
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginView()),
+          (route) => false,
+        );
+
+        // Show message
+        if (navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(
+              content: Text('Debes iniciar sesión para unirte al círculo'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _restorePendingInvitation() async {
+    if (_restoredPendingInvitation) return;
+    _restoredPendingInvitation = true;
+
+    final pendingToken = await _invitationService.getPendingInvitation();
+    if (pendingToken == null) {
+      return;
+    }
+
+    // Ensure we have a context to navigate
+    if (navigatorKey.currentContext == null) return;
+
+    final authViewModel = navigatorKey.currentContext!.read<AuthViewModel>();
+    await authViewModel.checkAuthStatus();
+    final isLoggedIn = authViewModel.isAuthenticated;
+
+    if (isLoggedIn) {
+      // If logged in, try to accept immediately like the deep-link flow
+      final circleViewModel = navigatorKey.currentContext!
+          .read<CircleViewModel>();
+      try {
+        final result = await circleViewModel.acceptInvitation(pendingToken);
+        if (result != null) {
+          await _invitationService.clearPendingInvitation();
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            SnackBar(
+              content: Text('¡Te uniste a ${result.circleName}!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        // On failure, keep the token so it can be retried or shown in login
+        debugPrint('❌ [Main] Failed to auto-accept pending invitation: $e');
+      }
+      return;
+    }
+
+    // Not logged in: fetch details to show banner in login/register
+    final details = await _invitationService.getInvitationDetails(pendingToken);
+    if (details == null) return;
+
+    final invitationContext = {
+      'circleName': details.circleName,
+      'inviterName': details.inviterName,
+      'invitedEmail': details.invitedEmail,
+    };
+
+    // If the invited email already has an account, go to login; otherwise register
+    if (details.isRegistered) {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => LoginView(invitationContext: invitationContext),
+        ),
+        (route) => false,
+      );
+    } else {
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) =>
+              RegisterView(invitationContext: invitationContext),
+        ),
+        (route) => false,
+      );
     }
   }
 

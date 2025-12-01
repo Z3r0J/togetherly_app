@@ -13,7 +13,7 @@ class NotificationViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   ApiError? _error;
-  String _currentCategory = 'all';
+  String? _currentCategory;
   int _currentPage = 1;
   bool _hasMore = true;
 
@@ -23,7 +23,7 @@ class NotificationViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
   ApiError? get error => _error;
-  String get currentCategory => _currentCategory;
+  String? get currentCategory => _currentCategory;
   int get totalUnread => _unreadCount?.total ?? 0;
 
   // Initialize notification service
@@ -138,7 +138,7 @@ class NotificationViewModel extends ChangeNotifier {
     try {
       developer.log('🔵 Marking all as read for category: $_currentCategory');
       final success = await _notificationService.markAllAsRead(
-        category: _currentCategory != 'all' ? _currentCategory : null,
+        category: _currentCategory,
       );
       if (success) {
         await Future.wait([loadNotifications(), loadUnreadCount()]);

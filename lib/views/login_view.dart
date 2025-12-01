@@ -329,26 +329,34 @@ class _LoginViewState extends State<LoginView> {
     setState(() => _isLoading = false);
 
     if (success) {
-      // Check for pending invitation before navigating
-      final invitationService = InvitationService();
-      final invitationData = await invitationService.processPendingInvitation();
+      bool navigated = false;
+      try {
+        // Check for pending invitation before navigating
+        final invitationService = InvitationService();
+        final invitationData = await invitationService.processPendingInvitation();
 
-      if (invitationData != null) {
-        // Successfully joined circle from invitation
-        print(
-          '✅ [LoginView] Processed pending invitation - Circle: ${invitationData.circleName}',
-        );
+        if (invitationData != null) {
+          // Successfully joined circle from invitation
+          print(
+            '✅ [LoginView] Processed pending invitation - Circle: ${invitationData.circleName}',
+          );
 
-        // Show success message
-        _showSuccess('¡Te uniste a ${invitationData.circleName}!');
+          // Show success message
+          _showSuccess('¡Te uniste a ${invitationData.circleName}!');
 
-        // Navigate to dashboard (circles will be refreshed automatically)
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardView()),
-        );
-      } else {
-        // Normal login flow - no pending invitation
+          // Navigate to dashboard (circles will be refreshed automatically)
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardView()),
+          );
+          navigated = true;
+        }
+      } catch (e) {
+        // Log and continue to dashboard even if invitation fails
+        print('❌ [LoginView] Error processing pending invitation: $e');
+      }
+
+      if (!navigated) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const DashboardView()),

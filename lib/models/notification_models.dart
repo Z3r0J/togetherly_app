@@ -171,14 +171,21 @@ class NotificationMetadata {
   final String? eventId;
   final String? circleId;
   final String? userId;
+  final String? shareToken;
 
-  NotificationMetadata({this.eventId, this.circleId, this.userId});
+  NotificationMetadata({
+    this.eventId,
+    this.circleId,
+    this.userId,
+    this.shareToken,
+  });
 
   factory NotificationMetadata.fromJson(Map<String, dynamic> json) {
     return NotificationMetadata(
       eventId: json['eventId'] as String?,
       circleId: json['circleId'] as String?,
       userId: json['userId'] as String?,
+      shareToken: json['shareToken'] as String?,
     );
   }
 }

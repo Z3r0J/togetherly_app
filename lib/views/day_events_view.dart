@@ -800,7 +800,7 @@ class _DayEventsViewState extends State<DayEventsView> {
     final startTime = timeFormat.format(event.startTime.toLocal());
     final endTime = timeFormat.format(event.endTime.toLocal());
     final color = event.color != null
-        ? Color(int.parse(event.color!.replaceFirst('#', '0xFF')))
+        ? AppColors.hexToColor(event.color!)
         : AppColors.primary;
 
     return CompactEventCard(
@@ -833,7 +833,7 @@ class _DayEventsViewState extends State<DayEventsView> {
     final startTime = timeFormat.format(event.startTime.toLocal());
     final endTime = timeFormat.format(event.endTime.toLocal());
     final circleColor = event.circleColor != null
-        ? Color(int.parse(event.circleColor!.replaceFirst('#', '0xFF')))
+        ? AppColors.hexToColor(event.circleColor!)
         : AppColors.primary;
 
     // For events with location, use EventCard

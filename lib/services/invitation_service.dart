@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/circle_models.dart';
+import '../models/api_error.dart';
 import 'circle_service.dart';
 import 'auth_service.dart';
 
@@ -92,9 +93,26 @@ class InvitationService {
         return result;
       }
       return null;
-    } catch (e) {
+    } on ApiError catch (e) {
       print('❌ [InvitationService] Error processing pending invitation: $e');
-      // Keep token for retry
+      // If it's already accepted/declined/expired/not found/email mismatch, clear token to avoid loops
+      const clearableCodes = {
+        'CIRCLE_INVITATION_ALREADY_ACCEPTED',
+        'INVITATION_ALREADY_ACCEPTED',
+        'INVITATION_ALREADY_DECLINED',
+        'INVITATION_EXPIRED',
+        'INVITATION_NOT_FOUND',
+        'ALREADY_CIRCLE_MEMBER',
+        'INVITATION_EMAIL_MISMATCH',
+      };
+      if (clearableCodes.contains(e.errorCode)) {
+        await clearPendingInvitation();
+        print(
+          'ℹ️ [InvitationService] Clearing pending token due to non-retriable error',
+        );
+        return null;
+      }
+      // Keep token for retry on other errors (e.g., mismatched email / network)
       rethrow;
     }
   }

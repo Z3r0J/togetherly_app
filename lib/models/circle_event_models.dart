@@ -161,6 +161,7 @@ RsvpStatus _statusFromString(String? value) {
     case 'maybe':
     case 'RsvpStatus.maybe':
       return RsvpStatus.maybe;
+    case 'not going': // Backend sends with space
     case 'notGoing':
     case 'not_going':
     case 'RsvpStatus.notGoing':

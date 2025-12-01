@@ -55,9 +55,20 @@ class AppColors {
   static const Color overlay = Color(0x33000000);
   static const Color scrim = Color(0x80000000);
 
-  // Helper method to get circle color from string
-  static Color getCircleColor(String colorName) {
-    switch (colorName.toLowerCase()) {
+  // Helper method to get circle color from string (supports both hex and color names)
+  static Color getCircleColor(String colorInput) {
+    // If it starts with #, parse as hex
+    if (colorInput.startsWith('#')) {
+      try {
+        return Color(int.parse(colorInput.replaceFirst('#', '0xFF')));
+      } catch (e) {
+        print('⚠️ Failed to parse hex color: $colorInput, using default');
+        return circlePurple;
+      }
+    }
+
+    // Otherwise, treat as color name
+    switch (colorInput.toLowerCase()) {
       case 'purple':
         return circlePurple;
       case 'blue':
@@ -76,6 +87,17 @@ class AppColors {
         return circleYellow;
       default:
         return circlePurple; // Default fallback
+    }
+  }
+
+  // Helper method to convert hex string to Color
+  static Color hexToColor(String hexString) {
+    try {
+      final hex = hexString.replaceFirst('#', '');
+      return Color(int.parse('FF$hex', radix: 16));
+    } catch (e) {
+      print('⚠️ Failed to parse hex color: $hexString, using default');
+      return circlePurple;
     }
   }
 }

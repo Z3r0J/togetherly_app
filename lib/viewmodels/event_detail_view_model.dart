@@ -10,7 +10,7 @@ class EventDetailViewModel extends ChangeNotifier {
   final EventService _eventService;
 
   EventDetailViewModel({EventService? eventService})
-      : _eventService = eventService ?? EventService();
+    : _eventService = eventService ?? EventService();
 
   bool _isLoading = false;
   bool _isActionLoading = false;
@@ -78,6 +78,63 @@ class EventDetailViewModel extends ChangeNotifier {
     } finally {
       _isActionLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> deleteEvent(String eventId) async {
+    _isActionLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _eventService.deleteCircleEvent(eventId);
+      _isActionLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e is ApiError ? e : ApiError.unknownError(e.toString());
+      _isActionLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> lockTimePoll(String eventId, String selectedTimeId) async {
+    _isActionLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _eventService.lockEventTimePoll(eventId, selectedTimeId);
+      if (_lastEvent != null) {
+        await load(_lastEvent!);
+      }
+      _isActionLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e is ApiError ? e : ApiError.unknownError(e.toString());
+      _isActionLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> finalizeEvent(String eventId) async {
+    _isActionLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _eventService.finalizeEvent(eventId);
+      if (_lastEvent != null) {
+        await load(_lastEvent!);
+      }
+      _isActionLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e is ApiError ? e : ApiError.unknownError(e.toString());
+      _isActionLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 }

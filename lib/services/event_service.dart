@@ -270,4 +270,189 @@ class EventService {
       throw ApiError.unknownError(e.toString());
     }
   }
+
+  Future<void> updateCircleEvent(
+    String eventId,
+    Map<String, dynamic> payload,
+  ) async {
+    final accessToken = await _requireToken();
+
+    try {
+      final response = await http
+          .put(
+            Uri.parse('${ApiConfig.baseUrl}/events/$eventId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) return;
+
+      if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      }
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (ApiError.isErrorResponse(body)) {
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      }
+      throw ApiError(
+        errorCode: 'EVENT_UPDATE_FAILED',
+        message: 'Failed to update event',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  Future<void> deleteCircleEvent(String eventId) async {
+    final accessToken = await _requireToken();
+
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('${ApiConfig.baseUrl}/events/$eventId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) return;
+
+      if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      }
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (ApiError.isErrorResponse(body)) {
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      }
+      throw ApiError(
+        errorCode: 'EVENT_DELETE_FAILED',
+        message: 'Failed to delete event',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  Future<void> lockEventTimePoll(String eventId, String selectedTimeId) async {
+    final accessToken = await _requireToken();
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/events/$eventId/lock'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode({'selectedTimeId': selectedTimeId}),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) return;
+
+      if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      }
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (ApiError.isErrorResponse(body)) {
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      }
+      throw ApiError(
+        errorCode: 'EVENT_LOCK_FAILED',
+        message: 'Failed to lock time poll',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
+
+  Future<void> finalizeEvent(String eventId) async {
+    final accessToken = await _requireToken();
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/events/$eventId/finalize'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) return;
+
+      if (response.statusCode == 401) {
+        await _authService.clearTokens();
+        throw ApiError(
+          errorCode: 'AUTH_SESSION_EXPIRED',
+          message: 'Session expired',
+          statusCode: 401,
+        );
+      }
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (ApiError.isErrorResponse(body)) {
+        throw ApiError.fromJson(body, statusCode: response.statusCode);
+      }
+      throw ApiError(
+        errorCode: 'EVENT_FINALIZE_FAILED',
+        message: 'Failed to finalize event',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiError.networkError();
+    } on TimeoutException {
+      throw ApiError.timeoutError();
+    } on ApiError {
+      rethrow;
+    } catch (e) {
+      throw ApiError.unknownError(e.toString());
+    }
+  }
 }

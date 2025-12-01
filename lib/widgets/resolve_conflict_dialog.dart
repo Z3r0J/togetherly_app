@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/resolve_conflict_viewmodel.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 /// A modal dialog that presents two overlapping events and actions to resolve the conflict.
-/// It reuses the visual layout from `ResolveConflictView` but is exposed as a dialog
-/// and integrates with `ResolveConflictViewModel` (MVVM).
 class ResolveConflictDialog extends StatelessWidget {
   final String personalEventId;
   final String circleEventId;
@@ -34,285 +34,456 @@ class ResolveConflictDialog extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => ResolveConflictViewModel(),
       child: Dialog(
-        insetPadding: const EdgeInsets.all(16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 700),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 50,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Resolve Schedule Conflict',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'You have 2 overlapping events:',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                const SizedBox(height: 20),
-
-                // Personal event card (only when present)
-                if (personalEventId.isNotEmpty)
-                  _eventCard(
-                    title: personalTitle,
-                    type: 'Personal Event',
-                    date: personalDate,
-                    location: personalLocation,
-                    sideColor: Colors.grey,
-                    actionsBuilder: (vm) => [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          onPressed: vm.isLoading
-                              ? null
-                              : () async {
-                                  // Debug: log event being cancelled
-                                  // ignore: avoid_print
-                                  print(
-                                    '[ResolveDialog] cancelling personal event: $personalEventId',
-                                  );
-                                  final ok = await vm.resolveConflict(
-                                    eventId: personalEventId,
-                                    eventType: 'personal',
-                                    action: 'cancel_personal',
-                                  );
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pop(ok);
-                                },
-                          child: const Text('Cancel This Event'),
-                        ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.15),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(
+                        Icons.warning_amber_rounded,
+                        color: AppColors.error,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Conflicto de Horario',
+                            style: AppTextStyles.headlineSmall.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Tienes eventos que se superponen',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(false),
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Personal event card
+                      if (personalEventId.isNotEmpty) ...[
+                        _buildEventCard(
+                          context: context,
+                          title: personalTitle,
+                          date: personalDate,
+                          location: personalLocation,
+                          color: AppColors.primary,
+                          icon: Icons.person,
+                          label: 'EVENTO PERSONAL',
+                          actions: (vm) => [
+                            _buildActionChip(
+                              label: 'Cancelar evento',
+                              icon: Icons.cancel_outlined,
+                              color: AppColors.error,
+                              onPressed: vm.isLoading
+                                  ? null
+                                  : () async {
+                                      final ok = await vm.resolveConflict(
+                                        eventId: personalEventId,
+                                        eventType: 'personal',
+                                        action: 'cancel_personal',
+                                      );
+                                      Navigator.of(
+                                        context,
+                                        rootNavigator: true,
+                                      ).pop(ok);
+                                    },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // VS Divider
+                      if (personalEventId.isNotEmpty &&
+                          circleEventId.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.border,
+                                thickness: 1,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Text(
+                                  'VS',
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: AppColors.border,
+                                thickness: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Circle event card
+                      if (circleEventId.isNotEmpty)
+                        _buildEventCard(
+                          context: context,
+                          title: circleTitle,
+                          date: circleDate,
+                          location: circleLocation,
+                          color: AppColors.info,
+                          icon: Icons.groups_rounded,
+                          label: 'EVENTO DE CÍRCULO',
+                          rsvpStatus: rsvpStatus,
+                          actions: (vm) => [
+                            _buildActionChip(
+                              label: 'Ir',
+                              icon: Icons.check_circle_outline,
+                              color: AppColors.success,
+                              onPressed: vm.isLoading
+                                  ? null
+                                  : () async {
+                                      final ok = await vm.resolveConflict(
+                                        eventId: circleEventId,
+                                        eventType: 'circle',
+                                        action: 'change_rsvp_going',
+                                      );
+                                      Navigator.of(
+                                        context,
+                                        rootNavigator: true,
+                                      ).pop(ok);
+                                    },
+                            ),
+                            _buildActionChip(
+                              label: 'Tal vez',
+                              icon: Icons.help_outline,
+                              color: AppColors.warning,
+                              onPressed: vm.isLoading
+                                  ? null
+                                  : () async {
+                                      final ok = await vm.resolveConflict(
+                                        eventId: circleEventId,
+                                        eventType: 'circle',
+                                        action: 'change_rsvp_maybe',
+                                      );
+                                      Navigator.of(
+                                        context,
+                                        rootNavigator: true,
+                                      ).pop(ok);
+                                    },
+                            ),
+                            _buildActionChip(
+                              label: 'No ir',
+                              icon: Icons.cancel_outlined,
+                              color: AppColors.error,
+                              onPressed: vm.isLoading
+                                  ? null
+                                  : () async {
+                                      final ok = await vm.resolveConflict(
+                                        eventId: circleEventId,
+                                        eventType: 'circle',
+                                        action: 'change_rsvp_not_going',
+                                      );
+                                      Navigator.of(
+                                        context,
+                                        rootNavigator: true,
+                                      ).pop(ok);
+                                    },
+                            ),
+                          ],
+                        ),
                     ],
                   ),
+                ),
+              ),
 
-                const SizedBox(height: 12),
-
-                // Circle event card (only when present)
-                if (circleEventId.isNotEmpty)
-                  _eventCard(
-                    title: circleTitle,
-                    type: 'Circle Event',
-                    date: circleDate,
-                    location: circleLocation,
-                    sideColor: Colors.blue,
-                    rsvpTag: 'Your RSVP: ',
-                    rsvpValue: rsvpStatus,
-                    actionsBuilder: (vm) => [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: vm.isLoading
-                              ? null
-                              : () async {
-                                  // ignore: avoid_print
-                                  print(
-                                    '[ResolveDialog] change RSVP to maybe for: $circleEventId',
-                                  );
-                                  final ok = await vm.resolveConflict(
-                                    eventId: circleEventId,
-                                    eventType: 'circle',
-                                    action: 'change_rsvp_maybe',
-                                  );
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pop(ok);
-                                },
-                          child: const Text('Change to Maybe'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: vm.isLoading
-                              ? null
-                              : () async {
-                                  // ignore: avoid_print
-                                  print(
-                                    '[ResolveDialog] change RSVP to going for: $circleEventId',
-                                  );
-                                  final ok = await vm.resolveConflict(
-                                    eventId: circleEventId,
-                                    eventType: 'circle',
-                                    action: 'change_rsvp_going',
-                                  );
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pop(ok);
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3A58FF),
-                          ),
-                          child: const Text('Change to Going'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: vm.isLoading
-                              ? null
-                              : () async {
-                                  // ignore: avoid_print
-                                  print(
-                                    '[ResolveDialog] change RSVP to not going for: $circleEventId',
-                                  );
-                                  final ok = await vm.resolveConflict(
-                                    eventId: circleEventId,
-                                    eventType: 'circle',
-                                    action: 'change_rsvp_not_going',
-                                  );
-                                  Navigator.of(
-                                    context,
-                                    rootNavigator: true,
-                                  ).pop(ok);
-                                },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                          ),
-                          child: const Text('Not Going'),
-                        ),
-                      ),
-                    ],
+              // Footer actions
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
                   ),
-
-                const SizedBox(height: 16),
-
-                Center(
-                  child: OutlinedButton(
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(true),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 20,
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        ).pop(true),
+                        icon: const Icon(Icons.event_available),
+                        label: const Text('Mantener ambos eventos'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: AppColors.border, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          foregroundColor: AppColors.textPrimary,
+                        ),
                       ),
-                      child: Text('Keep Both As-Is'),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(false),
+                      icon: Icon(
+                        Icons.calendar_month,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
+                      label: Text(
+                        'Ver en calendario',
+                        style: AppTextStyles.labelMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-
-                const SizedBox(height: 8),
-                Center(
-                  child: TextButton(
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(false),
-                    child: const Text('View Both in Calendar'),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _eventCard({
+  Widget _buildEventCard({
+    required BuildContext context,
     required String title,
-    required String type,
     required String date,
     required String location,
-    required Color sideColor,
-    String? rsvpTag,
-    String? rsvpValue,
-    required List<Widget> Function(ResolveConflictViewModel vm) actionsBuilder,
+    required Color color,
+    required IconData icon,
+    required String label,
+    String? rsvpStatus,
+    required List<Widget> Function(ResolveConflictViewModel vm) actions,
   }) {
     return Consumer<ResolveConflictViewModel>(
       builder: (context, vm, _) {
-        final actions = actionsBuilder(vm);
         return Container(
-          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: color.withOpacity(0.3), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header with icon and title
               Container(
-                width: 4,
-                height: 120,
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: sideColor,
-                  borderRadius: BorderRadius.circular(4),
+                  color: color.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(14),
+                    topRight: Radius.circular(14),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, color: color, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            label,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            title,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
+
+              // Details
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (rsvpStatus != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getRsvpColor(rsvpStatus).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _getRsvpColor(rsvpStatus).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getRsvpIcon(rsvpStatus),
+                              size: 16,
+                              color: _getRsvpColor(rsvpStatus),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Tu RSVP: ${_getRsvpLabel(rsvpStatus)}',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: _getRsvpColor(rsvpStatus),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     Row(
                       children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            date,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(type, style: const TextStyle(color: Colors.black45)),
                     const SizedBox(height: 8),
-                    if (rsvpTag != null)
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            location,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textPrimary,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(rsvpTag),
-                                const SizedBox(width: 6),
-                                Text(rsvpValue ?? ''),
-                              ],
-                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 16),
-                        const SizedBox(width: 6),
-                        Text(date),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined, size: 16),
-                        const SizedBox(width: 6),
-                        Text(location),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(children: actions),
+                    const SizedBox(height: 16),
+                    Wrap(spacing: 8, runSpacing: 8, children: actions(vm)),
                   ],
                 ),
               ),
@@ -321,5 +492,72 @@ class ResolveConflictDialog extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildActionChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onPressed,
+  }) {
+    return ActionChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(label),
+        ],
+      ),
+      onPressed: onPressed,
+      backgroundColor: color.withOpacity(0.1),
+      labelStyle: TextStyle(
+        color: color,
+        fontWeight: FontWeight.w600,
+        fontSize: 13,
+      ),
+      side: BorderSide(color: color.withOpacity(0.3), width: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    );
+  }
+
+  Color _getRsvpColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'going':
+        return AppColors.success;
+      case 'maybe':
+        return AppColors.warning;
+      case 'not going':
+        return AppColors.error;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  IconData _getRsvpIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'going':
+        return Icons.check_circle;
+      case 'maybe':
+        return Icons.help;
+      case 'not going':
+        return Icons.cancel;
+      default:
+        return Icons.info;
+    }
+  }
+
+  String _getRsvpLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'going':
+        return 'Voy';
+      case 'maybe':
+        return 'Tal vez';
+      case 'not going':
+        return 'No voy';
+      default:
+        return status;
+    }
   }
 }

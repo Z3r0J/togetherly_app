@@ -65,6 +65,18 @@
                     android:host="invite" />
             </intent-filter>
 
+            <!-- Deep Link - Circle Share Link (Custom Scheme) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- togetherly://circles/share/{shareToken} URL scheme -->
+                <data 
+                    android:scheme="togetherly"
+                    android:host="circles"
+                    android:pathPrefix="/share" />
+            </intent-filter>
+
             <!-- Deep Link - Circle Invitation (Universal Links) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -75,6 +87,18 @@
                     android:scheme="https"
                     android:host="togetherly.app"
                     android:pathPrefix="/invite" />
+            </intent-filter>
+
+            <!-- Deep Link - Circle Share Link (Universal Links) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- https://togetherly-backend.fly.dev/api/circles/share/{shareToken}/join -->
+                <data 
+                    android:scheme="https"
+                    android:host="togetherly-backend.fly.dev"
+                    android:pathPrefix="/api/circles/share" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
