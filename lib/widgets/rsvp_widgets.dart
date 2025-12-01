@@ -238,12 +238,12 @@ class RsvpSummary extends StatelessWidget {
     }
 
     if (maybeCount > 0) {
-      if (items.isNotEmpty) items.add(_buildDot());
+      if (items.isNotEmpty) items.add(_buildDot(context));
       items.add(_buildItem('$maybeCount Maybe', AppColors.rsvpMaybe));
     }
 
     if (notGoingCount > 0) {
-      if (items.isNotEmpty) items.add(_buildDot());
+      if (items.isNotEmpty) items.add(_buildDot(context));
       items.add(_buildItem('$notGoingCount Not Going', AppColors.rsvpNotGoing));
     }
 
@@ -252,7 +252,9 @@ class RsvpSummary extends StatelessWidget {
         Text(
           'No responses yet',
           style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textTertiary,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withOpacity(0.6),
           ),
         ),
       );
@@ -265,14 +267,16 @@ class RsvpSummary extends StatelessWidget {
     return Text(text, style: AppTextStyles.bodySmall.copyWith(color: color));
   }
 
-  Widget _buildDot() {
+  Widget _buildDot(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Container(
         width: 3,
         height: 3,
-        decoration: const BoxDecoration(
-          color: AppColors.textTertiary,
+        decoration: BoxDecoration(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
           shape: BoxShape.circle,
         ),
       ),

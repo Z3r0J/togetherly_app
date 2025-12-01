@@ -51,6 +51,7 @@ class CircleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       child: InkWell(
         onTap: onTap,
@@ -81,14 +82,16 @@ class CircleCard extends StatelessWidget {
                     Text(
                       '$memberCount ${AppLocalizations.instance.tr('circle.label.members')}, $eventCount ${eventCount == 1 ? AppLocalizations.instance.tr('circle.label.upcoming_event') : AppLocalizations.instance.tr('circle.label.upcoming_events')}',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${AppLocalizations.instance.tr('circle.label.active')} $lastActivity',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.textTertiary,
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                          0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -96,7 +99,10 @@ class CircleCard extends StatelessWidget {
               ),
 
               // Flecha
-              Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -194,7 +200,7 @@ class CompactCircleCard extends StatelessWidget {
                 Text(
                   '$memberCount ${AppLocalizations.instance.tr('circle.label.members')}',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
 
@@ -206,7 +212,9 @@ class CompactCircleCard extends StatelessWidget {
                   Text(
                     AppLocalizations.instance.tr('circle.label.next_event'),
                     style: AppTextStyles.overline.copyWith(
-                      color: AppColors.textTertiary,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -220,7 +228,7 @@ class CompactCircleCard extends StatelessWidget {
                   Text(
                     nextEventDate!,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
@@ -250,7 +258,7 @@ class CompactCircleCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.arrow_forward, size: 16),
+                          Icon(Icons.arrow_forward, size: 16),
                         ],
                       ),
                     ),

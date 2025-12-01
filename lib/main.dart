@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'viewmodels/counter_view_model.dart';
 import 'viewmodels/auth_view_model.dart';
@@ -11,6 +11,8 @@ import 'viewmodels/circle_view_model.dart';
 import 'viewmodels/event_detail_view_model.dart';
 import 'viewmodels/unified_calendar_view_model.dart';
 import 'viewmodels/notification_view_model.dart';
+import 'viewmodels/theme_viewmodel.dart';
+import 'viewmodels/locale_viewmodel.dart';
 import 'views/counter_view.dart';
 import 'views/component_catalog_view.dart';
 import 'views/login_view.dart';
@@ -82,15 +84,19 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Inicializando Togetherly...', style: TextStyle(fontSize: 16)),
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              l10n.tr('common.snackbar.initializing'),
+              style: const TextStyle(fontSize: 16),
+            ),
           ],
         ),
       ),
@@ -103,6 +109,7 @@ class StartupErrorScreen extends StatelessWidget {
   const StartupErrorScreen({super.key, required this.error});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -111,11 +118,14 @@ class StartupErrorScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              const Text(
-                'Error al iniciar la app',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                l10n.tr('common.snackbar.init_error'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -134,7 +144,7 @@ class StartupErrorScreen extends StatelessWidget {
                     ),
                   );
                 },
-                child: const Text('Reintentar'),
+                child: Text(l10n.tr('common.button.retry')),
               ),
             ],
           ),
@@ -183,8 +193,10 @@ class _MyAppState extends State<MyApp> {
 
           // Show success message
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: Text('¡Autenticación exitosa!'),
+            SnackBar(
+              content: Text(
+                AppLocalizations.instance.tr('common.snackbar.auth_success'),
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -193,7 +205,8 @@ class _MyAppState extends State<MyApp> {
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
             SnackBar(
               content: Text(
-                authViewModel.errorMessage ?? 'Error al autenticar',
+                authViewModel.errorMessage ??
+                    AppLocalizations.instance.tr('common.snackbar.auth_error'),
               ),
               backgroundColor: Colors.red,
             ),
@@ -244,8 +257,12 @@ class _MyAppState extends State<MyApp> {
 
               // Show success message
               ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-                const SnackBar(
-                  content: Text('¡Correo verificado exitosamente!'),
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.instance.tr(
+                      'common.snackbar.verification_success',
+                    ),
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -255,7 +272,9 @@ class _MyAppState extends State<MyApp> {
                 SnackBar(
                   content: Text(
                     authViewModel.errorMessage ??
-                        'Error al verificar el correo',
+                        AppLocalizations.instance.tr(
+                          'common.snackbar.verification_error',
+                        ),
                   ),
                   backgroundColor: Colors.red,
                 ),
@@ -308,7 +327,11 @@ class _MyAppState extends State<MyApp> {
             // Show success message
             ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
               SnackBar(
-                content: Text('¡Te uniste a ${result.circleName}!'),
+                content: Text(
+                  AppLocalizations.instance
+                      .tr('common.snackbar.join_success')
+                      .replaceAll('{circleName}', result.circleName),
+                ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -326,7 +349,10 @@ class _MyAppState extends State<MyApp> {
             ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
               SnackBar(
                 content: Text(
-                  circleViewModel.errorMessage ?? 'Error al aceptar invitación',
+                  circleViewModel.errorMessage ??
+                      AppLocalizations.instance.tr(
+                        'common.snackbar.join_error',
+                      ),
                 ),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
@@ -338,7 +364,9 @@ class _MyAppState extends State<MyApp> {
           if (navigatorKey.currentContext != null) {
             ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
               SnackBar(
-                content: Text('Error al aceptar invitación: $e'),
+                content: Text(
+                  '${AppLocalizations.instance.tr('common.snackbar.join_error')}: $e',
+                ),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -439,8 +467,10 @@ class _MyAppState extends State<MyApp> {
         // Show message
         if (navigatorKey.currentContext != null) {
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: Text('Debes iniciar sesión para unirte al círculo'),
+            SnackBar(
+              content: Text(
+                AppLocalizations.instance.tr('common.snackbar.login_required'),
+              ),
               backgroundColor: Colors.orange,
               behavior: SnackBarBehavior.floating,
             ),
@@ -476,7 +506,11 @@ class _MyAppState extends State<MyApp> {
           await _invitationService.clearPendingInvitation();
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
             SnackBar(
-              content: Text('¡Te uniste a ${result.circleName}!'),
+              content: Text(
+                AppLocalizations.instance
+                    .tr('common.snackbar.join_success')
+                    .replaceAll('{circleName}', result.circleName),
+              ),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
@@ -528,6 +562,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => ThemeViewModel()..loadThemeMode(),
+        ),
+        ChangeNotifierProvider(create: (_) => LocaleViewModel()..loadLocale()),
         ChangeNotifierProvider(create: (_) => CounterViewModel()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => CircleViewModel()),
@@ -537,6 +575,10 @@ class _MyAppState extends State<MyApp> {
       ],
       child: Builder(
         builder: (context) {
+          // Watch theme and locale changes
+          final themeViewModel = context.watch<ThemeViewModel>();
+          final localeViewModel = context.watch<LocaleViewModel>();
+
           // Set up notification initialization callback after providers are available
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final authViewModel = context.read<AuthViewModel>();
@@ -554,9 +596,7 @@ class _MyAppState extends State<MyApp> {
               await notificationViewModel.initialize(
                 onMessageTapped: (message) {
                   // Handle notification tap - navigate to appropriate screen
-                  if (message == null) return;
-
-                  final data = (message as RemoteMessage).data;
+                  final data = message.data;
                   final eventId = data['eventId'] as String?;
                   final circleId = data['circleId'] as String?;
 
@@ -576,6 +616,15 @@ class _MyAppState extends State<MyApp> {
             navigatorKey: navigatorKey,
             title: 'Togetherly App',
             theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeViewModel.themeMode,
+            locale: localeViewModel.locale,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('es'), Locale('en')],
             debugShowCheckedModeBanner: false,
             home: AuthWrapper(
               authenticatedChild: const DashboardView(),
@@ -595,12 +644,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Togetherly')),
+      appBar: AppBar(title: Text('Togetherly')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               '🎨 Togetherly Widget Library',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
@@ -614,7 +663,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Ver Catálogo de Componentes'),
+              child: Text('Ver Catálogo de Componentes'),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
@@ -624,7 +673,7 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const CounterView()),
                 );
               },
-              child: const Text('Ver Ejemplo MVVM'),
+              child: Text('Ver Ejemplo MVVM'),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
@@ -634,7 +683,7 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const LoginView()),
                 );
               },
-              child: const Text('Ver Login'),
+              child: Text('Ver Login'),
             ),
           ],
         ),

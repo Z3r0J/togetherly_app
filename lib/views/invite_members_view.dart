@@ -86,13 +86,13 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -149,9 +149,9 @@ class _InviteMembersViewState extends State<InviteMembersView> {
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
           padding: const EdgeInsets.all(16),
           child: _isGeneratingToken
@@ -174,7 +174,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                             color: AppColors.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.link,
                             color: AppColors.primary,
                             size: 20,
@@ -185,7 +185,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
                           child: Text(
                             _getShareLink(),
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -275,7 +275,7 @@ class _InviteMembersViewState extends State<InviteMembersView> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -285,17 +285,13 @@ class _InviteMembersViewState extends State<InviteMembersView> {
           Text(
             email,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           Row(
             children: [
               if (status == 'Joined')
-                const Icon(
-                  Icons.check_circle,
-                  color: AppColors.success,
-                  size: 18,
-                )
+                Icon(Icons.check_circle, color: AppColors.success, size: 18)
               else
                 Container(),
               const SizedBox(width: 6),

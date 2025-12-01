@@ -12,7 +12,7 @@ class CounterView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Togetherly — MVVM Sample'),
+        title: Text('Togetherly — MVVM Sample'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
@@ -21,24 +21,21 @@ class CounterView extends StatelessWidget {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Bienvenido a Togetherly App (MVVM)'),
+                  Text('Bienvenido a Togetherly App (MVVM)'),
                   const SizedBox(height: 12),
                   Text(
                     '${vm.value}',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: vm.reset,
-                    child: const Text('Reset'),
-                  ),
+                  ElevatedButton(onPressed: vm.reset, child: Text('Reset')),
                 ],
               ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: vm.increment,
         tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

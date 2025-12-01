@@ -24,7 +24,7 @@ class NotificationConfig {
   });
 }
 
-const Map<NotificationType, NotificationConfig> notificationConfigs = {
+final Map<NotificationType, NotificationConfig> notificationConfigs = {
   NotificationType.reminder: NotificationConfig(
     color: AppColors.info,
     backgroundColor: Color(0xFFE3F2FD),
@@ -41,7 +41,7 @@ const Map<NotificationType, NotificationConfig> notificationConfigs = {
     icon: Icons.person_outline,
   ),
   NotificationType.invitation: NotificationConfig(
-    color: AppColors.primary,
+    color: Color(0xFF6200EA),
     backgroundColor: Color(0xFFEDE7F6),
     icon: Icons.event,
   ),
@@ -107,7 +107,7 @@ class NotificationCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(left: BorderSide(color: config.color, width: 4)),
       ),
       child: Padding(
@@ -141,7 +141,9 @@ class NotificationCard extends StatelessWidget {
                       Text(
                         timeAgo,
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: AppColors.textTertiary,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -178,7 +180,9 @@ class NotificationCard extends StatelessWidget {
                           TextButton(
                             onPressed: onSecondaryAction,
                             style: TextButton.styleFrom(
-                              foregroundColor: AppColors.textSecondary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 8,
@@ -204,8 +208,8 @@ class NotificationCard extends StatelessWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(top: 4),
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -261,7 +265,7 @@ class ConflictBanner extends StatelessWidget {
                 Text(
                   message,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -326,7 +330,7 @@ class ConflictAlert extends StatelessWidget {
           Text(
             message,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
@@ -337,13 +341,13 @@ class ConflictAlert extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onResolve,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Resolve Conflict'),
+                    child: Text('Resolve Conflict'),
                   ),
                 ),
               if (onChangeRsvp != null) ...[
@@ -357,7 +361,7 @@ class ConflictAlert extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Change RSVP'),
+                    child: Text('Change RSVP'),
                   ),
                 ),
               ],
@@ -425,7 +429,7 @@ class InfoBanner extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

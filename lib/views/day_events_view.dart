@@ -180,7 +180,6 @@ class _DayEventsViewState extends State<DayEventsView> {
         }
 
         return Scaffold(
-          backgroundColor: AppColors.surface,
           body: SafeArea(
             child: Column(
               children: [
@@ -194,7 +193,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back),
+                        icon: Icon(Icons.arrow_back),
                       ),
                       Expanded(
                         child: Center(
@@ -223,7 +222,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                         onPressed: () {
                           setState(() => _isYearlyView = !_isYearlyView);
                         },
-                        icon: const Icon(Icons.grid_3x3_outlined),
+                        icon: Icon(Icons.grid_3x3_outlined),
                         tooltip: _isYearlyView
                             ? 'Vista mensual'
                             : 'Vista anual',
@@ -236,9 +235,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                 Expanded(
                   child: Container(
                     width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(24),
                       ),
                     ),
@@ -250,7 +249,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                           height: 6,
                           margin: const EdgeInsets.only(top: 16, bottom: 12),
                           decoration: BoxDecoration(
-                            color: AppColors.border,
+                            color: Theme.of(context).colorScheme.outline,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -267,7 +266,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                               children: [
                                 IconButton(
                                   onPressed: () => _changeMonth(-1),
-                                  icon: const Icon(Icons.chevron_left),
+                                  icon: Icon(Icons.chevron_left),
                                   iconSize: 24,
                                 ),
                                 Expanded(
@@ -280,7 +279,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                                 ),
                                 IconButton(
                                   onPressed: () => _changeMonth(1),
-                                  icon: const Icon(Icons.chevron_right),
+                                  icon: Icon(Icons.chevron_right),
                                   iconSize: 24,
                                 ),
                               ],
@@ -372,7 +371,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                                         vertical: 14,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primaryLight
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer
                                             .withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(14),
                                       ),
@@ -384,13 +385,17 @@ class _DayEventsViewState extends State<DayEventsView> {
                                             width: 28,
                                             height: 28,
                                             decoration: BoxDecoration(
-                                              color: AppColors.primary
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
                                                   .withOpacity(0.06),
                                               shape: BoxShape.circle,
                                             ),
                                             child: Icon(
                                               Icons.add,
-                                              color: AppColors.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               size: 18,
                                             ),
                                           ),
@@ -399,7 +404,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                                             'Agregar Evento',
                                             style: AppTextStyles.labelLarge
                                                 .copyWith(
-                                                  color: AppColors.primary,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
                                                 ),
                                           ),
                                         ],
@@ -477,7 +484,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                 int.parse(event.color!.replaceFirst('#', '0xFF')),
               );
             } else {
-              eventColor = AppColors.primary;
+              eventColor = Theme.of(context).colorScheme.primary;
             }
             colors.add(eventColor);
           }
@@ -606,7 +613,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                 child: Text(
                   'Sin eventos',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               )
@@ -650,21 +657,25 @@ class _DayEventsViewState extends State<DayEventsView> {
         decoration: BoxDecoration(
           color: hasEvents
               ? (primaryColor?.withOpacity(0.12) ??
-                    AppColors.primary.withOpacity(0.12))
+                    Theme.of(context).colorScheme.primary.withOpacity(0.12))
               : (isToday
-                    ? AppColors.primary.withOpacity(0.08)
-                    : AppColors.background),
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.08)
+                    : Theme.of(context).colorScheme.surfaceContainerHighest),
           border: Border.all(
             color: hasEvents
-                ? (primaryColor ?? AppColors.primary)
-                : (isToday ? AppColors.primary : AppColors.border),
+                ? (primaryColor ?? Theme.of(context).colorScheme.primary)
+                : (isToday
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline),
             width: hasEvents ? 2 : (isToday ? 1.5 : 0.5),
           ),
           borderRadius: BorderRadius.circular(10),
           boxShadow: hasEvents
               ? [
                   BoxShadow(
-                    color: (primaryColor ?? AppColors.primary).withOpacity(0.1),
+                    color:
+                        (primaryColor ?? Theme.of(context).colorScheme.primary)
+                            .withOpacity(0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -679,8 +690,10 @@ class _DayEventsViewState extends State<DayEventsView> {
                 day.toString(),
                 style: AppTextStyles.labelSmall.copyWith(
                   color: hasEvents
-                      ? (primaryColor ?? AppColors.primary)
-                      : (isToday ? AppColors.primary : AppColors.textPrimary),
+                      ? (primaryColor ?? Theme.of(context).colorScheme.primary)
+                      : (isToday
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface),
                   fontWeight: hasEvents
                       ? FontWeight.w700
                       : (isToday ? FontWeight.w600 : FontWeight.w500),
@@ -724,7 +737,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                           style: AppTextStyles.labelSmall.copyWith(
                             fontSize: 6,
                             fontWeight: FontWeight.w700,
-                            color: primaryColor ?? AppColors.primary,
+                            color:
+                                primaryColor ??
+                                Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -744,9 +759,9 @@ class _DayEventsViewState extends State<DayEventsView> {
       builder: (context) {
         final dateFormat = DateFormat('EEEE, MMMM d', 'es_ES');
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -755,7 +770,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                 height: 6,
                 margin: const EdgeInsets.only(top: 16, bottom: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: Theme.of(context).colorScheme.outline,
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -801,7 +816,7 @@ class _DayEventsViewState extends State<DayEventsView> {
     final endTime = timeFormat.format(event.endTime.toLocal());
     final color = event.color != null
         ? AppColors.hexToColor(event.color!)
-        : AppColors.primary;
+        : Theme.of(context).colorScheme.primary;
 
     return CompactEventCard(
       title: event.title,
@@ -834,7 +849,7 @@ class _DayEventsViewState extends State<DayEventsView> {
     final endTime = timeFormat.format(event.endTime.toLocal());
     final circleColor = event.circleColor != null
         ? AppColors.hexToColor(event.circleColor!)
-        : AppColors.primary;
+        : Theme.of(context).colorScheme.primary;
 
     // For events with location, use EventCard
     if (event.location != null) {
@@ -1028,7 +1043,7 @@ class _DayEventsViewState extends State<DayEventsView> {
             child: Text(
               'Resolve',
               style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
@@ -1062,7 +1077,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                       () => _localSelectedDate = DateTime(year - 1, 1, 1),
                     );
                   },
-                  icon: const Icon(Icons.chevron_left),
+                  icon: Icon(Icons.chevron_left),
                   iconSize: 28,
                 ),
                 Text(
@@ -1075,7 +1090,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                       () => _localSelectedDate = DateTime(year + 1, 1, 1),
                     );
                   },
-                  icon: const Icon(Icons.chevron_right),
+                  icon: Icon(Icons.chevron_right),
                   iconSize: 28,
                 ),
               ],
@@ -1121,7 +1136,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                         int.parse(event.color!.replaceFirst('#', '0xFF')),
                       );
                     } else {
-                      eventColor = AppColors.primary;
+                      eventColor = Theme.of(context).colorScheme.primary;
                     }
                     colors.add(eventColor);
                   }
@@ -1131,12 +1146,16 @@ class _DayEventsViewState extends State<DayEventsView> {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.textPrimary.withOpacity(0.05),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1153,8 +1172,10 @@ class _DayEventsViewState extends State<DayEventsView> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            AppColors.surface,
-                            AppColors.surface.withOpacity(0.7),
+                            Theme.of(context).colorScheme.surface,
+                            Theme.of(
+                              context,
+                            ).colorScheme.surface.withOpacity(0.7),
                           ],
                         ),
                         borderRadius: const BorderRadius.vertical(
@@ -1162,7 +1183,7 @@ class _DayEventsViewState extends State<DayEventsView> {
                         ),
                         border: Border(
                           bottom: BorderSide(
-                            color: AppColors.border,
+                            color: Theme.of(context).colorScheme.outline,
                             width: 0.5,
                           ),
                         ),
@@ -1279,25 +1300,25 @@ class _DayEventsViewState extends State<DayEventsView> {
         decoration: BoxDecoration(
           color: hasEvents
               ? (primaryColor?.withOpacity(0.18) ??
-                    AppColors.primary.withOpacity(0.18))
+                    Theme.of(context).colorScheme.primary.withOpacity(0.18))
               : (isToday
-                    ? AppColors.primary.withOpacity(0.12)
-                    : AppColors.background),
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.12)
+                    : Theme.of(context).colorScheme.surfaceContainerHighest),
           border: Border.all(
             color: hasEvents
-                ? primaryColor ?? AppColors.primary
+                ? primaryColor ?? Theme.of(context).colorScheme.primary
                 : (isToday
-                      ? AppColors.primary
-                      : AppColors.border.withOpacity(0.5)),
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withOpacity(0.5)),
             width: hasEvents ? 1 : (isToday ? 1 : 0.3),
           ),
           borderRadius: BorderRadius.circular(6),
           boxShadow: hasEvents
               ? [
                   BoxShadow(
-                    color: (primaryColor ?? AppColors.primary).withOpacity(
-                      0.15,
-                    ),
+                    color:
+                        (primaryColor ?? Theme.of(context).colorScheme.primary)
+                            .withOpacity(0.15),
                     blurRadius: 2,
                     offset: const Offset(0, 0.5),
                   ),
@@ -1314,7 +1335,9 @@ class _DayEventsViewState extends State<DayEventsView> {
                 fontSize: 9,
                 color: hasEvents
                     ? primaryColor
-                    : (isToday ? AppColors.primary : AppColors.textPrimary),
+                    : (isToday
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurface),
                 fontWeight: hasEvents
                     ? FontWeight.w700
                     : (isToday ? FontWeight.w600 : FontWeight.w500),
@@ -1369,7 +1392,7 @@ class _WeekdayLabel extends StatelessWidget {
         child: Text(
           label,
           style: AppTextStyles.labelMedium.copyWith(
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1392,7 +1415,7 @@ class _MiniWeekdayLabel extends StatelessWidget {
           label,
           style: AppTextStyles.labelSmall.copyWith(
             fontSize: 9,
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),

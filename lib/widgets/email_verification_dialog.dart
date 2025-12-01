@@ -23,13 +23,13 @@ class EmailVerificationDialog extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.email_outlined,
                 size: 40,
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 24),
@@ -39,7 +39,7 @@ class EmailVerificationDialog extends StatelessWidget {
                 'auth.email_verification.dialog_title',
               ),
               style: AppTextStyles.headlineSmall.copyWith(
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -50,7 +50,7 @@ class EmailVerificationDialog extends StatelessWidget {
                 'auth.email_verification.dialog_message',
               ),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -58,7 +58,7 @@ class EmailVerificationDialog extends StatelessWidget {
             Text(
               email,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.primary,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -69,7 +69,7 @@ class EmailVerificationDialog extends StatelessWidget {
                 'auth.email_verification.dialog_instruction',
               ),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -90,7 +90,7 @@ class EmailVerificationDialog extends StatelessWidget {
                 'auth.email_verification.info_expiry',
               ),
               style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,

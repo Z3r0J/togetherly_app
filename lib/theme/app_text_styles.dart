@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
 
 /// Estilos de texto de la aplicación Togetherly
 /// Basados en Material 3 Typography
+/// Los colores se heredan del tema, usar .copyWith(color: ...) cuando sea necesario
 class AppTextStyles {
   // Prevenir instanciación
   AppTextStyles._();
@@ -13,7 +13,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.12,
     letterSpacing: -0.25,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle displayMedium = TextStyle(
@@ -21,7 +20,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.16,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle displaySmall = TextStyle(
@@ -29,7 +27,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.22,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   // Headline - Para títulos de sección
@@ -38,7 +35,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.25,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle headlineMedium = TextStyle(
@@ -46,7 +42,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.29,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle headlineSmall = TextStyle(
@@ -54,7 +49,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.33,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   // Title - Para títulos de cards y elementos
@@ -63,7 +57,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.27,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle titleMedium = TextStyle(
@@ -71,7 +64,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.5,
     letterSpacing: 0.15,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle titleSmall = TextStyle(
@@ -79,7 +71,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.43,
     letterSpacing: 0.1,
-    color: AppColors.textPrimary,
   );
 
   // Body - Para contenido general
@@ -88,7 +79,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.5,
     letterSpacing: 0.5,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle bodyMedium = TextStyle(
@@ -96,7 +86,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.43,
     letterSpacing: 0.25,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle bodySmall = TextStyle(
@@ -104,7 +93,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.33,
     letterSpacing: 0.4,
-    color: AppColors.textSecondary,
   );
 
   // Label - Para botones y etiquetas
@@ -113,7 +101,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.43,
     letterSpacing: 0.1,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle labelMedium = TextStyle(
@@ -121,7 +108,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.33,
     letterSpacing: 0.5,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle labelSmall = TextStyle(
@@ -129,7 +115,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.45,
     letterSpacing: 0.5,
-    color: AppColors.textSecondary,
   );
 
   // Estilos específicos de la app
@@ -138,7 +123,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
     height: 1.25,
     letterSpacing: -0.5,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle eventTitle = TextStyle(
@@ -146,7 +130,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.3,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle circleTitle = TextStyle(
@@ -154,7 +137,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.33,
     letterSpacing: 0,
-    color: AppColors.textPrimary,
   );
 
   static const TextStyle buttonText = TextStyle(
@@ -162,7 +144,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
     height: 1.25,
     letterSpacing: 0.5,
-    color: AppColors.textOnPrimary,
   );
 
   static const TextStyle caption = TextStyle(
@@ -170,7 +151,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     height: 1.38,
     letterSpacing: 0.4,
-    color: AppColors.textSecondary,
   );
 
   static const TextStyle overline = TextStyle(
@@ -178,6 +158,5 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     height: 1.6,
     letterSpacing: 1.5,
-    color: AppColors.textTertiary,
   );
 }

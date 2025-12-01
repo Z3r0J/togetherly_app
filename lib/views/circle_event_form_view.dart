@@ -7,6 +7,7 @@ import '../theme/app_text_styles.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/circle_event_view_model.dart';
 import '../viewmodels/circle_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'location_picker_view.dart';
 
 class CircleEventFormView extends StatefulWidget {
@@ -36,9 +37,25 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
     DateTime.now().toLocal().add(const Duration(hours: 2)),
   );
   bool _enableTimePoll = false;
-  Color _selectedColorTag = AppColors.primary;
+  Color? _selectedColorTag;
   LocationModel? _selectedLocation;
   String? _selectedCircleId;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize color tag only once
+    if (!_isInitialized) {
+      _selectedColorTag = Theme.of(context).colorScheme.primary;
+      _isInitialized = true;
+    }
+  }
 
   final List<_TimeOption> _timeOptions = [
     _TimeOption(
@@ -59,10 +76,11 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
   Widget build(BuildContext context) {
     final vm = context.watch<CircleEventViewModel>();
     final circleVm = context.watch<CircleViewModel>();
+    final l10n = AppLocalizations.instance;
     // Ensure we don't leave _selectedCircleId uninitialized; prefer the
     // provided `widget.circleId`, otherwise we'll pick the first available
     // circle id. We'll not overwrite an explicit user selection.
-    _selectedCircleId ??=
+    _selectedCircleId ??
         widget.circleId ??
         (circleVm.circles.isNotEmpty ? circleVm.circles.first.id : null);
 
@@ -70,15 +88,15 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppTextField(
-          label: 'Título del evento',
-          hintText: 'Ej: Reunión de equipo',
+          label: l10n.tr('event.create.label.title'),
+          hintText: l10n.tr('event.create.hint.title'),
           controller: _eventTitleController,
         ),
         const SizedBox(height: 20),
         _buildCircleSelector(circleVm),
         const SizedBox(height: 20),
         _buildDateTimeField(
-          title: 'Fecha',
+          title: l10n.tr('event.create.label.date'),
           value: _formatDate(_selectedDate),
           onTap: () async {
             final picked = await showDatePicker(
@@ -188,9 +206,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +231,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
               else
                 TextButton(
                   onPressed: () => circleVm.fetchCircles(),
-                  child: const Text('Actualizar'),
+                  child: Text('Actualizar'),
                 ),
             ],
           ),
@@ -222,7 +240,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
             Text(
               'No tienes círculos disponibles',
               style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             )
           else
@@ -274,7 +292,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
           ? null
           : _notesController.text.trim(),
       'location': _selectedLocation?.toJson(),
-      'color': _colorToHex(_selectedColorTag),
+      'color': _colorToHex(
+        _selectedColorTag ?? Theme.of(context).colorScheme.primary,
+      ),
     };
 
     if (_enableTimePoll) {
@@ -333,9 +353,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -349,7 +369,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
               Switch(
                 value: _enableTimePoll,
                 onChanged: (value) => setState(() => _enableTimePoll = value),
-                activeColor: AppColors.primary,
+                activeColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -369,9 +389,13 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +410,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline),
+                              icon: Icon(Icons.delete_outline),
                               onPressed: _timeOptions.length > 1
                                   ? () {
                                       setState(() {
@@ -446,8 +470,8 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                     );
                   });
                 },
-                icon: const Icon(Icons.add),
-                label: const Text('Agregar horario'),
+                icon: Icon(Icons.add),
+                label: Text('Agregar horario'),
               ),
             ],
           ),
@@ -489,11 +513,14 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                   color: color,
                   shape: BoxShape.circle,
                   border: isSelected
-                      ? Border.all(color: AppColors.textPrimary, width: 2)
+                      ? Border.all(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          width: 2,
+                        )
                       : null,
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white)
+                    ? Icon(Icons.check, color: Colors.white)
                     : null,
               ),
             );
@@ -513,9 +540,9 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -523,7 +550,7 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
             Text(
               title,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Row(
@@ -531,14 +558,14 @@ class _CircleEventFormViewState extends State<CircleEventFormView> {
                 Text(
                   value,
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
               ],

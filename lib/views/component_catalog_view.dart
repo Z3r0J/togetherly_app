@@ -19,7 +19,7 @@ class _ComponentCatalogState extends State<ComponentCatalog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Component Catalog')),
+      appBar: AppBar(title: Text('Component Catalog')),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

@@ -44,7 +44,6 @@ class _LoginViewState extends State<LoginView> {
     final inviterName = widget.invitationContext?['inviterName'];
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -120,18 +119,18 @@ class _LoginViewState extends State<LoginView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
       ),
       child: Column(
         children: [
-          Icon(Icons.mail_outline, size: 48, color: AppColors.primary),
+          Icon(Icons.mail_outline, size: 48, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 12),
           Text(
             '¡Has sido invitado!',
             style: AppTextStyles.headlineSmall.copyWith(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -148,7 +147,7 @@ class _LoginViewState extends State<LoginView> {
             Text(
               'Invitado por $inviterName',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -156,7 +155,7 @@ class _LoginViewState extends State<LoginView> {
           Text(
             'Inicia sesión para unirte',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -172,7 +171,7 @@ class _LoginViewState extends State<LoginView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.groups, size: 40, color: AppColors.primary),
+            Icon(Icons.groups, size: 40, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 12),
             Text(
               l10n.tr('auth.login.title'),
@@ -207,7 +206,7 @@ class _LoginViewState extends State<LoginView> {
           return Container(
             height: 200,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -216,13 +215,13 @@ class _LoginViewState extends State<LoginView> {
                 Icon(
                   Icons.calendar_today,
                   size: 80,
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.tr('auth.login.illustration_placeholder'),
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -268,7 +267,7 @@ class _LoginViewState extends State<LoginView> {
         child: Text(
           l10n.tr('auth.login.link.forgot_password'),
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.primary,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -283,7 +282,7 @@ class _LoginViewState extends State<LoginView> {
         Text(
           l10n.tr('auth.login.link.no_account'),
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         GestureDetector(
@@ -291,7 +290,7 @@ class _LoginViewState extends State<LoginView> {
           child: Text(
             l10n.tr('auth.login.link.sign_up'),
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -333,7 +332,8 @@ class _LoginViewState extends State<LoginView> {
       try {
         // Check for pending invitation before navigating
         final invitationService = InvitationService();
-        final invitationData = await invitationService.processPendingInvitation();
+        final invitationData = await invitationService
+            .processPendingInvitation();
 
         if (invitationData != null) {
           // Successfully joined circle from invitation

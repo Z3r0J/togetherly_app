@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/auth_view_model.dart';
+import '../l10n/app_localizations.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -40,7 +41,9 @@ class _EditProfileViewState extends State<EditProfileView> {
     final ok = await authVm.updateProfile(
       name: _nameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
-      avatarUrl: _avatarCtrl.text.trim().isEmpty ? null : _avatarCtrl.text.trim(),
+      avatarUrl: _avatarCtrl.text.trim().isEmpty
+          ? null
+          : _avatarCtrl.text.trim(),
     );
 
     setState(() => _isSaving = false);
@@ -48,10 +51,25 @@ class _EditProfileViewState extends State<EditProfileView> {
     if (!mounted) return;
 
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.instance.tr('common.snackbar.profile_updated'),
+          ),
+        ),
+      );
       Navigator.of(context).pop(true);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update profile'), backgroundColor: AppColors.error));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.instance.tr(
+              'common.snackbar.profile_update_failed',
+            ),
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
@@ -60,19 +78,22 @@ class _EditProfileViewState extends State<EditProfileView> {
     final currentUser = context.watch<AuthViewModel>().currentUser;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PageHeader(title: 'Edit Profile'),
+              PageHeader(
+                title: AppLocalizations.instance.tr('profile.edit.title'),
+              ),
               const SizedBox(height: 16),
 
               Center(
                 child: UserAvatar(
-                  name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : (currentUser?.name ?? 'U'),
+                  name: _nameCtrl.text.isNotEmpty
+                      ? _nameCtrl.text
+                      : (currentUser?.name ?? 'U'),
                   imageUrl: currentUser?.avatarUrl,
                   size: 110,
                   showBorder: true,
@@ -82,16 +103,29 @@ class _EditProfileViewState extends State<EditProfileView> {
 
               const SizedBox(height: 18),
 
-              AppTextField(label: 'Name', controller: _nameCtrl),
+              AppTextField(
+                label: AppLocalizations.instance.tr('common.label.name'),
+                controller: _nameCtrl,
+              ),
               const SizedBox(height: 12),
-              AppTextField(label: 'Email', controller: _emailCtrl, keyboardType: TextInputType.emailAddress),
+              AppTextField(
+                label: AppLocalizations.instance.tr('common.label.email'),
+                controller: _emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 12),
-              AppTextField(label: 'Avatar URL', controller: _avatarCtrl, keyboardType: TextInputType.url),
+              AppTextField(
+                label: AppLocalizations.instance.tr(
+                  'profile.edit.label.avatar_url',
+                ),
+                controller: _avatarCtrl,
+                keyboardType: TextInputType.url,
+              ),
 
               const SizedBox(height: 24),
 
               AppButton(
-                text: 'Save',
+                text: AppLocalizations.instance.tr('common.button.save'),
                 type: AppButtonType.primary,
                 fullWidth: true,
                 isLoading: _isSaving,
@@ -100,7 +134,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
               const SizedBox(height: 12),
               AppButton(
-                text: 'Cancel',
+                text: AppLocalizations.instance.tr('common.button.cancel'),
                 type: AppButtonType.text,
                 fullWidth: true,
                 onPressed: () => Navigator.of(context).pop(false),

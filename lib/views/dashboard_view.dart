@@ -51,7 +51,7 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refreshData,
@@ -121,7 +121,7 @@ class _DashboardViewState extends State<DashboardView> {
                         ).format(DateTime.now()),
                       ),
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -132,8 +132,8 @@ class _DashboardViewState extends State<DashboardView> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                color: AppColors.textPrimary,
+                icon: Icon(Icons.notifications_outlined),
+                color: Theme.of(context).colorScheme.onSurface,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -166,7 +166,7 @@ class _DashboardViewState extends State<DashboardView> {
                     value: 'profile',
                     child: Row(
                       children: [
-                        const Icon(Icons.person_outline),
+                        Icon(Icons.person_outline),
                         const SizedBox(width: 8),
                         Text(l10n.tr('dashboard.menu.profile')),
                       ],
@@ -176,7 +176,7 @@ class _DashboardViewState extends State<DashboardView> {
                     value: 'settings',
                     child: Row(
                       children: [
-                        const Icon(Icons.settings_outlined),
+                        Icon(Icons.settings_outlined),
                         const SizedBox(width: 8),
                         Text(l10n.tr('dashboard.menu.settings')),
                       ],
@@ -187,7 +187,7 @@ class _DashboardViewState extends State<DashboardView> {
                     value: 'logout',
                     child: Row(
                       children: [
-                        const Icon(Icons.logout, color: Colors.red),
+                        Icon(Icons.logout, color: Colors.red),
                         const SizedBox(width: 8),
                         Text(
                           l10n.tr('dashboard.menu.logout'),
@@ -303,7 +303,7 @@ class _DashboardViewState extends State<DashboardView> {
           child: Text(
             l10n.tr('dashboard.empty.no_circles'),
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -343,9 +343,9 @@ class _DashboardViewState extends State<DashboardView> {
     return Container(
       width: 300,
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -374,7 +374,7 @@ class _DashboardViewState extends State<DashboardView> {
           Text(
             '$memberCount ${l10n.tr('dashboard.label.members')}',
             style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 6),
@@ -384,7 +384,9 @@ class _DashboardViewState extends State<DashboardView> {
             Text(
               l10n.tr('dashboard.section.upcoming_event'),
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textTertiary,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 fontSize: 10,
               ),
             ),
@@ -401,7 +403,7 @@ class _DashboardViewState extends State<DashboardView> {
             Text(
               eventDate,
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -411,7 +413,9 @@ class _DashboardViewState extends State<DashboardView> {
             Text(
               l10n.tr('dashboard.empty.no_events'),
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textTertiary,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 12),
@@ -537,7 +541,7 @@ class _DashboardViewState extends State<DashboardView> {
                       child: Text(
                         'No hay eventos para este filtro',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -592,13 +596,17 @@ class _DashboardViewState extends State<DashboardView> {
           });
         }
       },
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       selectedColor: AppColors.primary,
       labelStyle: AppTextStyles.labelMedium.copyWith(
-        color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
+        color: isSelected
+            ? AppColors.textOnPrimary
+            : Theme.of(context).colorScheme.onSurface,
       ),
       side: BorderSide(
-        color: isSelected ? AppColors.primary : AppColors.border,
+        color: isSelected
+            ? AppColors.primary
+            : Theme.of(context).colorScheme.outline,
       ),
     );
   }
@@ -708,9 +716,9 @@ class _DashboardViewState extends State<DashboardView> {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -730,7 +738,7 @@ class _DashboardViewState extends State<DashboardView> {
                   Text(
                     date,
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Text(
@@ -786,7 +794,7 @@ class _DashboardViewState extends State<DashboardView> {
                   Text(
                     time,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -800,13 +808,15 @@ class _DashboardViewState extends State<DashboardView> {
                         Icon(
                           Icons.people_outline,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '$attendeeCount',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -893,17 +903,17 @@ class _DashboardViewState extends State<DashboardView> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Theme.of(context).shadowColor.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Text(
+                child: Text(
                   'Crear Evento',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
@@ -926,7 +936,7 @@ class _DashboardViewState extends State<DashboardView> {
                     await context.read<CircleViewModel>().fetchCircles();
                   }
                 },
-                child: const Icon(Icons.event, color: AppColors.textOnPrimary),
+                child: Icon(Icons.event, color: AppColors.textOnPrimary),
               ),
             ],
           ),
@@ -942,17 +952,17 @@ class _DashboardViewState extends State<DashboardView> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Theme.of(context).shadowColor.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Text(
+                child: Text(
                   'Create Circle',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
@@ -969,10 +979,7 @@ class _DashboardViewState extends State<DashboardView> {
                     MaterialPageRoute(builder: (_) => const CreateCircleView()),
                   );
                 },
-                child: const Icon(
-                  Icons.group_add,
-                  color: AppColors.textOnPrimary,
-                ),
+                child: Icon(Icons.group_add, color: AppColors.textOnPrimary),
               ),
             ],
           ),
@@ -989,7 +996,7 @@ class _DashboardViewState extends State<DashboardView> {
           child: AnimatedRotation(
             turns: _isFABOpen ? 0.125 : 0, // 45 degrees when open
             duration: const Duration(milliseconds: 200),
-            child: const Icon(Icons.add, color: AppColors.textOnPrimary),
+            child: Icon(Icons.add, color: AppColors.textOnPrimary),
           ),
         ),
       ],

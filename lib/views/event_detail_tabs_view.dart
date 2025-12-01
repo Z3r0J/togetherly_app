@@ -11,6 +11,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../viewmodels/event_detail_view_model.dart';
 import '../widgets/rsvp_widgets.dart';
+import '../l10n/app_localizations.dart';
 
 class EventDetailTabsView extends StatefulWidget {
   final UnifiedEvent event;
@@ -58,10 +59,10 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text('Event Details'),
+          title: Text('Event Details'),
         ),
         body: Center(
           child: Padding(
@@ -79,7 +80,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () => vm.load(widget.event),
-                  child: const Text('Reintentar'),
+                  child: Text(
+                    AppLocalizations.instance.tr('common.button.retry'),
+                  ),
                 ),
               ],
             ),
@@ -97,12 +100,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         circleDetail?.location ?? personalDetail?.location ?? baseLocation;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -124,13 +126,13 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   unifiedEvent.circleName,
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -141,7 +143,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         centerTitle: false,
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
+            icon: Icon(Icons.more_vert),
             offset: const Offset(0, 45),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -319,10 +321,10 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today_outlined,
                       size: 18,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -333,7 +335,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                             .toLocal(),
                       ),
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -341,16 +343,16 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time_outlined,
                       size: 18,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${timeFormat.format((circleDetail?.startsAt ?? personalDetail?.startTime ?? unifiedEvent.startTime).toLocal())} - ${timeFormat.format((circleDetail?.endsAt ?? personalDetail?.endTime ?? unifiedEvent.endTime).toLocal())}',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -359,17 +361,19 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on_outlined,
                         size: 18,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           location.name,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -384,7 +388,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           // Tabs
           Container(
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.border)),
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
             ),
             child: TabBar(
               controller: _tabController,
@@ -481,7 +489,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 Text(
                   'Confirm your attendance',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -532,7 +540,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   Text(
                     'No RSVPs yet',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   )
                 else ...[
@@ -575,7 +583,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         child: Text(
           'No time options',
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -591,11 +599,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Theme.of(context).shadowColor.withOpacity(0.04),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -612,7 +620,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 Text(
                   totalVotes > 0 ? '$totalVotes votos' : 'Aún sin votos',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -644,7 +652,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     ? null
                     : () => _showVoteSheet(context, options, eventId),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -653,7 +661,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 child: Text(
                   'Vote or Change Vote',
                   style: AppTextStyles.labelLarge.copyWith(
-                    color: AppColors.textOnPrimary,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -671,7 +679,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         child: Text(
           'Sin ubicación',
           style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -706,9 +714,13 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                 : Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                     padding: const EdgeInsets.all(16),
                     child: Text(location.name, style: AppTextStyles.bodyMedium),
@@ -722,16 +734,16 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _shareLocation(location),
-                  icon: const Icon(Icons.share_outlined),
-                  label: const Text('Compartir'),
+                  icon: Icon(Icons.share_outlined),
+                  label: Text('Compartir'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => _openExternalMap(location),
-                  icon: const Icon(Icons.directions_outlined),
-                  label: const Text('Directions'),
+                  icon: Icon(Icons.directions_outlined),
+                  label: Text('Directions'),
                 ),
               ),
             ],
@@ -754,7 +766,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -772,7 +784,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
               Text(
                 '$votes ${votes == 1 ? "vote" : "votes"}',
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -784,8 +796,12 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             child: LinearProgressIndicator(
               value: progress.clamp(0.05, 1.0),
               minHeight: 10,
-              backgroundColor: AppColors.border.withOpacity(0.5),
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.outline.withOpacity(0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -794,7 +810,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
             child: TextButton(
               onPressed: onVote,
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
+                foregroundColor: Theme.of(context).colorScheme.primary,
                 padding: EdgeInsets.zero,
               ),
               child: Text(
@@ -834,7 +850,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: Theme.of(context).colorScheme.outline,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -850,13 +866,13 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                     subtitle: Text(
                       '${o.voteCount} ${o.voteCount == 1 ? "vote" : "votes"}',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     trailing: Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 16,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     onTap: vm.isActionLoading
                         ? null
@@ -879,11 +895,11 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).shadowColor.withOpacity(0.05),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -928,7 +944,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
                       ? 'You have a conflict with “$conflictTitle”.'
                       : 'You have another event at this time.',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -953,7 +969,9 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         label: Text(
           label,
           style: AppTextStyles.labelMedium.copyWith(
-            color: selected ? Colors.white : AppColors.textPrimary,
+            color: selected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -1000,7 +1018,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           Text(
             'No one here yet',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           )
         else
@@ -1046,7 +1064,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
           Text(
             name.split(' ').first,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1114,7 +1132,7 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Bloquear votación'),
+        title: Text('Bloquear votación'),
         content: Text(
           '¿Deseas bloquear la votación con la opción más votada?\n\n'
           '${DateFormat('EEEE, MMMM d', 'es_ES').format(winningOption.startTime)}\n'
@@ -1125,12 +1143,14 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Bloquear'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            child: Text('Bloquear'),
           ),
         ],
       ),
@@ -1171,20 +1191,22 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Finalizar evento'),
-        content: const Text(
+        title: Text('Finalizar evento'),
+        content: Text(
           '¿Deseas finalizar el evento y establecer el horario definitivo?\n\n'
           'El horario bloqueado se convertirá en el horario final del evento.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Finalizar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            child: Text('Finalizar'),
           ),
         ],
       ),
@@ -1212,20 +1234,20 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar evento'),
-        content: const Text(
+        title: Text('Eliminar evento'),
+        content: Text(
           '¿Estás seguro de que deseas eliminar este evento? '
           'Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Eliminar'),
+            child: Text('Eliminar'),
           ),
         ],
       ),
@@ -1280,19 +1302,19 @@ class _EventDetailTabsViewState extends State<EventDetailTabsView>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Eliminar evento'),
-        content: const Text(
+        title: Text('Eliminar evento'),
+        content: Text(
           '¿Estás seguro de que deseas eliminar este evento personal?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Eliminar'),
+            child: Text('Eliminar'),
           ),
         ],
       ),

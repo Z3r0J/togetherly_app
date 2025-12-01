@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/widgets.dart';
 import '../viewmodels/personal_event_view_model.dart';
+import '../l10n/app_localizations.dart';
 import 'location_picker_view.dart';
 
 class PersonalEventFormView extends StatefulWidget {
@@ -30,8 +31,14 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   );
   bool _isAllDay = false;
   String _selectedReminder = 'Ninguno';
-  Color _selectedColorTag = AppColors.primary;
+  late Color _selectedColorTag;
   LocationModel? _selectedLocation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _selectedColorTag = Theme.of(context).colorScheme.primary;
+  }
 
   @override
   void dispose() {
@@ -44,18 +51,19 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<PersonalEventViewModel>();
+    final l10n = AppLocalizations.instance;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppTextField(
-          label: 'Título del evento',
-          hintText: 'Ej: Reunión de equipo',
+          label: l10n.tr('event.create.label.title'),
+          hintText: l10n.tr('event.create.hint.title'),
           controller: _eventTitleController,
         ),
         const SizedBox(height: 20),
         _buildDateTimeField(
-          title: 'Fecha',
+          title: l10n.tr('event.create.label.date'),
           value: _formatDate(_selectedDate),
           onTap: () async {
             final picked = await showDatePicker(
@@ -72,7 +80,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         const SizedBox(height: 12),
         if (!_isAllDay)
           _buildDateTimeField(
-            title: 'Hora de inicio',
+            title: l10n.tr('event.create.label.start_time'),
             value: _formatTime(_startTime),
             onTap: () async {
               final picked = await showTimePicker(
@@ -103,15 +111,15 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Todo el día',
+                l10n.tr('event.create.label.all_day'),
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -119,7 +127,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
               Switch(
                 value: _isAllDay,
                 onChanged: (value) => setState(() => _isAllDay = value),
-                activeColor: AppColors.primary,
+                activeColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -156,8 +164,8 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         ),
         const SizedBox(height: 16),
         AppTextField(
-          label: 'Notas',
-          hintText: 'Agrega más detalles...',
+          label: l10n.tr('event.create.label.notes'),
+          hintText: l10n.tr('event.create.hint.notes'),
           controller: _notesController,
           maxLines: 4,
         ),
@@ -165,7 +173,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
         _buildColorTagSection(),
         const SizedBox(height: 24),
         _buildDateTimeField(
-          title: 'Recordatorio',
+          title: l10n.tr('event.create.label.reminder'),
           value: _selectedReminder,
           onTap: _showReminderPicker,
         ),
@@ -268,9 +276,9 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,7 +286,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
             Text(
               title,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             Row(
@@ -286,14 +294,14 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
                 Text(
                   value,
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   size: 20,
                 ),
               ],
@@ -338,11 +346,14 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
                   color: color,
                   shape: BoxShape.circle,
                   border: isSelected
-                      ? Border.all(color: AppColors.textPrimary, width: 2)
+                      ? Border.all(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          width: 2,
+                        )
                       : null,
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white)
+                    ? Icon(Icons.check, color: Colors.white)
                     : null,
               ),
             );
@@ -358,7 +369,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
       context: context,
       builder: (context) {
         return Container(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: ListView.builder(
             itemCount: reminders.length,
             itemBuilder: (context, index) {
@@ -404,13 +415,7 @@ class _PersonalEventFormViewState extends State<PersonalEventFormView> {
   }
 
   DateTime _combineDateAndTime(DateTime date, TimeOfDay time) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   int? _reminderStringToMinutes(String value) {

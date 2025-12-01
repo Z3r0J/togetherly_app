@@ -29,13 +29,13 @@ class _MyCirclesViewState extends State<MyCirclesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).colorScheme.onSurface,
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Mis Círculos', style: AppTextStyles.headlineMedium),
@@ -101,13 +101,13 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                   Icon(
                     Icons.groups_outlined,
                     size: 64,
-                    color: AppColors.textTertiary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.tr('dashboard.empty.no_circles'),
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -171,9 +171,9 @@ class _MyCirclesViewState extends State<MyCirclesView> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Material(
         color: Colors.transparent,
@@ -225,7 +225,7 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                             ? description
                             : '$memberCount ${l10n.tr('circle.label.members')}',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -235,7 +235,7 @@ class _MyCirclesViewState extends State<MyCirclesView> {
                 ),
 
                 // Flecha de navegación
-                Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
               ],
             ),
           ),

@@ -34,6 +34,27 @@
       "loading": "Cargando...",
       "no_data": "No hay datos disponibles",
       "network_error": "Error de conexión. Verifica tu internet."
+    },
+    "dialog": {
+      "confirm_action": "¿Estás seguro?",
+      "cannot_undo": "Esta acción no se puede deshacer"
+    },
+    "snackbar": {
+      "auth_success": "¡Autenticación exitosa!",
+      "auth_error": "Error al autenticar",
+      "verification_success": "¡Correo verificado exitosamente!",
+      "verification_error": "Error al verificar el correo",
+      "join_success": "¡Te uniste a {circleName}!",
+      "join_error": "Error al aceptar invitación",
+      "login_required": "Debes iniciar sesión para unirte al círculo",
+      "initializing": "Inicializando Togetherly...",
+      "init_error": "Error al iniciar la app",
+      "profile_updated": "Perfil actualizado",
+      "profile_update_failed": "Error al actualizar perfil",
+      "registration_success": "¡Registro exitoso!",
+      "registration_info": "Hemos enviado un correo de verificación a:",
+      "registration_instruction": "Después de verificar tu correo, podrás unirte al círculo.",
+      "understood": "Entendido"
     }
   },
   "auth": {
@@ -262,7 +283,87 @@
       "create_failed": "No se pudo crear el círculo. Por favor, intenta de nuevo.",
       "session_expired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
       "auth_required": "Autenticación requerida. Por favor, inicia sesión.",
-      "no_token": "No se encontró token de acceso"
+      "no_token": "No se encontró token de acceso",
+      "delete_success": "¡Círculo eliminado exitosamente!",
+      "delete_failed": "No se pudo eliminar el círculo"
+    },
+    "create": {
+      "title_edit": "Editar Círculo",
+      "title_create": "Crear Círculo",
+      "label": {
+        "name": "Nombre del Círculo",
+        "color": "Color del Círculo",
+        "description": "Descripción",
+        "privacy": "Privacidad"
+      },
+      "hint": {
+        "name": "Ingresa un nombre para tu círculo",
+        "description": "Opcional - Describe el propósito de este círculo"
+      },
+      "button": {
+        "save": "Guardar Cambios",
+        "create": "Crear Círculo",
+        "create_short": "+ Crear Círculo"
+      },
+      "privacy": {
+        "public": "Público",
+        "private": "Privado"
+      }
+    },
+    "invite": {
+      "title": "Invitar a {circleName}",
+      "invited": "¡Has sido invitado!",
+      "join_message": "Únete a \"{circleName}\"",
+      "invited_by": "Invitado por {inviterName}",
+      "login_to_join": "Inicia sesión para unirte",
+      "register_with_email": "Regístrate con el email de la invitación",
+      "divider": "o",
+      "share_link": "Compartir Enlace",
+      "share_link_subtitle": "Cualquiera con el enlace puede unirse",
+      "or_write_email": "O Escribir Email",
+      "invitations_sent": "Invitaciones Enviadas",
+      "invitation_pending": "Invitación Pendiente",
+      "sending": "Enviando...",
+      "created_by": "Creado por {ownerName}",
+      "joining": "Uniéndose...",
+      "join_info": "Al unirte, podrás ver y participar en todos los eventos del círculo.",
+      "hint": {
+        "email": "Ingresa direcciones de email..."
+      },
+      "status": {
+        "joined": "Unido ✓",
+        "pending": "Pendiente"
+      },
+      "button": {
+        "copy_link": "Copiar Enlace",
+        "share": "Compartir",
+        "send_invitation": "Enviar Invitación",
+        "join": "Unirse",
+        "join_circle": "Unirse al círculo",
+        "invite": "+ Invitar"
+      },
+      "message": {
+        "link_copied": "Enlace copiado al portapapeles",
+        "invitation_sent": "Invitación enviada a {emails}",
+        "join_success": "¡Te uniste a {circleName}!",
+        "join_error": "Error al aceptar invitación",
+        "link_generation_error": "Error al generar enlace de invitación",
+        "send_error": "Error al enviar invitación",
+        "already_invited": "Ya enviaste una invitación a este email",
+        "opening_share": "Abriendo opciones de compartir..."
+      }
+    },
+    "join": {
+      "title": "Unirse a círculo"
+    },
+    "detail": {
+      "my_circles": "Mis Círculos",
+      "members": "Miembros",
+      "upcoming_events": "Próximos Eventos",
+      "owner": "(Propietario)",
+      "edit_circle": "Editar Círculo",
+      "delete_circle": "Eliminar Círculo",
+      "delete_confirmation": "¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer."
     },
     "error": {
       "CIRCLE_NOT_FOUND": "Círculo no encontrado",
@@ -282,6 +383,70 @@
     }
   },
   "event": {
+    "create": {
+      "title": "Crear Evento",
+      "type": {
+        "personal": "Evento Personal",
+        "circle": "Evento de Círculo"
+      },
+      "location_picker_title": "Seleccionar Ubicación",
+      "label": {
+        "title": "Título del evento",
+        "description": "Descripción",
+        "location": "Ubicación",
+        "date": "Fecha",
+        "start_time": "Hora de inicio",
+        "end_time": "Hora de fin",
+        "all_day": "Todo el día",
+        "time": "Hora",
+        "duration": "Duración",
+        "circle": "Círculo",
+        "notes": "Notas",
+        "reminder": "Recordatorio"
+      },
+      "hint": {
+        "title": "Ej: Reunión de equipo",
+        "description": "Agrega detalles del evento",
+        "location": "¿Dónde será?",
+        "select_circle": "Selecciona un círculo",
+        "notes": "Agrega más detalles..."
+      },
+      "button": {
+        "create": "Crear Evento",
+        "add_time": "Agregar Horario"
+      }
+    },
+    "detail": {
+      "title": "Detalles del Evento",
+      "date_tbd": "Fecha por definir",
+      "time_tbd": "Horario por definir",
+      "all_day": "Todo el día",
+      "button": {
+        "retry": "Reintentar",
+        "edit": "Editar Evento",
+        "lock": "Bloquear Encuesta",
+        "finalize": "Finalizar Evento",
+        "view_details": "Ver detalles"
+      },
+      "label": {
+        "description": "Descripción",
+        "your_rsvp": "Tu RSVP"
+      }
+    },
+    "conflict": {
+      "title": "Resolver Conflicto de Horario",
+      "no_conflicts": "No se encontraron eventos en conflicto.",
+      "overlapping_events": "Tienes {count} evento(s) superpuesto(s):"
+    },
+    "rsvp": {
+      "dialog_title": "Tu respuesta",
+      "going": "Asistiré",
+      "maybe": "Tal vez",
+      "not_going": "No asistiré"
+    },
+    "day_view": {
+      "title": "Eventos del Día"
+    },
     "error": {
       "EVENT_NOT_FOUND": "Evento no encontrado",
       "EVENT_CREATE_FAILED": "No se pudo crear el evento",
@@ -310,6 +475,47 @@
       "EVENT_VOTE_FAILED": "No se pudo registrar el voto",
       "EVENT_CANNOT_VOTE_LOCKED": "No se puede votar en un evento bloqueado",
       "EVENT_ALREADY_VOTED": "Ya has votado en este evento"
+    }
+  },
+  "profile": {
+    "title": "Profile & Settings",
+    "edit": {
+      "title": "Editar Perfil",
+      "label": {
+        "avatar_url": "URL del Avatar"
+      },
+      "button": {
+        "save": "Guardar Cambios"
+      }
+    },
+    "section": {
+      "account": "Account",
+      "notifications": "Notifications",
+      "calendar": "Calendar",
+      "privacy": "Privacy",
+      "about": "About",
+      "danger_zone": "Danger Zone"
+    },
+    "option": {
+      "change_password": "Change Password",
+      "email_preferences": "Email Preferences",
+      "language": "Language",
+      "theme": "Theme",
+      "time_zone": "Time Zone",
+      "log_out": "Log Out",
+      "delete_account": "Delete Account"
+    },
+    "theme": {
+      "title": "Tema",
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "language": {
+      "title": "Idioma",
+      "system": "Sistema",
+      "spanish": "Español",
+      "english": "English"
     }
   },
   "validation": {

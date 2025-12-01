@@ -88,20 +88,17 @@ class _CreateCircleViewState extends State<CreateCircleView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         elevation: 0,
         title: Text(
           _isEditMode ? 'Editar Círculo' : 'Crear Círculo',
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
         leading: TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Cancelar',
-            style: TextStyle(color: AppColors.primary),
-          ),
+          child: Text('Cancelar', style: TextStyle(color: AppColors.primary)),
         ),
         leadingWidth: 100,
       ),
@@ -210,7 +207,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                       ),
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check, color: Colors.white, size: 24)
+                        ? Icon(Icons.check, color: Colors.white, size: 24)
                         : null,
                   ),
                 ),
@@ -275,10 +272,10 @@ class _CreateCircleViewState extends State<CreateCircleView> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -292,7 +289,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.primary : Theme.of(context).colorScheme.outline,
                   width: 2,
                 ),
               ),
@@ -323,7 +320,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
                   Text(
                     description,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -526,8 +523,8 @@ class _CreateCircleViewState extends State<CreateCircleView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.background,
-        title: const Text('Eliminar Círculo'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        title: Text('Eliminar Círculo'),
         content: Text(
           '¿Estás seguro de que deseas eliminar este círculo? Esta acción no se puede deshacer.',
           style: AppTextStyles.bodyMedium,
@@ -535,9 +532,11 @@ class _CreateCircleViewState extends State<CreateCircleView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           TextButton(
@@ -545,10 +544,7 @@ class _CreateCircleViewState extends State<CreateCircleView> {
               Navigator.pop(context);
               _proceedWithDelete();
             },
-            child: const Text(
-              'Eliminar',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: Text('Eliminar', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),

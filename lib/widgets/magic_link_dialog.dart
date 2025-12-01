@@ -87,11 +87,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(
-              Icons.mark_email_read,
-              color: AppColors.success,
-              size: 28,
-            ),
+            Icon(Icons.mark_email_read, color: AppColors.success, size: 28),
             const SizedBox(width: 12),
             Text(AppLocalizations.instance.tr('auth.magic_link.success.title')),
           ],
@@ -113,11 +109,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.info_outline,
-                    color: AppColors.info,
-                    size: 20,
-                  ),
+                  Icon(Icons.info_outline, color: AppColors.info, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -136,7 +128,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
             Text(
               AppLocalizations.instance.tr('auth.magic_link.success.expiry'),
               style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -169,12 +161,14 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.link,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
                 ),
@@ -194,14 +188,14 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                           'auth.magic_link.dialog_subtitle',
                         ),
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: _isLoading
                       ? null
                       : () => Navigator.of(context).pop(),
@@ -219,7 +213,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                 'auth.magic_link.dialog_description',
               ),
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
 
@@ -262,11 +256,7 @@ class _MagicLinkDialogState extends State<MagicLinkDialog> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: AppColors.error,
-                      size: 20,
-                    ),
+                    Icon(Icons.error_outline, color: AppColors.error, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

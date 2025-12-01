@@ -5,6 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../theme/app_colors.dart';
 import '../widgets/widgets.dart';
+import '../l10n/app_localizations.dart';
 
 /// Location Picker View
 ///
@@ -324,19 +325,22 @@ class _LocationPickerViewState extends State<LocationPickerView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.instance;
     return Scaffold(
-      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Select Location',
+        title: Text(
+          l10n.tr('event.create.location_picker_title'),
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -347,10 +351,10 @@ class _LocationPickerViewState extends State<LocationPickerView> {
               : _selectedLocation != null)
             TextButton(
               onPressed: _confirm,
-              child: const Text(
+              child: Text(
                 'Done',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -372,9 +376,9 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     hintText: 'Search for a place...',
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     filled: true,
                     fillColor: Colors.white,
@@ -384,9 +388,11 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.clear,
-                              color: AppColors.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
                               _searchController.clear();
@@ -470,17 +476,21 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.location_on,
-                                      color: AppColors.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       size: 24,
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         _selectedAddress,
-                                        style: const TextStyle(
-                                          color: AppColors.textPrimary,
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -496,7 +506,9 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                   child: ElevatedButton(
                                     onPressed: _confirm,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 12,
@@ -505,7 +517,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'Confirm Location',
                                       style: TextStyle(
                                         fontSize: 16,
@@ -539,7 +551,10 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected
-                              ? Border.all(color: AppColors.primary, width: 2)
+                              ? Border.all(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  width: 2,
+                                )
                               : null,
                         ),
                         child: ListTile(
@@ -551,22 +566,24 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.primary.withOpacity(0.1),
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.location_on,
                               color: isSelected
                                   ? Colors.white
-                                  : AppColors.primary,
+                                  : Theme.of(context).colorScheme.primary,
                               size: 20,
                             ),
                           ),
                           title: Text(
                             location,
                             style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 16,
                               fontWeight: isSelected
                                   ? FontWeight.w600
@@ -574,9 +591,9 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             ),
                           ),
                           trailing: isSelected
-                              ? const Icon(
+                              ? Icon(
                                   Icons.check_circle,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 )
                               : null,
                           onTap: () => _selectLocation(location),
@@ -646,9 +663,9 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                     itemBuilder: (context, index) {
                       final suggestion = _searchSuggestions[index];
                       return ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.location_on,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                         title: Text(
                           suggestion['address'],
